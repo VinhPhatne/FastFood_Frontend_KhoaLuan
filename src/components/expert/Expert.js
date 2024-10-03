@@ -20,7 +20,7 @@ const Expert = () => {
           </p>
           <div className={styles.button}>
             <Button className={styles.btnContent}>
-              Chia sẻ kinh nghiệm sống của bạn ngay hôm nay
+              <span> Chia sẻ kinh nghiệm sống của bạn ngay hôm nay</span>
             </Button>
           </div>
         </div>

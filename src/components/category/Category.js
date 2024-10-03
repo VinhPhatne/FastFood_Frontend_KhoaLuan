@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { MdOutlineKeyboardDoubleArrowRight } from "react-icons/md";
-import styles from "./Card.module.scss";
+import styles from "./Category.module.scss";
 import image from "../../assets/images/courseimage.png";
 import { FaRegStar } from "react-icons/fa";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { PrevArrow, NextArrow } from "../Arrow";
+import Header from "../header/Header";
+import Footer from "../footer/Footer";
+import { useNavigate } from "react-router-dom";
 
-const Card = () => {
+const Category = () => {
   const [items, setItems] = useState([
     {
       title: "Khóa học React Native TypeScript New 2024",
@@ -60,94 +62,71 @@ const Card = () => {
   const [showPrevArrow, setShowPrevArrow] = useState(false);
   const [showNextArrow, setShowNextArrow] = useState(true);
 
-  const settings = {
-    dots: false,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    prevArrow: showPrevArrow ? <PrevArrow /> : null,
-    nextArrow: showNextArrow ? <NextArrow /> : null,
-    responsive: [
-      {
-        breakpoint: 1300,
-        settings: {
-          slidesToShow: 3.5,
-          centerMode: false,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 1200,
-        settings: {
-          slidesToShow: 3.5,
-          centerMode: false,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 1100,
-        settings: {
-          slidesToShow: 3,
-          centerMode: false,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 900,
-        settings: {
-          slidesToShow: 2.5,
-          centerMode: false,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 800,
-        settings: {
-          slidesToShow: 2,
-        },
-      },
-      {
-        breakpoint: 700,
-        settings: {
-          slidesToShow: 1.5,
-          centerMode: false,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 500,
-        settings: {
-          slidesToShow: 1,
-        },
-      },
-    ],
-    afterChange: (current) => {
-      setShowPrevArrow(current > 0);
-      setShowNextArrow(current < items.length - 4);
-    },
-  };
+  // const settings = {
+  //   dots: false,
+  //   infinite: true,
+  //   speed: 500,
+  //   slidesToShow: 4,
+  //   slidesToScroll: 1,
+  //   prevArrow: showPrevArrow ? <PrevArrow /> : null,
+  //   nextArrow: showNextArrow ? <NextArrow /> : null,
+  //   responsive: [
+  //     {
+  //       breakpoint: 1400,
+  //       settings: {
+  //         slidesToShow: 3,
+  //       },
+  //     },
+  //     {
+  //       breakpoint: 1150,
+  //       settings: {
+  //         slidesToShow: 2,
+  //       },
+  //     },
+  //     {
+  //       breakpoint: 800,
+  //       settings: {
+  //         slidesToShow: 1.5,
+  //         centerMode: false,
+  //         infinite: false,
+  //       },
+  //     },
+  //     {
+  //       breakpoint: 500,
+  //       settings: {
+  //         slidesToShow: 1,
+  //       },
+  //     },
+  //   ],
+  //   afterChange: (current) => {
+  //     setShowPrevArrow(current > 0);
+  //     setShowNextArrow(current < items.length - 4);
+  //   },
+  // };
+
   const navigate = useNavigate();
   const handleRedirect = () => {
-    navigate("/category/7089338599931904");
+    navigate("/detail/7089338599931904");
   };
 
   return (
-    <div className={styles.card}>
-      <div className={styles.content}>
-        <div className={styles.left}>
-          <p>Những khóa học nổi bật</p>
-        </div>
-        <div className={styles.right} onClick={handleRedirect}>
+    <>
+      <Header />
+      <div className={styles.card}>
+        <div className={styles.content}>
+          <div className={styles.left}>
+            <p>Những khóa học nổi bật</p>
+          </div>
+          {/* <div className={styles.right}>
           <p>Xem thêm </p>
           <MdOutlineKeyboardDoubleArrowRight className={styles.icon} />
+        </div> */}
         </div>
-      </div>
 
-      <div className={styles.container}>
-        <Slider {...settings}>
+        <div className={styles.container}>
+          {/* <Slider {...settings}> */}
           {items.map((item, index) => (
-            <div className={styles.item} key={index}>
+            <div className={styles.item} key={index} onClick={handleRedirect}>
               <img className={styles.img} src={image} alt={item.title} />
               <div className={styles.course}>
                 <p className={styles.title}>{item.title}</p>
@@ -170,10 +149,12 @@ const Card = () => {
               </div>
             </div>
           ))}
-        </Slider>
+          {/* </Slider> */}
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 };
 
-export default Card;
+export default Category;

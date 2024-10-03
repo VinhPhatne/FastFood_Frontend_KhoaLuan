@@ -1,0 +1,65 @@
+.modal-title {
+  text-align: center;
+  color: #00acc1;
+  font-size: 34px;
+  font-weight: bold;
+}
+
+.ant-modal-body {
+  padding: 24px;
+}
+
+.form-item {
+  margin-bottom: 16px;
+  color: #404040;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.submit-button {
+  background-color: #00acc1;
+  color: #fff;
+  border: none;
+  height: 40px;
+  font-size: 16px;
+  font-weight: 500;
+  width: 100%;
+  height: 50px;
+  margin-top: 16px;
+}
+
+.link-container {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #000;
+  text-align: center;
+}
+
+.link {
+  font-weight: 600;
+  font-size: 15px;
+  margin: 0 12px;
+
+  &:first-child {
+    color: #000;
+  }
+
+  &:last-child {
+    color: #00acc1;
+  }
+}
+
+.google-button {
+  background-color: #db4437;
+  border: none;
+  color: #fff;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+  width: 25%;
+  border-radius: 20px;
+}

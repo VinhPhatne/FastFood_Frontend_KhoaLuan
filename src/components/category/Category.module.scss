@@ -1,50 +1,37 @@
 .card {
-  display: flex;
-  flex-direction: column;
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 0 20px;
+  font-family: SFPro, sans-serif;
   margin-bottom: 40px;
+  padding-top: 85px;
   .content {
-    display: flex;
-    justify-content: space-between;
-
     .left {
+      max-width: 1900px;
+      background-color: #00acc1;
       p {
-        font-size: 32px;
+        padding: 40px 0px;
+        font-size: 48px;
+        margin: 0 100px;
         font-weight: bold;
-        color: #00acc1;
-      }
-    }
-
-    .right {
-      font-size: 24px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-
-      .icon {
-        font-size: 28px;
-        margin-top: 6px;
+        color: #fff;
       }
     }
   }
 
   .container {
+    display: grid;
+    margin: 20px 100px;
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(300px, 1fr)
+    ); 
+    gap: 20px; 
+
     .item {
       cursor: pointer;
-
-      width: 90% !important;
-
-      height: auto;
       background-color: #f3f4f9;
       overflow: hidden;
       border-radius: 16px;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
       text-align: left;
+      transition: transform 0.3s ease-in-out;
 
       &:hover {
         .img {
@@ -56,15 +43,16 @@
       }
 
       .img {
-        width: 100%;
+        max-width: 100%;
         border-top-left-radius: 13px;
         border-top-right-radius: 13px;
         height: 180px;
         object-fit: cover;
+        transition: transform 0.3s ease-in-out;
       }
 
       .course {
-        margin-left: 12px;
+        padding: 12px;
 
         .title {
           font-size: 22px;

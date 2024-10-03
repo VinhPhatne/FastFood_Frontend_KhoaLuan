@@ -58,16 +58,16 @@ const Experter = () => {
       {
         breakpoint: 750,
         settings: {
-          slidesToShow: 1.5 ,
-          centerMode: true,
-          centerPadding: '0px',
+          slidesToShow: 1.5,
+          centerMode: false,
+          infinite: false,
+          centerPadding: "0px",
         },
       },
       {
         breakpoint: 600,
         settings: {
           slidesToShow: 1,
-
         },
       },
     ],

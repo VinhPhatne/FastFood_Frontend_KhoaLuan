@@ -28,9 +28,9 @@
       padding: 0;
       display: flex;
       gap: 40px;
-     
+
       @media (max-width: 1280px) {
-        display: none; 
+        display: none;
       }
     }
   }
@@ -54,21 +54,24 @@
     gap: 40px;
     margin-right: 24px;
     color: #00acc1;
-    
+
     .btn {
       display: block;
       font-size: 16px;
       font-weight: bold;
       padding: 10px 14px;
+      &:hover {
+        cursor: pointer;
+      }
     }
-    
+
     .btn-expert {
       background-color: #00acc1;
       color: #ffffff;
       border: none;
       border-radius: 6px;
     }
-    
+
     .btn-student {
       background-color: #ffffff;
       color: #00acc1;
@@ -76,7 +79,7 @@
       border-radius: 4px;
       width: 160px;
     }
-    
+
     .cart {
       position: relative;
       font-size: 24px;
@@ -113,7 +116,7 @@
         color: #00acc1;
         margin-right: 8px;
       }
-      
+
       .searchInput {
         border: none;
         outline: none;

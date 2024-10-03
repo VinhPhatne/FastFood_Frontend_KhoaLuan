@@ -1,0 +1,70 @@
+$primary-color: #00acc1; 
+$border-radius: 4px; 
+$input-height: 50px;
+$link-color: #00acc1; 
+
+.register-form {
+  .ant-modal-content {
+    border-radius: $border-radius;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .ant-modal-header {
+    border-bottom: none;
+  }
+
+  .ant-modal-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: $primary-color;
+  }
+
+  .ant-form-item {
+    margin-bottom: 24px;
+    
+    label {
+      font-weight: 500;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .ant-input,
+    .ant-input-password {
+      height: $input-height;
+      border-radius: $border-radius;
+      border: 1px solid #d9d9d9;
+
+      &:focus {
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+      }
+    }
+  }
+
+  .ant-btn-primary {
+    height: $input-height;
+    border-radius: $border-radius;
+    background-color: $primary-color;
+    border-color: $primary-color;
+
+    &:hover {
+      background-color: darken($primary-color, 10%);
+      border-color: darken($primary-color, 10%);
+    }
+  }
+
+  .link-container {
+    text-align: center;
+    margin-top: 16px;
+
+    .link {
+      color: $link-color;
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
