@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdOutlineKeyboardDoubleArrowRight } from "react-icons/md";
 import styles from "./Card.module.scss";
@@ -8,6 +8,9 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { PrevArrow, NextArrow } from "../Arrow";
+import { useDispatch, useSelector } from "react-redux";
+import { getCategories } from "../State/Category/Action";
+import { getProducts } from "../State/Product/Action";
 
 const Card = () => {
   const [items, setItems] = useState([
@@ -57,6 +60,20 @@ const Card = () => {
       students: 2,
     },
   ]);
+
+  const dispatch = useDispatch();
+  const { categories } = useSelector(
+    (state) => state.categoryReducer.categories
+  );
+
+  const { products } = useSelector((state) => state.productReducer);
+
+  useEffect(() => {
+    const jwt = localStorage.getItem("jwt");
+    dispatch(getCategories({ jwt }));
+    dispatch(getProducts({ jwt }));
+  }, [dispatch]);
+
   const [showPrevArrow, setShowPrevArrow] = useState(false);
   const [showNextArrow, setShowNextArrow] = useState(true);
 
@@ -136,7 +153,19 @@ const Card = () => {
     <div className={styles.card}>
       <div className={styles.content}>
         <div className={styles.left}>
-          <p>Những khóa học nổi bật</p>
+          {Array.isArray(categories) && categories.length > 0 ? (
+            categories.map((category) => (
+              <div
+                key={category._id}
+                onClick={() => handleRedirect(category._id)}
+              >
+                <h3>{category.name}</h3>
+                {/* Bạn có thể thêm các thông tin khác về category ở đây */}
+              </div>
+            ))
+          ) : (
+            <p>No categories available</p> // Thông báo nếu không có dữ liệu
+          )}
         </div>
         <div className={styles.right} onClick={handleRedirect}>
           <p>Xem thêm </p>
@@ -146,30 +175,39 @@ const Card = () => {
 
       <div className={styles.container}>
         <Slider {...settings}>
-          {items.map((item, index) => (
-            <div className={styles.item} key={index}>
-              <img className={styles.img} src={image} alt={item.title} />
-              <div className={styles.course}>
-                <p className={styles.title}>{item.title}</p>
-                <div className={styles.info}>
-                  <p>By {item.author}</p>
-                  {[...Array(5)].map((_, starIndex) => (
-                    <FaRegStar key={starIndex} />
-                  ))}
-                  <p>
-                    Thời gian {item.duration} - {item.lessons} Bài giảng
-                  </p>
-                </div>
-                <div className={styles.footer}>
-                  <div className={styles.cost}>
-                    <span>{item.price}</span>
-                    <span>{item.originalPrice}</span>
+          {Array.isArray(products) && products.length > 0 ? (
+            products.map((item, index) => (
+              <div className={styles.item} key={index}>
+                <img
+                  className={styles.img}
+                  src={item.picture}
+                  alt={item.name}
+                />
+                <div className={styles.course}>
+                  <p className={styles.title}>{item.name}</p>
+                  <div className={styles.info}>
+                    <p>By {item.author}</p>{" "}
+                    {/* Cần chắc chắn rằng author có trong item */}
+                    {[...Array(5)].map((_, starIndex) => (
+                      <FaRegStar key={starIndex} />
+                    ))}
+                    <p>
+                      Thời gian {item.duration} - {item.lessons} Bài giảng
+                    </p>
                   </div>
-                  <p>{item.students} đã học</p>
+                  <div className={styles.footer}>
+                    <div className={styles.cost}>
+                      <span>{item.price}</span>
+                      <span>{item.originalPrice}</span>
+                    </div>
+                    <p>{item.students} đã học</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p>No products available</p>
+          )}
         </Slider>
       </div>
     </div>

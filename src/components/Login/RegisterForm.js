@@ -1,8 +1,24 @@
 import React from "react";
 import { Modal, Input, Form, Button as AntButton, Row, Col } from "antd";
 import styles from "./RegisterForm.module.scss";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { registerUser } from "../State/Authentication/Action";
 
-const RegisterForm = ({ isModalVisible, handleCancel, onFinish }) => {
+const RegisterForm = ({ isModalVisible, handleCancel }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const onFinish = (values) => {
+    const reqData = {
+      fullname: values.fullName,
+      phonenumber: values.phoneNumber,
+      password: values.password,
+      navigate,
+    };
+
+    dispatch(registerUser(reqData));
+  };
   return (
     <Modal
       title="Đăng ký"

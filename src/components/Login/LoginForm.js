@@ -2,13 +2,25 @@ import React from "react";
 import { Modal, Input, Form, Button as AntButton, Flex } from "antd";
 import styles from "./LoginForm.module.scss";
 import { TbBrandGoogle } from "react-icons/tb";
+import { useDispatch } from "react-redux";
+import { loginUser } from "../State/Authentication/Action";
 
 const LoginForm = ({
   isModalVisible,
   handleCancel,
-  onFinish,
+  handleLoginSuccess,
   switchToRegister,
 }) => {
+  const dispatch = useDispatch();
+  const onFinish = async (values) => {
+    await dispatch(
+      loginUser({
+        userData: { phoneNumber: values.email, password: values.password },
+      })
+    );
+    handleCancel();
+    handleLoginSuccess();
+  };
   return (
     <Modal
       title={<div className={styles["modal-title"]}>Đăng nhập</div>}

@@ -20,19 +20,24 @@ export const registerUser = (reqData) => async (dispatch) => {
   dispatch({ type: REGISTER_REQUEST });
   try {
     const { data } = await axios.post(
-      `${API_URL}/auth/signup`,
-      reqData.userData
+      `${API_URL}/v1/account/register`,
+      //reqData.userData
+      {
+        phonenumber: reqData.phonenumber,
+        password: reqData.password,
+        fullname: reqData.fullname,
+      }
     );
     console.log("signup user", data);
 
     if (data.jwt) {
       localStorage.setItem("jwt", data.jwt);
     }
-    if (data.role === "ROLE_RESTAURANT_OWNER") {
-      reqData.navigate("/admin/restaurants");
-    } else {
-      reqData.navigate("/");
-    }
+    // if (data.role === "ROLE_RESTAURANT_OWNER") {
+    //   reqData.navigate("/admin/restaurants");
+    // } else {
+    //   reqData.navigate("/");
+    // }
     dispatch({ type: REGISTER_SUCCESS, payload: data.jwt });
   } catch (error) {
     console.log(error);
@@ -44,20 +49,32 @@ export const loginUser = (reqData) => async (dispatch) => {
   dispatch({ type: LOGIN_REQUEST });
   try {
     const { data } = await axios.post(
-      `${API_URL}/auth/signin`,
-      reqData.userData
+      `${API_URL}/v1/account/login`,
+      //reqData.userData
+      {
+        phonenumber: reqData.userData.phoneNumber,
+        password: reqData.userData.password,
+      }
     );
     console.log("login user", data);
 
-    if (data.jwt) {
-      localStorage.setItem("jwt", data.jwt);
+    if (data.accountLogin.access_token) {
+      localStorage.setItem("jwt", data.accountLogin.access_token);
     }
-    if (data.role === "ROLE_RESTAURANT_OWNER") {
-      reqData.navigate("/admin/restaurants");
+    // if (data.role === "ROLE_RESTAURANT_OWNER") {
+    //   reqData.navigate("/admin/restaurants");
+    // } else {
+    //   reqData.navigate("/");
+    // }
+
+    if (data.accountLogin.account.role === 1) {
+      // Ví dụ: nếu vai trò là Admin
+      reqData.navigate("/admin/dashboard");
     } else {
       reqData.navigate("/");
     }
-    dispatch({ type: LOGIN_SUCCESS, payload: data.jwt });
+    //dispatch({ type: LOGIN_SUCCESS, payload: data.jwt });
+    dispatch({ type: LOGIN_SUCCESS, payload: data });
   } catch (error) {
     console.log(error);
     dispatch({ type: LOGIN_FAILURE, payload: error.message });
