@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 import {
   GET_PRODUCTS_SUCCESS,
   GET_PRODUCTS_FAILURE,
@@ -28,7 +28,10 @@ export const getProducts = () => async (dispatch) => {
 
 export const createProduct = (productData) => async (dispatch) => {
   try {
-    const response = await axios.post(`${API_URL}/v1/product/create`, productData);
+    const response = await axios.post(
+      `${API_URL}/v1/product/create`,
+      productData
+    );
     dispatch({
       type: CREATE_PRODUCT_SUCCESS,
       payload: response.data.createNew,
@@ -43,7 +46,10 @@ export const createProduct = (productData) => async (dispatch) => {
 
 export const updateProduct = (id, productData) => async (dispatch) => {
   try {
-    const response = await axios.put(`${API_URL}/v1/product/${id}`, productData);
+    const response = await axios.put(
+      `${API_URL}/v1/product/${id}`,
+      productData
+    );
     dispatch({
       type: UPDATE_PRODUCT_SUCCESS,
       payload: response.data.updateNew,
@@ -58,10 +64,15 @@ export const updateProduct = (id, productData) => async (dispatch) => {
 
 export const getProductsByCategory = (categoryId) => async (dispatch) => {
   try {
-    const response = await axios.get(`${API_URL}/v1/product/category/${categoryId}`);
+    const response = await axios.get(
+      `${API_URL}/v1/product/category/${categoryId}`
+    );
     dispatch({
       type: GET_PRODUCTS_BY_CATEGORY_SUCCESS,
-      payload: response.data,
+      payload: {
+        categoryId: categoryId,
+        products: response.data.products,
+      },
     });
   } catch (error) {
     dispatch({

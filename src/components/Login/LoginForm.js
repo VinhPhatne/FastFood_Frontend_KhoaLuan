@@ -4,6 +4,7 @@ import styles from "./LoginForm.module.scss";
 import { TbBrandGoogle } from "react-icons/tb";
 import { useDispatch } from "react-redux";
 import { loginUser } from "../State/Authentication/Action";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = ({
   isModalVisible,
@@ -11,6 +12,7 @@ const LoginForm = ({
   handleLoginSuccess,
   switchToRegister,
 }) => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const onFinish = async (values) => {
     await dispatch(
@@ -19,7 +21,8 @@ const LoginForm = ({
       })
     );
     handleCancel();
-    handleLoginSuccess();
+    //handleLoginSuccess();
+    navigate("/admin")
   };
   return (
     <Modal

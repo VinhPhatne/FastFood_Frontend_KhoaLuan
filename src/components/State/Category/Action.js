@@ -33,7 +33,7 @@ export const createCategory =
     dispatch({ type: CREATE_CATEGORY_REQUEST });
     try {
       const { data } = await api.post(
-        "/category/create",
+        `${API_URL}/v1/category/create`,
         { name },
         {
           headers: {

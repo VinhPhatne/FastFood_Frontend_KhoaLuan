@@ -81,6 +81,31 @@ export const loginUser = (reqData) => async (dispatch) => {
   }
 };
 
+export const getUserProfile = () => async (dispatch) => {
+  const jwt = localStorage.getItem("jwt"); // Lấy JWT từ localStorage
+  if (!jwt) {
+    // Nếu không có JWT, dispatch một action hoặc xử lý theo ý muốn
+    console.log("No JWT found");
+    return; // Thoát khỏi hàm nếu không có JWT
+  }
+
+  dispatch({ type: GET_USER_REQUEST });
+  try {
+    const { data } = await axios.get(`${API_URL}/v1/account/profile`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    });
+    console.log("user profile", data);
+
+    dispatch({ type: GET_USER_SUCCESS, payload: data });
+  } catch (error) {
+    console.log(error);
+    dispatch({ type: GET_USER_FAILURE, payload: error.message });
+  }
+};
+
+
 export const getUser = (jwt) => async (dispatch) => {
   dispatch({ type: GET_USER_REQUEST });
   try {

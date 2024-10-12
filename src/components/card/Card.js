@@ -10,62 +10,14 @@ import "slick-carousel/slick/slick-theme.css";
 import { PrevArrow, NextArrow } from "../Arrow";
 import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "../State/Category/Action";
-import { getProducts } from "../State/Product/Action";
+import { getProducts, getProductsByCategory } from "../State/Product/Action";
 
 const Card = () => {
-  const [items, setItems] = useState([
-    {
-      title: "Khóa học React Native TypeScript New 2024",
-      author: "Vinh Phat",
-      duration: "05:32",
-      lessons: 5,
-      price: "551,000 đ",
-      originalPrice: "580,000 đ",
-      students: 2,
-    },
-    {
-      title: "Khóa học React Native TypeScript New 2024",
-      author: "Vinh Phat",
-      duration: "05:32",
-      lessons: 5,
-      price: "551,000 đ",
-      originalPrice: "580,000 đ",
-      students: 2,
-    },
-    {
-      title: "Khóa học React Native TypeScript New 2024",
-      author: "Vinh Phat",
-      duration: "05:32",
-      lessons: 5,
-      price: "551,000 đ",
-      originalPrice: "580,000 đ",
-      students: 2,
-    },
-    {
-      title: "Khóa học React Native TypeScript New 2024",
-      author: "Vinh Phat",
-      duration: "05:32",
-      lessons: 5,
-      price: "551,000 đ",
-      originalPrice: "580,000 đ",
-      students: 2,
-    },
-    {
-      title: "Khóa học React Native TypeScript New 2024",
-      author: "Vinh Phat",
-      duration: "05:32",
-      lessons: 5,
-      price: "551,000 đ",
-      originalPrice: "580,000 đ",
-      students: 2,
-    },
-  ]);
-
   const dispatch = useDispatch();
   const { categories } = useSelector(
     (state) => state.categoryReducer.categories
   );
-
+  const { productsByCategory } = useSelector((state) => state.productReducer);
   const { products } = useSelector((state) => state.productReducer);
 
   useEffect(() => {
@@ -77,11 +29,19 @@ const Card = () => {
   const [showPrevArrow, setShowPrevArrow] = useState(false);
   const [showNextArrow, setShowNextArrow] = useState(true);
 
+  const [categoryProducts, setCategoryProducts] = useState({});
+
+  useEffect(() => {
+    const jwt = localStorage.getItem("jwt");
+    dispatch(getCategories({ jwt }));
+  }, [dispatch]);
+
   const settings = {
     dots: false,
-    infinite: true,
     speed: 500,
     slidesToShow: 4,
+    centerMode: false,
+    infinite: false,
     slidesToScroll: 1,
     prevArrow: showPrevArrow ? <PrevArrow /> : null,
     nextArrow: showNextArrow ? <NextArrow /> : null,
@@ -89,7 +49,7 @@ const Card = () => {
       {
         breakpoint: 1300,
         settings: {
-          slidesToShow: 3.5,
+          slidesToShow: 4,
           centerMode: false,
           infinite: false,
         },
@@ -97,7 +57,7 @@ const Card = () => {
       {
         breakpoint: 1200,
         settings: {
-          slidesToShow: 3.5,
+          slidesToShow: 2.5,
           centerMode: false,
           infinite: false,
         },
@@ -140,8 +100,8 @@ const Card = () => {
       },
     ],
     afterChange: (current) => {
-      setShowPrevArrow(current > 0);
-      setShowNextArrow(current < items.length - 4);
+      //setShowPrevArrow(current > 0);
+      //setShowNextArrow(current < items.length - 4);
     },
   };
   const navigate = useNavigate();
@@ -149,67 +109,67 @@ const Card = () => {
     navigate("/category/7089338599931904");
   };
 
+  console.log("products", products);
   return (
-    <div className={styles.card}>
-      <div className={styles.content}>
-        <div className={styles.left}>
-          {Array.isArray(categories) && categories.length > 0 ? (
-            categories.map((category) => (
+    <div>
+      {Array.isArray(categories) && categories.length > 0 ? (
+        categories.map((category) => (
+          <div key={category._id} className={styles.card}>
+            <div className={styles.content}>
+              <div className={styles.left}>
+                <p>{category.name}</p>
+              </div>
               <div
-                key={category._id}
+                className={styles.right}
                 onClick={() => handleRedirect(category._id)}
               >
-                <h3>{category.name}</h3>
-                {/* Bạn có thể thêm các thông tin khác về category ở đây */}
+                <p>Xem thêm </p>
+                <MdOutlineKeyboardDoubleArrowRight className={styles.icon} />
               </div>
-            ))
-          ) : (
-            <p>No categories available</p> // Thông báo nếu không có dữ liệu
-          )}
-        </div>
-        <div className={styles.right} onClick={handleRedirect}>
-          <p>Xem thêm </p>
-          <MdOutlineKeyboardDoubleArrowRight className={styles.icon} />
-        </div>
-      </div>
+            </div>
 
-      <div className={styles.container}>
-        <Slider {...settings}>
-          {Array.isArray(products) && products.length > 0 ? (
-            products.map((item, index) => (
-              <div className={styles.item} key={index}>
-                <img
-                  className={styles.img}
-                  src={item.picture}
-                  alt={item.name}
-                />
-                <div className={styles.course}>
-                  <p className={styles.title}>{item.name}</p>
-                  <div className={styles.info}>
-                    <p>By {item.author}</p>{" "}
-                    {/* Cần chắc chắn rằng author có trong item */}
-                    {[...Array(5)].map((_, starIndex) => (
-                      <FaRegStar key={starIndex} />
-                    ))}
-                    <p>
-                      Thời gian {item.duration} - {item.lessons} Bài giảng
-                    </p>
-                  </div>
-                  <div className={styles.footer}>
-                    <div className={styles.cost}>
-                      <span>{item.price}</span>
-                      <span>{item.originalPrice}</span>
-                    </div>
-                    <p>{item.students} đã học</p>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>No products available</p>
-          )}
-        </Slider>
-      </div>
+            <div className={styles.container}>
+              <Slider {...settings}>
+                {products.filter((item) => item.category === category._id)
+                  .length > 0 ? (
+                  products
+                    .filter((item) => item.category === category._id)
+                    .map((item) => (
+                      <div className={styles.item}>
+                        <img
+                          className={styles.img}
+                          src={item.picture}
+                          alt={item.name}
+                        />
+                        <div className={styles.course}>
+                          <p className={styles.title}>{item.name}</p>
+                          <div className={styles.info}>
+                            <p>{item.description}</p>
+                            <p>
+                              Thời gian {item.duration} - {item.lessons} Bài
+                              giảng
+                            </p>
+                          </div>
+                          <div className={styles.footer}>
+                            <div className={styles.cost}>
+                              <span>{item.price} đ</span>
+                              <span>{item.originalPrice} </span>
+                            </div>
+                            <div>Thêm vào giỏ hàng</div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                ) : (
+                  <p>No products available for this category</p>
+                )}
+              </Slider>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p>No categories available</p>
+      )}
     </div>
   );
 };

@@ -11,6 +11,7 @@ import {
 
 const initialState = {
   products: [],
+  productsByCategory: {},
   error: null,
 };
 
@@ -54,7 +55,10 @@ const productReducer = (state = initialState, action) => {
     case GET_PRODUCTS_BY_CATEGORY_SUCCESS:
       return {
         ...state,
-        products: action.payload,
+        productsByCategory: {
+          ...state.productsByCategory,
+          [action.payload.categoryId]: action.payload.products,
+        },
         error: null,
       };
     case GET_PRODUCTS_BY_CATEGORY_FAILURE:

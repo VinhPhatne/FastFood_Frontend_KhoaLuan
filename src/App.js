@@ -14,6 +14,9 @@ import Experter from "./components/experter/Experter";
 import Category from "./components/category/Category";
 import Home from "./components/Home";
 import DetailCourse from "./components/detailCourse/DetailCourse";
+import UserProfile from "./components/profile/UserProfile";
+import ChangePassword from "./components/profile/ChangePassword";
+import Admin from "./AdminComponents/Admin/Admin";
 
 function App() {
   return (
@@ -32,8 +35,12 @@ function App() {
           <Suggest />
           <Footer /> */}
           <Route path="/" element={<Home />} />
+          <Route path="/admin/*" element={<Admin />} />
           <Route path="/category/:categoryId" element={<Category />} />
           <Route path="/detail/:id" element={<DetailCourse />} />
+          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/change-password" element={<ChangePassword />} />
         </Routes>
       </Router>
     </div>

@@ -83,14 +83,19 @@ const Header = () => {
   };
 
   const menuItems = [
-    { label: "Thể loại" },
-    { label: "Chuyên gia" },
+    { label: "Menu" },
+    { label: "Khuyến Mãi" },
     { label: "Giới thiệu" },
   ];
 
   const userMenu = (
     <Menu>
-      <Menu.Item key="profile">Profile</Menu.Item>
+      <Menu.Item key="profile" onClick={() => navigate("/profile")}>
+        Profile
+      </Menu.Item>
+      <Menu.Item key="profile" onClick={() => navigate("/change-password")}>
+        Đổi mật khẩu
+      </Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
         Logout
       </Menu.Item>
