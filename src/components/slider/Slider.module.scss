@@ -1,9 +1,15 @@
 .slider {
   padding-top: 85px;
-  background-color: #00acc1;
+  //background-color: #00acc1;
   height: 650px;
 
   .content {
+    .image {
+      width: 100%; /* Chiều rộng hình ảnh 100% để bao phủ slide */
+      height: 500px;
+
+      z-index: -1; /* Đặt hình ảnh xuống dưới */
+    }
     ul {
       list-style-type: none;
 
@@ -69,7 +75,7 @@
       width: 80%;
 
       &:first-child {
-        font-size: 36px; 
+        font-size: 36px;
       }
 
       &:nth-child(2) {
@@ -91,10 +97,10 @@
     .content ul li {
       padding-left: 10px;
       width: 100%;
-      text-align: center; 
+      text-align: center;
 
       &:first-child {
-        font-size: 28px; 
+        font-size: 28px;
       }
 
       &:nth-child(2) {

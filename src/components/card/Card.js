@@ -36,100 +36,54 @@ const Card = () => {
     dispatch(getCategories({ jwt }));
   }, [dispatch]);
 
-  const settings = {
-    dots: false,
-    speed: 500,
-    slidesToShow: 4,
-    centerMode: false,
-    infinite: false,
-    slidesToScroll: 1,
-    prevArrow: showPrevArrow ? <PrevArrow /> : null,
-    nextArrow: showNextArrow ? <NextArrow /> : null,
-    responsive: [
-      {
-        breakpoint: 1300,
-        settings: {
-          slidesToShow: 4,
-          centerMode: false,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 1200,
-        settings: {
-          slidesToShow: 2.5,
-          centerMode: false,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 1100,
-        settings: {
-          slidesToShow: 3,
-          centerMode: false,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 900,
-        settings: {
-          slidesToShow: 2.5,
-          centerMode: false,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 800,
-        settings: {
-          slidesToShow: 2,
-        },
-      },
-      {
-        breakpoint: 700,
-        settings: {
-          slidesToShow: 1.5,
-          centerMode: false,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 500,
-        settings: {
-          slidesToShow: 1,
-        },
-      },
-    ],
-    afterChange: (current) => {
-      //setShowPrevArrow(current > 0);
-      //setShowNextArrow(current < items.length - 4);
-    },
-  };
   const navigate = useNavigate();
   const handleRedirect = () => {
     navigate("/category/7089338599931904");
   };
 
+  const [active, setActive] = useState(1);
+
   console.log("products", products);
   return (
     <div>
-      {Array.isArray(categories) && categories.length > 0 ? (
-        categories.map((category) => (
-          <div key={category._id} className={styles.card}>
-            <div className={styles.content}>
-              <div className={styles.left}>
-                <p>{category.name}</p>
-              </div>
-              <div
-                className={styles.right}
-                onClick={() => handleRedirect(category._id)}
+      <div className="border-b">
+        <ul className="flex justify-between items-center max-w-screen-lg mx-auto px-4">
+          {Array.isArray(categories) &&
+            categories.map((category) => (
+              <li
+                key={category._id}
+                className={`relative px-4 py-2 cursor-pointer font-bold ${
+                  active === category._id ? "text-black" : "text-gray-400"
+                }`}
+                onClick={() => setActive(category._id)}
               >
-                <p>Xem thêm </p>
-                <MdOutlineKeyboardDoubleArrowRight className={styles.icon} />
-              </div>
-            </div>
+                {category.name}
+                {active === category._id && (
+                  <span className="absolute left-0 bottom-0 w-full h-[3px] bg-red-600" />
+                )}
+              </li>
+            ))}
+        </ul>
+      </div>
 
-            <div className={styles.container}>
-              <Slider {...settings}>
+      <div>
+        {Array.isArray(categories) && categories.length > 0 ? (
+          categories.map((category) => (
+            <div key={category._id} className={styles.card}>
+              <div className={styles.content}>
+                <div className={styles.left}>
+                  <p>{category.name}</p>
+                </div>
+                <div
+                  className={styles.right}
+                  onClick={() => handleRedirect(category._id)}
+                >
+                  <p>Xem thêm </p>
+                  <MdOutlineKeyboardDoubleArrowRight className={styles.icon} />
+                </div>
+              </div>
+
+              <div className={styles.container}>
                 {products.filter((item) => item.category === category._id)
                   .length > 0 ? (
                   products
@@ -145,31 +99,29 @@ const Card = () => {
                           <p className={styles.title}>{item.name}</p>
                           <div className={styles.info}>
                             <p>{item.description}</p>
-                            <p>
-                              Thời gian {item.duration} - {item.lessons} Bài
-                              giảng
-                            </p>
                           </div>
                           <div className={styles.footer}>
                             <div className={styles.cost}>
                               <span>{item.price} đ</span>
                               <span>{item.originalPrice} </span>
                             </div>
-                            <div>Thêm vào giỏ hàng</div>
                           </div>
+                          <button className={styles.addToCartButton}>
+                            Thêm vào giỏ hàng
+                          </button>
                         </div>
                       </div>
                     ))
                 ) : (
                   <p>No products available for this category</p>
                 )}
-              </Slider>
+              </div>
             </div>
-          </div>
-        ))
-      ) : (
-        <p>No categories available</p>
-      )}
+          ))
+        ) : (
+          <p>No categories available</p>
+        )}
+      </div>
     </div>
   );
 };
