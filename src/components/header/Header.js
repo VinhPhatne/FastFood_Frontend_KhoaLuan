@@ -105,7 +105,7 @@ const Header = () => {
   return (
     <div className={styles.header}>
       <div>
-        <img src={logo} alt="" />
+        <img src={logo} alt="" onClick={() => navigate("/")} />
       </div>
 
       <div className={styles.menu}>
