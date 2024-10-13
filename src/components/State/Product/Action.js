@@ -26,6 +26,29 @@ export const getProducts = () => async (dispatch) => {
   }
 };
 
+export const getProductsListPage = ({ jwt, page = 1,  search = "" }) => async (dispatch) => {
+  try {
+    const response = await axios.get(`${API_URL}/v1/product/listpage`, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+      params: {
+        page: page, 
+        search: search,
+      },
+    });
+    
+    dispatch({
+      type: GET_PRODUCTS_SUCCESS,
+      payload: response.data.data,
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_PRODUCTS_FAILURE,
+      payload: error.response?.data?.message || "Failed to fetch products",
+    });
+  }
+};
 export const createProduct = (productData) => async (dispatch) => {
   try {
     const response = await axios.post(

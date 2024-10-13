@@ -11,29 +11,71 @@ import {
   TextField,
   Button,
   IconButton,
-  InputAdornment ,
+  InputAdornment,
+  Pagination,
+  Avatar,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useEffect, useState } from "react";
 import CreateIcon from "@mui/icons-material/Create";
-import { Delete, Edit  } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import ClearIcon from "@mui/icons-material/Clear";
+import { Delete, Edit } from "@mui/icons-material";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getProducts } from "../../components/State/Product/Action";
+import {
+  getProducts,
+  getProductsListPage,
+} from "../../components/State/Product/Action";
 
 const ProductTable = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
   const { products } = useSelector((state) => state.productReducer);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const handleSearch = () => {
-    // Implement search functionality
-    console.log("Searching for:", searchTerm);
+    setCurrentPage(1);
+    const params = new URLSearchParams();
+    const jwt = localStorage.getItem("jwt");
+    if (searchTerm) {
+      params.set("search", searchTerm);
+    }
+    navigate(`?${params.toString()}`);
+    dispatch(getProductsListPage({ jwt, search: searchTerm }));
+  };
+  const handleClearSearch = () => {
+    setSearchTerm(""); 
+    const jwt = localStorage.getItem("jwt");
+    searchParams.delete("search");
+    setSearchParams(searchParams);
+    const search = ""
+    const page = 1
+    setCurrentPage(page);
+    dispatch(getProductsListPage({ jwt, page, search }));
+    
+  };
+
+  const handlePageChange = (event, value) => {
+    const params = new URLSearchParams(location.search);
+    const search = params.get("search");
+    if (search) {
+      params.set("search", search);
+    }
+    setCurrentPage(value);
+    setSearchParams(params.toString());
+    const jwt = localStorage.getItem("jwt");
+    dispatch(getProductsListPage({ jwt, page: value, search }));
   };
 
   useEffect(() => {
     const jwt = localStorage.getItem("jwt");
-    dispatch(getProducts({ jwt }));
+    const pageFromParams = searchParams.get("page");
+    const page = pageFromParams ? parseInt(pageFromParams, 10) : currentPage;
+    setCurrentPage(page);
+    dispatch(getProductsListPage({ jwt, page }));
   }, [dispatch]);
 
   return (
@@ -50,9 +92,9 @@ const ProductTable = () => {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between", // Space between search and button
-          alignItems: "center", // Center items vertically
-          marginBottom: "20px", // Space below the search and button
+          justifyContent: "space-between", 
+          alignItems: "center", 
+          marginBottom: "20px", 
         }}
       >
         <TextField
@@ -62,8 +104,9 @@ const ProductTable = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           sx={{
             "& .MuiOutlinedInput-root": {
-              borderRadius: "20px", // Change this value to adjust border radius
+              borderRadius: "20px",
               height: "40px",
+            
             },
           }}
           InputProps={{
@@ -72,11 +115,18 @@ const ProductTable = () => {
                 <IconButton onClick={handleSearch}>
                   <SearchIcon />
                 </IconButton>
+                <IconButton onClick={() => handleClearSearch()} edge="end">
+                  <ClearIcon />
+                </IconButton>
               </InputAdornment>
             ),
           }}
         />
-        <Button variant="contained" color="primary" onClick={() => console.log("Add New clicked")}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate("create")}
+        >
           Thêm mới
         </Button>
       </Box>
@@ -96,13 +146,16 @@ const ProductTable = () => {
                 </TableCell>{" "}
                 {/* Đổi màu chữ thành trắng */}
                 <TableCell align="left" sx={{ color: "#000" }}>
-                  Title
+                  Name
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
                   Price
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
-                  Availability
+                  Current Price
+                </TableCell>
+                <TableCell align="right" sx={{ color: "#000" }}>
+                  Category
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
                   isSell
@@ -113,8 +166,9 @@ const ProductTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {Array.isArray(products) && products.length > 0 ? (
-                products.map((item, index) => (
+              {Array.isArray(products.products) &&
+              products.products.length > 0 ? (
+                products.products.map((item, index) => (
                   <TableRow
                     key={item.id}
                     sx={{
@@ -124,25 +178,31 @@ const ProductTable = () => {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {/* <Avatar src={item.images[0]} /> */}
+                      <img
+                        src={item.picture}
+                        alt={item.name}
+                        style={{
+                          width: "100px", // Đặt chiều rộng
+                          height: "auto", // Tự động tính chiều cao theo tỷ lệ
+                          objectFit: "cover", // Giữ nguyên tỷ lệ và cắt ảnh nếu cần
+                          borderRadius: "8px", // Bo tròn góc ảnh (nếu muốn)
+                        }}
+                      />
                     </TableCell>
                     <TableCell align="left">{item.name}</TableCell>
-                    <TableCell align="right">
-                      {/* {item.ingredients.map((ingredient) => (
-                        <Chip label={ingredient.name} />
-                      ))} */}
-                    </TableCell>
                     <TableCell align="right">{item.price} VND</TableCell>
+                    <TableCell align="right">{item.currentPrice} VND</TableCell>
+                    <TableCell align="right">{item.category.name} </TableCell>
                     <TableCell align="right">
-                      {item.isStock ? (
-                        <span style={{ color: "#43A047" }}>In stock</span>
+                      {item.isSelling ? (
+                        <span style={{ color: "#43A047" }}>Selling</span>
                       ) : (
-                        <span style={{ color: "#D32F2F" }}>Out of stock</span>
+                        <span style={{ color: "#D32F2F" }}>Block</span>
                       )}
                     </TableCell>
                     <TableCell align="right">
                       <IconButton color="error">
-                        <Edit/>
+                        <Edit />
                         <Delete />
                       </IconButton>
                     </TableCell>
@@ -155,13 +215,23 @@ const ProductTable = () => {
           </Table>
         </TableContainer>
       </Card>
-      <div
-        style={{ padding: "16px", display: "flex", justifyContent: "flex-end" }}
-      >
-        <Button variant="outlined" color="primary">
-          List Page
-        </Button>
-      </div>
+
+      {Array.isArray(products.products) && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "20px",
+          }}
+        >
+          <Pagination
+            count={products.pagination.totalPages} // Tổng số trang từ pagination trong reducer
+            page={currentPage}
+            onChange={handlePageChange} // Xử lý khi thay đổi trang
+            color="primary"
+          />
+        </Box>
+      )}
     </Box>
   );
 };
