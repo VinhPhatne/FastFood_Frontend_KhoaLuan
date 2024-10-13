@@ -1,5 +1,5 @@
 .footer {
-  background-color: #00acc1;
+  background-color: #ff7d01;
   margin-top: 60px;
   .stats {
     display: flex;
@@ -11,12 +11,12 @@
       .number {
         font-size: 62px;
         font-weight: bold;
-        color: #00acc1;
+        color: #ff7d01;
       }
       .text {
         font-size: 22px;
         font-weight: bold;
-        color: #00acc1;
+        color: #ff7d01;
       }
     }
   }
@@ -26,7 +26,7 @@
     justify-content: space-around;
     padding-top: 40px;
     margin-left: 48px;
-    width: 70%;
+    width: 80%;
     .infoBox {
       .title {
         font-size: 24px;
@@ -42,6 +42,7 @@
           color: #fff;
           font-size: 18px;
           line-height: 1.6;
+          display: flex;
           .infoIcon {
             font-size: 24px;
             position: relative;
@@ -56,7 +57,7 @@
   .copyright {
     text-align: right;
     padding-right: 10px;
-    color: #00acc1;
+    color: #ff7d01;
     font-size: 20px;
 
     span {

@@ -3,7 +3,7 @@ import { Button } from "@mantine/core";
 import { FaCartShopping } from "react-icons/fa6";
 import { AiOutlineSearch } from "react-icons/ai";
 import styles from "./Header.module.scss";
-import logo from "../../assets/images/logo.jpg";
+import logo from "../../assets/images/logo1.png";
 import LoginForm from "../Login/LoginForm";
 import RegisterForm from "../Login/RegisterForm";
 import { Dropdown, Menu, notification, Avatar } from "antd";
@@ -129,7 +129,6 @@ const Header = () => {
           <input
             type="text"
             className={styles.searchInput}
-            placeholder="Nhập tên khoá học"
             onFocus={handleFocus}
             onBlur={handleBlur}
           />

@@ -7,7 +7,7 @@ import { MdOutlineEmail } from "react-icons/md";
 const Footer = () => {
   return (
     <footer className={styles.footer}>
-      <div className={styles.stats}>
+      {/* <div className={styles.stats}>
         <div className={styles.stat}>
           <div className={styles.number}>218</div>
           <div className={styles.text}>Học viên đăng ký</div>
@@ -24,7 +24,7 @@ const Footer = () => {
           <div className={styles.number}>163</div>
           <div className={styles.text}>Khoá học đã bán</div>
         </div>
-      </div>
+      </div> */}
 
       <div className={styles.infoSection}>
         <div className={styles.infoBox}>
@@ -68,7 +68,7 @@ const Footer = () => {
         </div>
       </div>
       <div className={styles.copyright}>
-        <span>@2023 Life, Inc.</span>
+        <span>@2024 Life, Inc.</span>
       </div>
     </footer>
   );

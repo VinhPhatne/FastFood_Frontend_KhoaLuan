@@ -4,6 +4,9 @@ import styles from "./Slider.module.scss";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Sliderr from "react-slick";
+import slide1 from "../../assets/images/slide1.jpeg";
+import slide2 from "../../assets/images/slide2.jpeg";
+import slide3 from "../../assets/images/slide3.jpg";
 
 const Slider = () => {
   const settings = {
@@ -21,34 +24,12 @@ const Slider = () => {
   return (
     <div className={styles.slider}>
       <Sliderr {...settings}>
-        <div className={styles.content}>
-          <ul>
-            <li>Learn from expert with Life Unit</li>
-            <li>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-                ac ultricies lorem.
-              </p>
-            </li>
-            <li>
-              <Button className={styles.btn}>Học thử</Button>
-            </li>
-          </ul>
+        <div className={`${styles.content} ${styles.slide3}`}>
+          <img src={slide3} alt="Slide 3" className={styles.image} />
         </div>
 
-        <div className={styles.content}>
-          <ul>
-            <li>Learn from expert with Life Unit</li>
-            <li>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-                ac ultricies lorem.
-              </p>
-            </li>
-            <li>
-              <Button className={styles.btn}>Học thử</Button>
-            </li>
-          </ul>
+        <div className={`${styles.content} ${styles.slide3}`}>
+          <img src={slide3} alt="Slide 3" className={styles.image} />
         </div>
       </Sliderr>
     </div>
