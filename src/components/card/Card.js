@@ -41,29 +41,80 @@ const Card = () => {
     navigate("/category/7089338599931904");
   };
 
-  const [active, setActive] = useState(1);
+  //const [active, setActive] = useState(1);
+
+  const [active, setActive] = useState(null);
+  const [startIndex, setStartIndex] = useState(0); // Vị trí bắt đầu hiển thị
+  const visibleCount = 5; // Hiển thị 5 categories cùng lúc
+
+  const handleNext = () => {
+    // Chuyển sang các category tiếp theo, đảm bảo không vượt quá số lượng category
+    if (startIndex + visibleCount < categories.length) {
+      setStartIndex(startIndex + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    // Chuyển về các category trước đó
+    if (startIndex > 0) {
+      setStartIndex(startIndex - 1);
+    }
+  };
 
   console.log("products", products);
   return (
     <div>
-      <div className="border-b">
-        <ul className="flex justify-between items-center max-w-screen-lg mx-auto px-4">
+      <div className="border-b relative mb-10 ">
+        {startIndex > 0 && (
+          <button
+            className="absolute left-[180px] top-1/2 transform -translate-y-1/2 px-2 py-1 text-2xl font-bold text-black hover:text-orange-600"
+            onClick={handlePrev}
+          >
+            {"<"}
+          </button>
+        )}
+
+        <ul className="flex justify-between items-center max-w-screen-lg mx-auto px-4 overflow-hidden">
           {Array.isArray(categories) &&
-            categories.map((category) => (
-              <li
-                key={category._id}
-                className={`relative px-4 py-2 cursor-pointer font-bold ${
-                  active === category._id ? "text-black" : "text-gray-400"
-                }`}
-                onClick={() => setActive(category._id)}
-              >
-                {category.name}
-                {active === category._id && (
-                  <span className="absolute left-0 bottom-0 w-full h-[3px] bg-red-600" />
-                )}
-              </li>
-            ))}
+            categories
+              .slice(startIndex, startIndex + visibleCount)
+              .map((category) => (
+                <li
+                  key={category._id}
+                  className={`relative px-4 py-2 cursor-pointer font-bold text-2xl  ${
+                    active === category._id ? "text-black" : "text-gray-400"
+                  }`}
+                  onClick={() => {
+                    setActive(category._id);
+                    const element = document.getElementById(category._id);
+                    if (element) {
+                      const headerHeight = 160;
+                      const elementPosition =
+                        element.getBoundingClientRect().top +
+                        window.pageYOffset;
+                      window.scrollTo({
+                        top: elementPosition - headerHeight,
+                        behavior: "auto",
+                      });
+                    }
+                  }}
+                >
+                  {category.name}
+                  {active === category._id && (
+                    <span className="absolute left-0 bottom-0 w-full h-[3px] bg-orange-600" />
+                  )}
+                </li>
+              ))}
         </ul>
+        {Array.isArray(categories) &&
+          startIndex + visibleCount < categories.length && (
+            <button
+              className="absolute right-[180px] top-1/2 transform -translate-y-1/2 px-2 py-1 text-2xl font-bold text-black hover:text-orange-600"
+              onClick={handleNext}
+            >
+              {">"}
+            </button>
+          )}
       </div>
 
       <div>
@@ -83,11 +134,11 @@ const Card = () => {
                 </div>
               </div>
 
-              <div className={styles.container}>
-                {products.filter((item) => item.category === category._id)
+              <div id={category._id} className={styles.container}>
+                {products.filter((item) => item.category._id === category._id)
                   .length > 0 ? (
                   products
-                    .filter((item) => item.category === category._id)
+                    .filter((item) => item.category._id === category._id)
                     .map((item) => (
                       <div className={styles.item}>
                         <img

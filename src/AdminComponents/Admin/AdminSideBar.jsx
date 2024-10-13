@@ -42,7 +42,7 @@ const AdminSideBar = ({ handleClose }) => {
         onClose={handleClose}
         open={true}
         anchor="left"
-        sx={{ zIndex: 1, backgroundColor: "#FAF3E0", marginTop: "20px" }}
+        sx={{ backgroundColor: "#FAF3E0", marginTop: "20px" }}
       >
         <div className="w-[70vw] lg:w-[14vw] h-screen flex flex-col justify-center text-l space-y-[1rem]">
           {menu.map((item, i) => (
@@ -50,7 +50,9 @@ const AdminSideBar = ({ handleClose }) => {
               <div
                 onClick={() => handleNavigate(item)}
                 className={`px-5 flex items-center gap-5 cursor-pointer text-orange-700 py-3 rounded transition-colors duration-300 mt-20 ${
-                  activeItem === item.title ? "bg-orange-300 text-orange-900" : "hover:bg-orange-300 hover:text-orange-900"
+                  activeItem === item.title
+                    ? "bg-orange-300 text-orange-900"
+                    : "hover:bg-orange-300 hover:text-orange-900"
                 }`}
               >
                 {item.icon}

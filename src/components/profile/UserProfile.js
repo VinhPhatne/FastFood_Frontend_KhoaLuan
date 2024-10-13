@@ -10,13 +10,12 @@ const UserProfile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userProfile = useSelector((state) => state.auth.user);
+
   useEffect(() => {
     dispatch(getUserProfile());
   }, [dispatch]);
 
   const onFinish = async (values) => {
-    //console.log("Received values:", values);
-
     await dispatch(
       updateUserProfile(userProfile?._id, {
         userData: { fullname: values.fullname, password: values.password },
@@ -34,13 +33,9 @@ const UserProfile = () => {
     }
   }, [userProfile, form]);
 
-  console.log("0000>>>>:", userProfile?._id);
-  console.log("userProfile>>>>:", userProfile?.phonenumber);
-  console.log("userProfile>>>>:", userProfile?.email);
-
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Thông tin người dùng</h2>
+    <div className="flex flex-col items-center justify-center h-screen p-5">
+      <h2 className="text-2xl font-semibold mb-6">Thông tin tài khoản</h2>
       <Form
         form={form}
         name="userProfile"
@@ -52,13 +47,14 @@ const UserProfile = () => {
           email: userProfile?.email || "",
         }}
         autoComplete="off"
+        className="w-full max-w-md" // Chiều rộng tối đa cho form
       >
         <Form.Item
           name="fullname"
           label="Họ và Tên"
           rules={[{ required: true, message: "Vui lòng nhập Họ và Tên!" }]}
         >
-          <Input placeholder="Nhập Họ và Tên" style={{ height: "50px" }} />
+          <Input placeholder="Nhập Họ và Tên" className="h-12" />
         </Form.Item>
 
         <Form.Item
@@ -66,7 +62,7 @@ const UserProfile = () => {
           label="Số điện thoại"
           rules={[{ required: true, message: "Vui lòng nhập Số điện thoại!" }]}
         >
-          <Input placeholder="Nhập Số điện thoại" style={{ height: "50px" }} />
+          <Input placeholder="Nhập Số điện thoại" className="h-12" />
         </Form.Item>
 
         <Form.Item
@@ -74,24 +70,26 @@ const UserProfile = () => {
           label="Mật khẩu"
           rules={[{ message: "Vui lòng nhập mật khẩu!" }]}
         >
-          <Input.Password
-            placeholder="Nhập mật khẩu"
-            style={{ height: "50px" }}
-          />
+          <Input.Password placeholder="Nhập mật khẩu" className="h-12" />
         </Form.Item>
 
-        <Form.Item style={{ display: "flex", justifyContent: "flex-end" }}>
+        <Form.Item className="flex justify-end">
           <Button
             onClick={() => navigate(-1)}
-            type="primary"
-            style={{ height: "35px", width: "100px", marginRight: "12px" }}
+            type="default"
+            className="mr-2 w-28"
           >
             Hủy
           </Button>
           <Button
             type="primary"
             htmlType="submit"
-            style={{ width: "100px", height: "35px" }}
+            className="w-28"
+            style={{
+              backgroundColor: "#ff7d01",
+              color: "#fff",
+              fontWeight: "500",
+            }}
           >
             Cập nhật
           </Button>

@@ -1,6 +1,14 @@
 import React, { useState } from "react";
-import { AppBar, Toolbar, Typography, IconButton, Menu, MenuItem } from "@mui/material";
-import AccountCircle from "@mui/icons-material/AccountCircle"; // Import the User Icon
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Menu,
+  MenuItem,
+} from "@mui/material";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import logo from "../../assets/images/logo1.png";
 
 const AdminHeader = () => {
   const [anchorEl, setAnchorEl] = useState(null); // State to manage the menu open state
@@ -29,9 +37,16 @@ const AdminHeader = () => {
       }}
     >
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Admin
-        </Typography>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <img
+            src={logo}
+            alt="logo"
+            style={{ height: "40px", marginRight: "10px" }}
+          />
+          <Typography variant="h6" component="div">
+            Admin
+          </Typography>
+        </div>
         <IconButton
           color="inherit"
           sx={{ fontSize: "30px" }}

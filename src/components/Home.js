@@ -9,11 +9,14 @@ import Expert from "./expert/Expert";
 import Experter from "./experter/Experter";
 import Suggest from "./suggest/Suggest";
 import Footer from "./footer/Footer";
+import { Route, Routes } from "react-router-dom";
+import UserProfile from "./profile/UserProfile";
+import ChangePassword from "./profile/ChangePassword";
 
 const Home = () => {
   return (
     <div>
-      <Header />
+      {/* <Header /> */}
       <Slider />
       <Card />
       {/* <Review />
@@ -23,6 +26,15 @@ const Home = () => {
       <Suggest /> */}
       <Footer />
     </div>
+
+    // <div>
+    //   <Header />
+    //   <Routes>
+    //     {/* <Route path="/" element={<Home />} /> */}
+    //     <Route path="/profile" element={<UserProfile />} />
+    //     <Route path="/change-password" element={<ChangePassword />} />
+    //   </Routes>
+    // </div>
   );
 };
 

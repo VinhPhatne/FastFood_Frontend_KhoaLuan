@@ -6,15 +6,18 @@ import reportWebVitals from "./reportWebVitals";
 import { MantineProvider } from "@mantine/core";
 import { store } from "./components/State/store";
 import { Provider } from "react-redux";
+import { BrowserRouter } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <MantineProvider withGlobalStyles withNormalizeCSS>
-        <App />
-      </MantineProvider>
-    </Provider>
+    <BrowserRouter>
+      <Provider store={store}>
+        <MantineProvider withGlobalStyles withNormalizeCSS>
+          <App />
+        </MantineProvider>
+      </Provider>
+    </BrowserRouter>
   </React.StrictMode>
 );
 

@@ -3,13 +3,14 @@ import { Form, Input, Button } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserProfile } from "../State/Authentication/Action";
 import { useNavigate } from "react-router-dom";
-import { changePassword, updateUserProfile } from "../State/User/Action";
+import { changePassword } from "../State/User/Action";
 
 const ChangePassword = () => {
   const [form] = Form.useForm();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userProfile = useSelector((state) => state.auth.user);
+
   useEffect(() => {
     dispatch(getUserProfile());
   }, [dispatch]);
@@ -30,8 +31,8 @@ const ChangePassword = () => {
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Thông tin người dùng</h2>
+    <div className="flex flex-col items-center justify-center h-screen p-5">
+      <h2 className="text-2xl font-semibold mb-6">Đổi Mật Khẩu</h2>
       <Form
         form={form}
         name="userProfile"
@@ -43,6 +44,7 @@ const ChangePassword = () => {
           email: userProfile?.email || "",
         }}
         autoComplete="off"
+        className="w-full max-w-md" // Chiều rộng tối đa cho form
       >
         <Form.Item
           name="currentPassword"
@@ -51,10 +53,7 @@ const ChangePassword = () => {
             { required: true, message: "Vui lòng nhập mật khẩu hiện tại!" },
           ]}
         >
-          <Input.Password
-            placeholder="Nhập mật khẩu hiện tại"
-            style={{ height: "50px" }}
-          />
+          <Input.Password placeholder="Nhập mật khẩu hiện tại" className="h-12"/>
         </Form.Item>
 
         <Form.Item
@@ -62,10 +61,7 @@ const ChangePassword = () => {
           label="Mật khẩu mới"
           rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới!" }]}
         >
-          <Input.Password
-            placeholder="Nhập mật khẩu mới"
-            style={{ height: "50px" }}
-          />
+          <Input.Password placeholder="Nhập mật khẩu mới" className="h-12"/>
         </Form.Item>
 
         <Form.Item
@@ -73,7 +69,6 @@ const ChangePassword = () => {
           label="Xác nhận mật khẩu"
           rules={[
             { required: true, message: "Vui lòng xác nhận mật khẩu!" },
-            // Thêm custom validation để kiểm tra nếu mật khẩu mới và xác nhận mật khẩu không trùng khớp
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue("newPassword") === value) {
@@ -86,24 +81,26 @@ const ChangePassword = () => {
             }),
           ]}
         >
-          <Input.Password
-            placeholder="Xác nhận mật khẩu"
-            style={{ height: "50px" }}
-          />
+          <Input.Password placeholder="Xác nhận mật khẩu" className="h-12"/>
         </Form.Item>
 
-        <Form.Item style={{ display: "flex", justifyContent: "flex-end" }}>
+        <Form.Item className="flex justify-end">
           <Button
             onClick={() => navigate(-1)}
-            type="primary"
-            style={{ height: "35px", width: "100px", marginRight: "12px" }}
+            type="default"
+            className="mr-2 w-28"
           >
             Hủy
           </Button>
           <Button
             type="primary"
             htmlType="submit"
-            style={{ width: "100px", height: "35px" }}
+            className="w-28"
+            style={{
+              backgroundColor: "#ff7d01",
+              color: "#fff",
+              fontWeight: "500",
+            }}
           >
             Cập nhật
           </Button>
