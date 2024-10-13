@@ -1,20 +1,22 @@
 import {
-  Avatar,
-  Box,
   Card,
-  CardHeader,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
   TableContainer,
+  Paper,
+  Box,
+  Table,
   TableHead,
   TableRow,
+  TableCell,
+  TableBody,
+  TextField,
+  Button,
+  IconButton,
+  InputAdornment ,
 } from "@mui/material";
-import React, { useEffect } from "react";
+import SearchIcon from "@mui/icons-material/Search";
+import React, { useEffect, useState } from "react";
 import CreateIcon from "@mui/icons-material/Create";
-import { Delete } from "@mui/icons-material";
+import { Delete, Edit  } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getProducts } from "../../components/State/Product/Action";
@@ -23,6 +25,11 @@ const ProductTable = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { products } = useSelector((state) => state.productReducer);
+  const [searchTerm, setSearchTerm] = useState("");
+  const handleSearch = () => {
+    // Implement search functionality
+    console.log("Searching for:", searchTerm);
+  };
 
   useEffect(() => {
     const jwt = localStorage.getItem("jwt");
@@ -30,29 +37,57 @@ const ProductTable = () => {
   }, [dispatch]);
 
   return (
-    <Box>
-      <Card sx={{ boxShadow: "0 3px 5px rgba(0,0,0,0.1)" }}>
-        <CardHeader
-          action={
-            <IconButton
-              onClick={() => navigate("/admin/product/create")}
-              aria-label="settings"
-            >
-              <CreateIcon />
-            </IconButton>
-          }
-          title={"Menu"}
+    <Box
+      sx={{
+        width: "95%",
+        // display: 'flex',
+        justifyContent: "center",
+        alignItems: "center",
+        margin: "0px auto",
+        marginTop: "100px",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between", // Space between search and button
+          alignItems: "center", // Center items vertically
+          marginBottom: "20px", // Space below the search and button
+        }}
+      >
+        <TextField
+          label="Search"
+          variant="outlined"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           sx={{
-            pt: 2,
-            alignItems: "center",
-            color: "#fff",
-            backgroundColor: "#ff7d01",
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "20px", // Change this value to adjust border radius
+              height: "40px",
+            },
+          }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={handleSearch}>
+                  <SearchIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
           }}
         />
-
+        <Button variant="contained" color="primary" onClick={() => console.log("Add New clicked")}>
+          Thêm mới
+        </Button>
+      </Box>
+      <Card sx={{ boxShadow: "0 3px 5px rgba(0,0,0,0.1)" }}>
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead >
+            <TableHead
+              sx={{
+                backgroundColor: "#fdba74", // Set background color to #FFF3E0
+              }}
+            >
               {" "}
               {/* Đổi màu nền TableHead thành cam Popeyes */}
               <TableRow>
@@ -64,16 +99,16 @@ const ProductTable = () => {
                   Title
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
-                  Ingredients
-                </TableCell>
-                <TableCell align="right" sx={{ color: "#000" }}>
                   Price
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
                   Availability
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
-                  Delete
+                  isSell
+                </TableCell>
+                <TableCell align="right" sx={{ color: "#000" }}>
+                  Action
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -84,8 +119,8 @@ const ProductTable = () => {
                     key={item.id}
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
-                      backgroundColor: index % 2 === 0 ? "#FFF3E0" : "#FFFFFF", // Màu xen kẽ giữa các hàng: cam nhạt và trắng
-                      "&:hover": { backgroundColor: "#FFCCBC" }, // Màu khi hover
+                      // backgroundColor: index % 2 === 0 ? "#FFF3E0" : "#FFFFFF", // Màu xen kẽ giữa các hàng: cam nhạt và trắng
+                      "&:hover": { backgroundColor: "#FFF3E0" }, // Màu khi hover
                     }}
                   >
                     <TableCell component="th" scope="row">
@@ -107,6 +142,7 @@ const ProductTable = () => {
                     </TableCell>
                     <TableCell align="right">
                       <IconButton color="error">
+                        <Edit/>
                         <Delete />
                       </IconButton>
                     </TableCell>
@@ -119,6 +155,13 @@ const ProductTable = () => {
           </Table>
         </TableContainer>
       </Card>
+      <div
+        style={{ padding: "16px", display: "flex", justifyContent: "flex-end" }}
+      >
+        <Button variant="outlined" color="primary">
+          List Page
+        </Button>
+      </div>
     </Box>
   );
 };

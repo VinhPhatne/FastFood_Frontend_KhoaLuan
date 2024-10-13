@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import FoodCategory from "../Category/FoodCategory";
 import CreateProductForm from "../Product/CreateProductForm";
 import Product from "../Product/Product";
+import AdminHeader from "./AdminHeader";
 //import { getRestaurantsCategory } from "../../component/State/Restaurant/Action";
 
 const Admin = () => {
@@ -31,20 +32,15 @@ const Admin = () => {
 
   return (
     <div>
-      <div className="lg:flex justify-between">
-        <div>
+      <AdminHeader /> 
+      <div className="lg:flex ">
+        <div className="lg:w-[15%]">  
           <AdminSideBar handleClose={handleClose} />
         </div>
-        <div className="lg:w-[80%]">
+        <div className="lg:w-[85%]">
           <Routes>
-            {/* <Route path="/" element={<Dashboard />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/menu" element={<Menu />} /> */}
+
             <Route path="category" element={<FoodCategory />} />
-            {/* <Route path="/ingredients" element={<Ingredients />} /> */}
-            {/* <Route path="/event" element={<Events />} />
-            <Route path="/details" element={<RestaurantDetails />} />
-            */}
             <Route path="/product" element={<Product />} />
             <Route path="/product/create" element={<CreateProductForm />} />
           </Routes>
