@@ -34,7 +34,10 @@ const UserProfile = () => {
   }, [userProfile, form]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen p-5">
+    <div
+      className="flex flex-col items-center justify-center h-screen p-5"
+      style={{ height: "500px" }}
+    >
       <h2 className="text-2xl font-semibold mb-6">Thông tin tài khoản</h2>
       <Form
         form={form}
@@ -47,7 +50,7 @@ const UserProfile = () => {
           email: userProfile?.email || "",
         }}
         autoComplete="off"
-        className="w-full max-w-md" // Chiều rộng tối đa cho form
+        className="w-full max-w-md"
       >
         <Form.Item
           name="fullname"

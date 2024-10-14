@@ -55,7 +55,6 @@ const ProductTable = () => {
     const page = 1
     setCurrentPage(page);
     dispatch(getProductsListPage({ jwt, page, search }));
-    
   };
 
   const handlePageChange = (event, value) => {
@@ -225,7 +224,7 @@ const ProductTable = () => {
           }}
         >
           <Pagination
-            count={products.pagination.totalPages} // Tổng số trang từ pagination trong reducer
+            count={products.pagination.totalPages} 
             page={currentPage}
             onChange={handlePageChange} // Xử lý khi thay đổi trang
             color="primary"

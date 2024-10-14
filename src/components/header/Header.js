@@ -9,6 +9,7 @@ import RegisterForm from "../Login/RegisterForm";
 import { Dropdown, Menu, notification, Avatar } from "antd";
 import { useNavigate } from "react-router-dom";
 import { UserOutlined } from "@ant-design/icons";
+import Cookies from "js-cookie";
 
 const Header = () => {
   const [activeTab, setActiveTab] = useState("Trang chủ");
@@ -16,8 +17,21 @@ const Header = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [activeForm, setActiveForm] = useState("login");
+  const [cartItemCount, setCartItemCount] = useState(0);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    setIsLoggedIn(!!token);
+    const savedCart = JSON.parse(Cookies.get(token) || "[]");
+    const itemCount = savedCart.reduce(
+      (total, item) => total + item.quantity,
+      0
+    );
+    setCartItemCount(itemCount);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("jwt");
@@ -74,13 +88,8 @@ const Header = () => {
     setIsModalVisible(false);
   };
 
-  const switchToRegister = () => {
-    setIsRegisterMode(true);
-  };
-
-  const switchToLogin = () => {
-    setIsRegisterMode(false);
-  };
+  const handleSwitchToRegister = () => setActiveForm("register");
+  const handleSwitchToLogin = () => setActiveForm("login");
 
   const menuItems = [
     { label: "Menu" },
@@ -93,7 +102,10 @@ const Header = () => {
       <Menu.Item key="profile" onClick={() => navigate("/profile")}>
         Profile
       </Menu.Item>
-      <Menu.Item key="profile" onClick={() => navigate("/change-password")}>
+      <Menu.Item
+        key="profile"
+        onClick={() => navigate("/profile/change-password")}
+      >
         Đổi mật khẩu
       </Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
@@ -135,7 +147,7 @@ const Header = () => {
         </div>
         <div className={styles.cart} onClick={handleCartClick}>
           <FaCartShopping />
-          <span className={styles.cartBadge}>0</span>
+          <span className={styles.cartBadge}>{cartItemCount}</span>
         </div>
 
         {isLoggedIn ? (
@@ -149,7 +161,6 @@ const Header = () => {
                   shape="circle"
                   size="large"
                 />
-                IT - Prod
               </a>
             </Dropdown>
           </div>
@@ -169,7 +180,7 @@ const Header = () => {
         </Button> */}
       </div>
 
-      <LoginForm
+      {/* <LoginForm
         isModalVisible={isModalVisible && !isRegisterMode}
         handleCancel={handleCancel}
         //onFinish={onFinish}
@@ -182,7 +193,21 @@ const Header = () => {
         handleCancel={handleCancel}
         onFinish={onFinishRegister}
         switchToLogin={switchToLogin}
-      />
+      /> */}
+
+      {activeForm === "login" ? (
+        <LoginForm
+          isModalVisible={isModalVisible}
+          handleCancel={handleCancel}
+          switchToRegister={handleSwitchToRegister}
+        />
+      ) : (
+        <RegisterForm
+          isModalVisible={isModalVisible}
+          handleCancel={handleCancel}
+          switchToLogin={handleSwitchToLogin}
+        />
+      )}
     </div>
   );
 };
