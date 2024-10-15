@@ -42,7 +42,7 @@ const CreateFoodCategoryForm = ({ onClose }) => {
   return (
     <div className="">
       <div className="p-5">
-        <h1 className="text-gray-400 text-center text-xl pb-10">
+        <h1 className="text-orange-600 font-semibold text-center text-2xl pb-10">
           Thêm mới danh mục
         </h1>
         <form className="space-y-5" onSubmit={handleSubmit}>

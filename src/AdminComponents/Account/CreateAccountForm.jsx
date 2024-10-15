@@ -28,7 +28,7 @@ const initialValues = {
   picture: "",
 };
 
-const CreateProductForm = () => {
+const CreateAccountForm = () => {
   const dispatch = useDispatch();
   //const { restaurant, ingredients } = useSelector((store) => store);
   const jwt = localStorage.getItem("jwt");
@@ -250,4 +250,4 @@ const CreateProductForm = () => {
   );
 };
 
-export default CreateProductForm;
+export default CreateAccountForm;
