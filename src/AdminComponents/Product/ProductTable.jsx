@@ -14,10 +14,15 @@ import {
   InputAdornment,
   Pagination,
   Avatar,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useEffect, useState } from "react";
 import CreateIcon from "@mui/icons-material/Create";
+import { useFormik } from "formik";
 import ClearIcon from "@mui/icons-material/Clear";
 import { Delete, Edit } from "@mui/icons-material";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
@@ -26,6 +31,7 @@ import {
   getProducts,
   getProductsListPage,
 } from "../../components/State/Product/Action";
+import { getCategories } from "../../components/State/Category/Action";
 
 const ProductTable = () => {
   const navigate = useNavigate();
@@ -35,6 +41,11 @@ const ProductTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [isSell, setIsSell] = useState("");
+  const { categories } = useSelector(
+    (state) => state.categoryReducer.categories
+  );
 
   const handleSearch = () => {
     setCurrentPage(1);
@@ -43,30 +54,58 @@ const ProductTable = () => {
     if (searchTerm) {
       params.set("search", searchTerm);
     }
+    if (selectedCategory) {
+      params.set("category", selectedCategory);
+    }
+    if (isSell) {
+      params.set("isSell", isSell);
+    }
     navigate(`?${params.toString()}`);
-    dispatch(getProductsListPage({ jwt, search: searchTerm }));
+    dispatch(
+      getProductsListPage({ jwt, search: searchTerm, cateId: selectedCategory, isSelling: isSell })
+    );
   };
   const handleClearSearch = () => {
-    setSearchTerm(""); 
+    setSearchTerm("");
+    setSelectedCategory("");
+    setIsSell("");
     const jwt = localStorage.getItem("jwt");
+    searchParams.delete("category");
     searchParams.delete("search");
+    searchParams.delete("isSell");
     setSearchParams(searchParams);
-    const search = ""
-    const page = 1
+    const search = "";
+    const page = 1;
     setCurrentPage(page);
     dispatch(getProductsListPage({ jwt, page, search }));
+
   };
+  const handleIsSellChange = (event) => {
+    setIsSell(event.target.value);
+  }
 
   const handlePageChange = (event, value) => {
     const params = new URLSearchParams(location.search);
     const search = params.get("search");
+    const cateId = params.get("category");
+    const isSell = params.get("isSell");
     if (search) {
       params.set("search", search);
+    }
+    if (cateId) {
+      params.set("category", cateId);
+    }
+    if (isSell) {
+      params.set("isSell", isSell);
     }
     setCurrentPage(value);
     setSearchParams(params.toString());
     const jwt = localStorage.getItem("jwt");
-    dispatch(getProductsListPage({ jwt, page: value, search }));
+    dispatch(getProductsListPage({ jwt, page: value, search, cateId, isSelling: isSell }));
+  };
+
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
   };
 
   useEffect(() => {
@@ -75,6 +114,7 @@ const ProductTable = () => {
     const page = pageFromParams ? parseInt(pageFromParams, 10) : currentPage;
     setCurrentPage(page);
     dispatch(getProductsListPage({ jwt, page }));
+    dispatch(getCategories({ jwt }));
   }, [dispatch]);
 
   return (
@@ -91,40 +131,87 @@ const ProductTable = () => {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between", 
-          alignItems: "center", 
-          marginBottom: "20px", 
+          // justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
         }}
       >
         <TextField
-          label="Search"
+          label="Tình kiếm"
           variant="outlined"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "20px",
-              height: "40px",
-            
+              height: "50px",
             },
           }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={handleSearch}>
-                  <SearchIcon />
-                </IconButton>
-                <IconButton onClick={() => handleClearSearch()} edge="end">
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
+          // InputProps={{
+          //   endAdornment: (
+          //     <InputAdornment position="end">
+          //       <IconButton onClick={handleSearch}>
+          //         <SearchIcon />
+          //       </IconButton>
+          //       <IconButton onClick={() => handleClearSearch()} edge="end">
+          //         <ClearIcon />
+          //       </IconButton>
+          //     </InputAdornment>
+          //   ),
+          // }}
         />
+
+        <FormControl sx={{ minWidth: 150, marginLeft: 2 }}>
+          <InputLabel>Danh mục</InputLabel>
+          <Select
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+            label="Category"
+          >
+            {/* <MenuItem value="">All Categories</MenuItem> */}
+            {Array.isArray(categories) &&
+              categories.map((category) => (
+                <MenuItem key={category._id} value={category._id}>
+                  {category.name}
+                </MenuItem>
+              ))}
+          </Select>
+        </FormControl>
+
+        <FormControl sx={{ minWidth: 150, marginLeft: 2 }}>
+          <InputLabel>Trạng thái bán</InputLabel>
+          <Select
+            value={isSell} 
+            onChange={handleIsSellChange} 
+            label="Trạng thái bán"
+          >
+         
+            <MenuItem value={true}>Đang bán</MenuItem>
+            <MenuItem value={false}>Ngừng bán</MenuItem>{" "}
+            {/* False: Ngừng bán */}
+          </Select>
+        </FormControl>
+
+        <InputAdornment position="end">
+          <IconButton onClick={handleSearch}>
+            <SearchIcon />
+          </IconButton>
+          <IconButton onClick={() => handleClearSearch()} edge="end">
+            <ClearIcon />
+          </IconButton>
+        </InputAdornment>
+        {/* ),
+          }} */}
+
         <Button
           variant="contained"
           color="primary"
           onClick={() => navigate("create")}
+          sx={{
+            ml: "auto",
+            height: "40px",
+            borderRadius: "20px",
+          }}
         >
           Thêm mới
         </Button>

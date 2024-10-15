@@ -26,7 +26,7 @@ export const getProducts = () => async (dispatch) => {
   }
 };
 
-export const getProductsListPage = ({ jwt, page = 1,  search = "" }) => async (dispatch) => {
+export const getProductsListPage = ({ jwt, page = 1,  search , cateId, isSelling  }) => async (dispatch) => {
   try {
     const response = await axios.get(`${API_URL}/v1/product/listpage`, {
       headers: {
@@ -35,6 +35,8 @@ export const getProductsListPage = ({ jwt, page = 1,  search = "" }) => async (d
       params: {
         page: page, 
         search: search,
+        cateId: cateId,
+        isSelling: isSelling
       },
     });
     
