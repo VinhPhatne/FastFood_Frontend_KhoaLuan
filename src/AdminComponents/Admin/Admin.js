@@ -7,6 +7,7 @@ import FoodCategory from "../Category/FoodCategory";
 import CreateProductForm from "../Product/CreateProductForm";
 import Product from "../Product/Product";
 import AdminHeader from "./AdminHeader";
+import Event from "../Event/Event";
 //import { getRestaurantsCategory } from "../../component/State/Restaurant/Action";
 
 const Admin = () => {
@@ -32,17 +33,17 @@ const Admin = () => {
 
   return (
     <div>
-      <AdminHeader /> 
+      <AdminHeader />
       <div className="lg:flex ">
-        <div className="lg:w-[15%]">  
+        <div className="lg:w-[15%]">
           <AdminSideBar handleClose={handleClose} />
         </div>
         <div className="lg:w-[85%]">
           <Routes>
-
             <Route path="category" element={<FoodCategory />} />
             <Route path="/product" element={<Product />} />
             <Route path="/product/create" element={<CreateProductForm />} />
+            <Route path="/event" element={<Event />} />
           </Routes>
         </div>
       </div>

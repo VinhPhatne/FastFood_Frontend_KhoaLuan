@@ -109,11 +109,11 @@ export const getCategoryById =
         },
       });
       dispatch({ type: "GET_CATEGORY_BY_ID_SUCCESS", payload: response.data });
-      return response.data; // Trả về dữ liệu
+      return response.data; 
     } catch (error) {
       console.error("Error fetching category by ID:", error);
       dispatch({ type: "GET_CATEGORY_BY_ID_FAILURE", payload: error });
-      return null; // Hoặc có thể trả về thông báo lỗi
+      return null; 
     }
   };
 

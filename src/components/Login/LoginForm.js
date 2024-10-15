@@ -14,15 +14,17 @@ const LoginForm = ({
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const onFinish = async (values) => {
-    await dispatch(
+  const onFinish = (values) => {
+    handleCancel();
+    dispatch(
       loginUser({
         userData: { phoneNumber: values.email, password: values.password },
+        navigate,
       })
     );
-    handleCancel();
+
     //handleLoginSuccess();
-    navigate("/admin")
+    // navigate("/")
   };
   return (
     <Modal

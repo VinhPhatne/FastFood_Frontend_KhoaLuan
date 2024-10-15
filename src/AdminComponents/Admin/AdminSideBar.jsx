@@ -8,6 +8,8 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Divider, Drawer, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../../components/State/Authentication/Action";
 // import { logout } from "../../component/State/Authentication/Action";
 
 const menu = [
@@ -23,14 +25,16 @@ const menu = [
 
 const AdminSideBar = ({ handleClose }) => {
   const isSmallScreen = useMediaQuery("(max-width:1080px)");
-  const [activeItem, setActiveItem] = useState(menu[0].title); // Set the default active item
+  const [activeItem, setActiveItem] = useState(menu[0].title);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleNavigate = (item) => {
-    setActiveItem(item.title); // Update active item
+    setActiveItem(item.title); 
     navigate(`/admin${item.path}`);
     if (item.title === "Logout") {
-      // dispatch(logout());
+      navigate("/");
+      dispatch(logout());
       handleClose();
     }
   };
