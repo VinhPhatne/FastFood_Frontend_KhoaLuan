@@ -8,6 +8,7 @@ import CreateProductForm from "../Product/CreateProductForm";
 import Product from "../Product/Product";
 import AdminHeader from "./AdminHeader";
 import Event from "../Event/Event";
+import Account from "../Account/Account";
 //import { getRestaurantsCategory } from "../../component/State/Restaurant/Action";
 
 const Admin = () => {
@@ -44,6 +45,7 @@ const Admin = () => {
             <Route path="/product" element={<Product />} />
             <Route path="/product/create" element={<CreateProductForm />} />
             <Route path="/event" element={<Event />} />
+            <Route path="/account" element={<Account />} />
           </Routes>
         </div>
       </div>

@@ -11,13 +11,13 @@ import {
 } from "./ActionType";
 
 const initialState = {
-  user: null,
+  accounts: [],
   isLoading: false,
   error: null,
   success: null,
 };
 
-export const authReducer = (state = initialState, action) => {
+export const userReducer = (state = initialState, action) => {
   switch (action.type) {
     case GET_USER_REQUEST:
     case UPDATE_USER_REQUEST:
@@ -28,14 +28,14 @@ export const authReducer = (state = initialState, action) => {
       return {
         ...state,
         isLoading: false,
-        user: action.payload,
+        accounts: action.payload,
       };
 
     case UPDATE_USER_SUCCESS:
       return {
         ...state,
         isLoading: false,
-        user: { ...state.user, ...action.payload },
+        accounts: { ...state.accounts, ...action.payload },
         success: "Update success",
       };
 
@@ -59,3 +59,26 @@ export const authReducer = (state = initialState, action) => {
       return state;
   }
 };
+
+
+
+// export const toggleUserState = ({ id, jwt, state }) => async (dispatch) => {
+//   dispatch({ type: DELETE_USER_REQUEST });
+//   try {
+//     const { data } = await api.put(
+//       `${API_URL}/v1/account/${state ? 'unblock' : 'delete'}/${id}`,
+//       { state },
+//       {
+//         headers: {
+//           Authorization: `Bearer ${jwt}`,
+//         },
+//       }
+//     );
+//     console.log("User state updated", data);
+//     dispatch({ type: DELETE_USER_SUCCESS, payload: id });
+//   } catch (error) {
+//     console.log("error", error);
+//     dispatch({ type: DELETE_USER_FAILURE });
+//   }
+// };
+

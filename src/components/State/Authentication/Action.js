@@ -110,44 +110,22 @@ export const getUserProfile = () => async (dispatch) => {
   }
 };
 
-export const getUser = (jwt) => async (dispatch) => {
-  dispatch({ type: GET_USER_REQUEST });
-  try {
-    const { data } = await api.get(`/api/users/profile`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-      },
-    });
-    console.log("user profile", data);
+// export const getUser = (jwt) => async (dispatch) => {
+//   dispatch({ type: GET_USER_REQUEST });
+//   try {
+//     const { data } = await api.get(`/api/users/profile`, {
+//       headers: {
+//         Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+//       },
+//     });
+//     console.log("user profile", data);
 
-    dispatch({ type: GET_USER_SUCCESS, payload: data });
-  } catch (error) {
-    console.log(error);
-    dispatch({ type: GET_USER_FAILURE, payload: error.message });
-  }
-};
-
-export const addToFavorite =
-  ({ jwt, restaurantId }) =>
-  async (dispatch) => {
-    dispatch({ type: ADD_TO_FAVORITE_REQUEST });
-    try {
-      const { data } = await api.put(
-        `/api/restaurants/${restaurantId}/add-favorites`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-          },
-        }
-      );
-      console.log("addToFavorite", data);
-      dispatch({ type: ADD_TO_FAVORITE_SUCCESS, payload: data });
-    } catch (error) {
-      console.log(error);
-      dispatch({ type: ADD_TO_FAVORITE_FAILURE, payload: error.message });
-    }
-  };
+//     dispatch({ type: GET_USER_SUCCESS, payload: data });
+//   } catch (error) {
+//     console.log(error);
+//     dispatch({ type: GET_USER_FAILURE, payload: error.message });
+//   }
+// };
 
 export const logout = () => async (dispatch) => {
   try {

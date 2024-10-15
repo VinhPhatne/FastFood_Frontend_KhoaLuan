@@ -45,8 +45,8 @@ const CreateEventForm = ({ onClose }) => {
   return (
     <div className="">
       <div className="p-5">
-        <h1 className="text-gray-400 text-center text-xl pb-10">
-          Thêm mới danh mục
+        <h1 className="text-orange-600 font-semibold text-center text-2xl pb-10">
+          Thêm mới sự kiện 
         </h1>
         <form className="space-y-5" onSubmit={handleSubmit}>
           <TextField
@@ -69,6 +69,7 @@ const CreateEventForm = ({ onClose }) => {
           ></TextField>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
+              className="w-full"
               label="Ngày hết hạn"
               value={formData.expDate}
               onChange={(newValue) => {
@@ -76,8 +77,9 @@ const CreateEventForm = ({ onClose }) => {
               }}
               format="dd/MM/yyyy"
               inputFormat="dd/MM/yyyy"
+              fullWidth
               renderInput={(params) => (
-                <TextField {...params} fullWidth variant="outlined" />
+                <TextField {...params} className="w-96" variant="outlined" />
               )}
             />
           </LocalizationProvider>
