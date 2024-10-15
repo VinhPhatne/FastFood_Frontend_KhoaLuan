@@ -1,14 +1,10 @@
 import {
-  Box,
   Button,
-  Chip,
   CircularProgress,
   FormControl,
   Grid,
   IconButton,
-  InputLabel,
   MenuItem,
-  OutlinedInput,
   Select,
   TextField,
 } from "@mui/material";
@@ -30,7 +26,6 @@ const initialValues = {
 
 const CreateProductForm = () => {
   const dispatch = useDispatch();
-  //const { restaurant, ingredients } = useSelector((store) => store);
   const jwt = localStorage.getItem("jwt");
 
   const { categories } = useSelector(
@@ -49,8 +44,8 @@ const CreateProductForm = () => {
       const productData = {
         ...values,
         price: parseFloat(values.price),
-        category: values.category || null, 
-        picture: values.picture || "", 
+        category: values.category || null,
+        picture: values.picture || "",
       };
       dispatch(
         createProduct({
@@ -64,6 +59,7 @@ const CreateProductForm = () => {
       console.log("data ----", values);
     },
   });
+
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     setUploadImage(true);
@@ -72,178 +68,170 @@ const CreateProductForm = () => {
     setUploadImage(false);
   };
 
-  const handelRemoveImage = () => {
+  const handleRemoveImage = () => {
     formik.setFieldValue("picture", "");
   };
 
-  // useEffect(() => {
-  //   dispatch(
-  //     getIngredientsOfRestaurant({ jwt, id: restaurant.usersRestaurant.id })
-  //   );
-  // }, []);
-
   return (
-    <div className="py-10 px-5 lg:flex items-center justify-center min-h-screen">
-      <div className="lg:max-w-4xl">
-        <h1 className="font-bold text-2xl text-center py-2">Add New Product</h1>
+    <div className="flex items-center justify-center min-h-screen py-10 px-5">
+      <div className="lg:max-w-4xl w-full">
+        <h1 className="font-bold text-2xl text-center py-2">
+          Thêm mới sản phẩm
+        </h1>
         <form onSubmit={formik.handleSubmit} className="space-y-4">
-          <Grid container spacing={2}>
-            <Grid className="flex flex-wrap gap-5" item xs={12}>
-              <input
-                accept="image/*"
-                id="fileInput"
-                style={{ display: "none" }}
-                onChange={handleImageChange}
-                type="file"
-              />
+          <Grid container spacing={2} justifyContent="flex-start">
+            <Grid item xs={12}>
+              <div className="flex items-center">
+                <label
+                  htmlFor="picture"
+                  className="block font-medium mb-1 w-1/4"
+                >
+                  Image:
+                </label>
+                <div className="flex items-center w-full">
+                  <input
+                    accept="image/*"
+                    id="fileInput"
+                    style={{ display: "none" }}
+                    onChange={handleImageChange}
+                    type="file"
+                  />
+                  <label htmlFor="fileInput">
+                    {!formik.values.picture ? (
+                      <span className="w-24 h-24 cursor-pointer flex items-center justify-center p-3 border rounded-md border-gray-600">
+                        <AddPhotoAlternateIcon />
+                      </span>
+                    ) : (
+                      <div className="relative w-24 h-24 border rounded-md overflow-hidden border-gray-600">
+                        <img
+                          className="w-full h-full object-cover"
+                          src={formik.values.picture}
+                          alt="Product"
+                        />
+                        <IconButton
+                          size="small"
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            right: 0,
+                            backgroundColor: "rgba(0, 0, 0, 0.5)",
+                            color: "white",
+                          }}
+                          onClick={handleRemoveImage}
+                        >
+                          <CloseIcon sx={{ fontSize: "1rem" }} />
+                        </IconButton>
+                      </div>
+                    )}
+                  </label>
+                  {uploadImage && (
+                    <CircularProgress size={24} className="ml-4" />
+                  )}
+                </div>
+              </div>
+            </Grid>
 
-              <label className="relative" htmlFor="fileInput">
-                {!formik.values.picture ? (
-                  <span className="w-24 h-24 cursor-pointer flex items-center justify-center p-3 border rounded-md border-gray-600">
-                    <AddPhotoAlternateIcon className="text-white" />
-                  </span>
-                ) : (
-                  <div className="relative w-24 h-24 border rounded-md overflow-hidden border-gray-600">
-                    <img
-                      className="w-full h-full object-cover"
-                      src={formik.values.picture}
-                      alt="Product"
-                    />
-                    <IconButton
-                      size="small"
-                      sx={{
-                        position: "absolute",
-                        top: 0,
-                        right: 0,
-                        outline: "none",
-                        backgroundColor: "rgba(0, 0, 0, 0.5)",
-                        color: "white",
-                      }}
-                      onClick={handelRemoveImage}
-                    >
-                      <CloseIcon sx={{ fontSize: "1rem" }} />
-                    </IconButton>
-                  </div>
-                )}
-                {uploadImage && (
-                  <div className="absolute left-0 right-0 top-0 bottom-0 w-24 h-24 flex justify-center items-center">
-                    <CircularProgress />
-                  </div>
-                )}
-              </label>
+            {/* Row for name field */}
+            <Grid item xs={12}>
+              <div className="flex items-center">
+                <label htmlFor="name" className="block font-medium mb-1 w-1/4">
+                  Name:
+                </label>
+                <TextField
+                  fullWidth
+                  id="name"
+                  name="name"
+                  variant="outlined"
+                  onChange={formik.handleChange}
+                  value={formik.values.name}
+                  sx={{ maxWidth: "100%" }} 
+                />
+              </div>
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
-                fullWidth
-                id="name"
-                name="name"
-                label="Name"
-                variant="outlined"
-                onChange={formik.handleChange}
-                value={formik.values.name}
-              ></TextField>
+              <div className="flex items-center">
+                <label
+                  htmlFor="description"
+                  className="block font-medium mb-1 w-1/4"
+                >
+                  Description:
+                </label>
+                <TextField
+                  fullWidth
+                  id="description"
+                  name="description"
+                  variant="outlined"
+                  onChange={formik.handleChange}
+                  value={formik.values.description}
+                  sx={{ maxWidth: "100%" }}
+                />
+              </div>
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
-                fullWidth
-                id="description"
-                name="description"
-                label="Description"
-                variant="outlined"
-                onChange={formik.handleChange}
-                value={formik.values.description}
-              ></TextField>
-            </Grid>
-
-            <Grid item xs={12} lg={6}>
-              <TextField
-                fullWidth
-                id="price"
-                name="price"
-                label="Price"
-                variant="outlined"
-                onChange={formik.handleChange}
-                value={formik.values.price}
-              ></TextField>
-            </Grid>
-
-            <Grid item xs={12} lg={6}>
-              <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Category</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={
-                    formik.values.category ? formik.values.category._id : ""
-                  }
-                  label="Category"
-                  onChange={(e) => {
-                    const selectedCategory = categories.find(
-                      (cat) => cat._id === e.target.value
-                    );
-                    formik.setFieldValue("category", selectedCategory);
-                  }}
-                  name="category"
-                >
-                  {categories &&
-                    categories.map((item) => (
-                      <MenuItem key={item._id} value={item._id}>
-                        {item.name}
-                      </MenuItem>
-                    ))}
-                </Select>
-              </FormControl>
-            </Grid>
-
-            {/* <Grid item xs={12} lg={6}>
-              <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">
-                  Is Seasonal
-                </InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="seasonal"
-                  value={formik.values.seasonal}
-                  label="Is Seasonal"
+              <div className="flex items-center">
+                <label htmlFor="price" className="block font-medium mb-1 w-1/4">
+                  Price:
+                </label>
+                <TextField
+                  fullWidth
+                  id="price"
+                  name="price"
+                  variant="outlined"
                   onChange={formik.handleChange}
-                  name="seasonal"
-                >
-                  <MenuItem value={true}>Yes</MenuItem>
-                  <MenuItem value={false}>No</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid> */}
+                  value={formik.values.price}
+                  sx={{ maxWidth: "100%" }} 
+                />
+              </div>
+            </Grid>
 
-            {/* <Grid item xs={12} lg={6}>
-              <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">
-                  Is Vegetarian
-                </InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="vegetarian"
-                  value={formik.values.vegetarian}
-                  label="Is Vegetarian"
-                  onChange={formik.handleChange}
-                  name="vegetarian"
+            <Grid item xs={12}>
+              <div className="flex items-center">
+                <label
+                  htmlFor="category"
+                  className="block font-medium mb-1 w-1/4"
                 >
-                  <MenuItem value={true}>Yes</MenuItem>
-                  <MenuItem value={false}>No</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid> */}
+                  Category:
+                </label>
+                <FormControl fullWidth sx={{ maxWidth: "100%" }}>
+                  <Select
+                    id="category"
+                    value={
+                      formik.values.category ? formik.values.category._id : ""
+                    }
+                    onChange={(e) => {
+                      const selectedCategory = categories.find(
+                        (cat) => cat._id === e.target.value
+                      );
+                      formik.setFieldValue("category", selectedCategory);
+                    }}
+                    name="category"
+                  >
+                    {categories &&
+                      categories.map((item) => (
+                        <MenuItem key={item._id} value={item._id}>
+                          {item.name}
+                        </MenuItem>
+                      ))}
+                  </Select>
+                </FormControl>
+              </div>
+            </Grid>
           </Grid>
 
-          <Button
-            className="mt-4"
-            variant="contained"
-            color="primary"
-            type="submit"
-          >
-            Create Menu
-          </Button>
+          <Grid item xs={12}>
+            <div className="flex justify-end mt-4">
+              <Button
+                variant="contained"
+                color="primary"
+                type="submit"
+                sx={{ maxWidth: "400px" }}
+              >
+                Tạo thêm
+              </Button>
+            </div>
+          </Grid>
         </form>
       </div>
     </div>
