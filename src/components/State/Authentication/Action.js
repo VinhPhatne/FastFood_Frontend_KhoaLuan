@@ -15,6 +15,7 @@ import {
   REGISTER_SUCCESS,
 } from "./ActionType";
 import { API_URL, api } from "../../config/api";
+import { notification } from "antd";
 
 export const registerUser = (reqData) => async (dispatch) => {
   dispatch({ type: REGISTER_REQUEST });
@@ -67,14 +68,18 @@ export const loginUser = (reqData) => async (dispatch) => {
     //   reqData.navigate("/");
     // }
 
-    if (data.accountLogin.account.role === 1) {
-      // Ví dụ: nếu vai trò là Admin
-      reqData.navigate("/admin/dashboard");
-    } else {
+    const role = data.accountLogin.account.role;
+
+    if (role === 1) {
+      reqData.navigate("/admin");
+    } else if (role === 2) {
       reqData.navigate("/");
     }
     //dispatch({ type: LOGIN_SUCCESS, payload: data.jwt });
     dispatch({ type: LOGIN_SUCCESS, payload: data });
+    notification.success({
+      message: "Đăng nhập thành công",
+    });
   } catch (error) {
     console.log(error);
     dispatch({ type: LOGIN_FAILURE, payload: error.message });
@@ -104,7 +109,6 @@ export const getUserProfile = () => async (dispatch) => {
     dispatch({ type: GET_USER_FAILURE, payload: error.message });
   }
 };
-
 
 export const getUser = (jwt) => async (dispatch) => {
   dispatch({ type: GET_USER_REQUEST });
@@ -147,7 +151,7 @@ export const addToFavorite =
 
 export const logout = () => async (dispatch) => {
   try {
-    localStorage.clear();
+    localStorage.removeItem("jwt");
     console.log("logout");
     dispatch({ type: LOGOUT });
   } catch (error) {

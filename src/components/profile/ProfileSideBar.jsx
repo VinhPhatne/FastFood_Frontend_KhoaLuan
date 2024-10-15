@@ -3,7 +3,9 @@ import { Divider } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Dashboard, ShoppingBag } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserProfile } from "../State/Authentication/Action";
+import { getUserProfile, logout } from "../State/Authentication/Action";
+import { notification, Avatar } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 
 const menu = [
   { title: "Thông tin tài khoản", icon: <Dashboard />, path: "/" },
@@ -25,6 +27,14 @@ const ProfileSideBar = () => {
     navigate(`/profile${item.path}`);
   };
 
+  const handleLogout = () => {
+    navigate("/");
+    dispatch(logout());
+    notification.success({
+      message: "Đăng xuất thành công",
+    });
+  };
+
   const userProfile = useSelector((state) => state.auth.user);
 
   useEffect(() => {
@@ -41,15 +51,22 @@ const ProfileSideBar = () => {
         style={{ color: "#ff7d01" }}
       >
         <div className="text-center mb-4">
-          <img
-            src="https://via.placeholder.com/80"
-            alt="User avatar"
-            className="rounded-full mx-auto"
-          />
+          <a onClick={(e) => e.preventDefault()}>
+            <Avatar
+              src={"https://example.com/avatar.jpg"}
+              icon={<UserOutlined style={{ fontSize: "30px" }} />}
+              className="w-14 h-14"
+              shape="circle"
+              size="large"
+            />
+          </a>
           <h2 className="mt-3 font-bold text-xl">
             XIN CHÀO, {userProfile?.fullname}
           </h2>
-          <button className="text-gray-400 mt-1 hover:underline">
+          <button
+            className="text-gray-400 mt-1 hover:underline hover:text-orange-600"
+            onClick={() => handleLogout()}
+          >
             Đăng xuất
           </button>
         </div>

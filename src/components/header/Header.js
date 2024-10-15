@@ -10,6 +10,8 @@ import { Dropdown, Menu, notification, Avatar } from "antd";
 import { useNavigate } from "react-router-dom";
 import { UserOutlined } from "@ant-design/icons";
 import Cookies from "js-cookie";
+import { useDispatch } from "react-redux";
+import { logout } from "../State/Authentication/Action";
 
 const Header = () => {
   const [activeTab, setActiveTab] = useState("Trang chủ");
@@ -18,20 +20,16 @@ const Header = () => {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeForm, setActiveForm] = useState("login");
-  const [cartItemCount, setCartItemCount] = useState(0);
+  const [cart, setCart] = useState([]);
+  const jwt = localStorage.getItem("jwt");
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const token = localStorage.getItem("jwt");
-    setIsLoggedIn(!!token);
-    const savedCart = JSON.parse(Cookies.get(token) || "[]");
-    const itemCount = savedCart.reduce(
-      (total, item) => total + item.quantity,
-      0
-    );
-    setCartItemCount(itemCount);
-  }, []);
+    const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
+    setCart(savedCart);
+  }, [jwt, cart]);
 
   useEffect(() => {
     const token = localStorage.getItem("jwt");
@@ -40,7 +38,9 @@ const Header = () => {
     } else {
       setIsLoggedIn(false);
     }
-  }, []);
+  }, [jwt]);
+
+  const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   const handleFocus = () => {
     setIsSearchActive(true);
@@ -76,7 +76,8 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("jwt");
+    navigate("/");
+    dispatch(logout());
     setIsLoggedIn(false);
     notification.success({
       message: "Đăng xuất thành công",
@@ -147,7 +148,7 @@ const Header = () => {
         </div>
         <div className={styles.cart} onClick={handleCartClick}>
           <FaCartShopping />
-          <span className={styles.cartBadge}>{cartItemCount}</span>
+          <span className={styles.cartBadge}>{totalQuantity}</span>
         </div>
 
         {isLoggedIn ? (

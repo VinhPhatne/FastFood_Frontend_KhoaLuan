@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "../State/Category/Action";
 import { getProducts, getProductsByCategory } from "../State/Product/Action";
 import Cookies from "js-cookie";
+import { notification } from "antd";
 
 const Card = () => {
   const dispatch = useDispatch();
@@ -43,7 +44,7 @@ const Card = () => {
   //const [active, setActive] = useState(1);
 
   const [active, setActive] = useState(null);
-  const [startIndex, setStartIndex] = useState(0); 
+  const [startIndex, setStartIndex] = useState(0);
   const visibleCount = 5;
 
   const handleNext = () => {
@@ -90,10 +91,11 @@ const Card = () => {
 
     Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
 
-    alert("Sản phẩm đã được thêm vào giỏ hàng!");
+    notification.success({
+      message: "Sản phẩm đã được thêm vào giỏ hàng!",
+    });
   };
 
-  console.log("products", products);
   return (
     <div>
       <div className="border-b-2 sticky top-16 z-10 pt-10 py-4 bg-white mb-10 ">

@@ -9,22 +9,31 @@ import {
 } from "@mui/material";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import logo from "../../assets/images/logo1.png";
+import { notification } from "antd";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../../components/State/Authentication/Action";
 
 const AdminHeader = () => {
-  const [anchorEl, setAnchorEl] = useState(null); // State to manage the menu open state
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleMenuClick = (event) => {
-    setAnchorEl(event.currentTarget); // Open the menu
+    setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
-    setAnchorEl(null); // Close the menu
+    setAnchorEl(null);
   };
 
   const handleLogout = () => {
-    // Add your logout logic here
-    console.log("Logged out");
-    handleClose(); // Close the menu after logout
+    navigate("/");
+    dispatch(logout());
+    notification.success({
+      message: "Đăng xuất thành công",
+    });
+    handleClose();
   };
 
   return (
