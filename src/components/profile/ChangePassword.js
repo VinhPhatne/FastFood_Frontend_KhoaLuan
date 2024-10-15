@@ -31,7 +31,7 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen p-5">
+    <div className="flex flex-col items-center justify-center p-5" style={{ height: "500px" }}>
       <h2 className="text-2xl font-semibold mb-6">Đổi Mật Khẩu</h2>
       <Form
         form={form}
@@ -53,7 +53,10 @@ const ChangePassword = () => {
             { required: true, message: "Vui lòng nhập mật khẩu hiện tại!" },
           ]}
         >
-          <Input.Password placeholder="Nhập mật khẩu hiện tại" className="h-12"/>
+          <Input.Password
+            placeholder="Nhập mật khẩu hiện tại"
+            className="h-12"
+          />
         </Form.Item>
 
         <Form.Item
@@ -61,7 +64,7 @@ const ChangePassword = () => {
           label="Mật khẩu mới"
           rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới!" }]}
         >
-          <Input.Password placeholder="Nhập mật khẩu mới" className="h-12"/>
+          <Input.Password placeholder="Nhập mật khẩu mới" className="h-12" />
         </Form.Item>
 
         <Form.Item
@@ -81,7 +84,7 @@ const ChangePassword = () => {
             }),
           ]}
         >
-          <Input.Password placeholder="Xác nhận mật khẩu" className="h-12"/>
+          <Input.Password placeholder="Xác nhận mật khẩu" className="h-12" />
         </Form.Item>
 
         <Form.Item className="flex justify-end">

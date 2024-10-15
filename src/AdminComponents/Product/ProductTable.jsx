@@ -77,7 +77,8 @@ const ProductTable = () => {
     const search = "";
     const page = 1;
     setCurrentPage(page);
-    dispatch(getProductsListPage({ jwt, page }));
+    dispatch(getProductsListPage({ jwt, page, search }));
+
   };
   const handleIsSellChange = (event) => {
     setIsSell(event.target.value);
@@ -310,7 +311,7 @@ const ProductTable = () => {
           }}
         >
           <Pagination
-            count={products.pagination.totalPages} // Tổng số trang từ pagination trong reducer
+            count={products.pagination.totalPages} 
             page={currentPage}
             onChange={handlePageChange} // Xử lý khi thay đổi trang
             color="primary"

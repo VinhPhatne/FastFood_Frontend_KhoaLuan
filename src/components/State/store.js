@@ -3,6 +3,7 @@ import { authReducer } from "./Authentication/Reducer";
 import { thunk } from "redux-thunk";
 import { categoryReducer } from "./Category/Reducer";
 import productReducer from "./Product/Reducer";
+import { eventReducer } from "./Event/Reducer";
 // import { restaurantReducer } from "./Restaurant/Reducer";
 // import { menuItemReducer } from "./Menu/Reducer";
 // import { cartReducer } from "./Cart/Reducer";
@@ -14,6 +15,7 @@ const rooteReducer = combineReducers({
   auth: authReducer,
   categoryReducer: categoryReducer,
   productReducer: productReducer,
+  eventReducer: eventReducer,
 
   // restaurant: restaurantReducer,
   // menu: menuItemReducer,

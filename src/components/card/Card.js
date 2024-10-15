@@ -11,6 +11,8 @@ import { PrevArrow, NextArrow } from "../Arrow";
 import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "../State/Category/Action";
 import { getProducts, getProductsByCategory } from "../State/Product/Action";
+import Cookies from "js-cookie";
+import { notification } from "antd";
 
 const Card = () => {
   const dispatch = useDispatch();
@@ -19,12 +21,11 @@ const Card = () => {
   );
   const { productsByCategory } = useSelector((state) => state.productReducer);
   const { products } = useSelector((state) => state.productReducer);
-
+  const jwt = localStorage.getItem("jwt");
   useEffect(() => {
-    const jwt = localStorage.getItem("jwt");
     dispatch(getCategories({ jwt }));
     dispatch(getProducts({ jwt }));
-  }, [dispatch]);
+  }, [dispatch, jwt]);
 
   const [showPrevArrow, setShowPrevArrow] = useState(false);
   const [showNextArrow, setShowNextArrow] = useState(true);
@@ -32,9 +33,8 @@ const Card = () => {
   const [categoryProducts, setCategoryProducts] = useState({});
 
   useEffect(() => {
-    const jwt = localStorage.getItem("jwt");
     dispatch(getCategories({ jwt }));
-  }, [dispatch]);
+  }, [dispatch, jwt]);
 
   const navigate = useNavigate();
   const handleRedirect = () => {
@@ -44,27 +44,61 @@ const Card = () => {
   //const [active, setActive] = useState(1);
 
   const [active, setActive] = useState(null);
-  const [startIndex, setStartIndex] = useState(0); // Vị trí bắt đầu hiển thị
-  const visibleCount = 5; // Hiển thị 5 categories cùng lúc
+  const [startIndex, setStartIndex] = useState(0);
+  const visibleCount = 5;
 
   const handleNext = () => {
-    // Chuyển sang các category tiếp theo, đảm bảo không vượt quá số lượng category
     if (startIndex + visibleCount < categories.length) {
       setStartIndex(startIndex + 1);
     }
   };
 
   const handlePrev = () => {
-    // Chuyển về các category trước đó
     if (startIndex > 0) {
       setStartIndex(startIndex - 1);
     }
   };
 
-  console.log("products", products);
+  const handleAddToCart = (product) => {
+    if (!jwt) {
+      alert("Bạn cần đăng nhập để thêm vào giỏ hàng.");
+      return;
+    }
+
+    const cart = JSON.parse(Cookies.get(jwt) || "[]");
+
+    const existingProduct = cart.find((item) => item.id === product._id);
+
+    let updatedCart;
+    if (existingProduct) {
+      updatedCart = cart.map((item) =>
+        item.id === product._id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      );
+    } else {
+      updatedCart = [
+        ...cart,
+        {
+          id: product._id,
+          name: product.name,
+          price: product.price,
+          picture: product.picture,
+          quantity: 1,
+        },
+      ];
+    }
+
+    Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
+
+    notification.success({
+      message: "Sản phẩm đã được thêm vào giỏ hàng!",
+    });
+  };
+
   return (
     <div>
-      <div className="border-b relative mb-10 ">
+      <div className="border-b-2 sticky top-16 z-10 pt-10 py-4 bg-white mb-10 ">
         {startIndex > 0 && (
           <button
             className="absolute left-[180px] top-1/2 transform -translate-y-1/2 px-2 py-1 text-2xl font-bold text-black hover:text-orange-600"
@@ -88,7 +122,7 @@ const Card = () => {
                     setActive(category._id);
                     const element = document.getElementById(category._id);
                     if (element) {
-                      const headerHeight = 160;
+                      const headerHeight = 230;
                       const elementPosition =
                         element.getBoundingClientRect().top +
                         window.pageYOffset;
@@ -157,7 +191,10 @@ const Card = () => {
                               <span>{item.originalPrice} </span>
                             </div>
                           </div>
-                          <button className={styles.addToCartButton}>
+                          <button
+                            className={styles.addToCartButton}
+                            onClick={() => handleAddToCart(item)}
+                          >
                             Thêm vào giỏ hàng
                           </button>
                         </div>

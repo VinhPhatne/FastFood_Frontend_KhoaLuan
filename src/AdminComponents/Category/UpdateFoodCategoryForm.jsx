@@ -4,31 +4,52 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   createCategory,
   getCategories,
+  updateCategory,
 } from "../../components/State/Category/Action";
+//import { createCategoryAction } from "../../component/State/Restaurant/Action";
 
-const CreateFoodCategoryForm = ({ onClose }) => {
+const UpdateFoodCategoryForm = ({ category, onClose }) => {
+  //const {restaurant} = useSelector(store => store)
+
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
     categoryName: "",
-    restaurantId: "",
+    categoryId: "",
+    // restaurantId: "",
   });
+
+  console.log("CHECK >>>", category.data.name);
+
+  useEffect(() => {
+    if (category) {
+      setFormData({
+        categoryName: category.data.name || "",
+      });
+    } else {
+      setFormData({
+        categoryName: "",
+      });
+    }
+  }, [category]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const data = {
       name: formData.categoryName,
-      restaurantId: {
-        id: 1,
-      },
+      // restaurantId: {
+      //   id: 1,
+      // },
     };
     dispatch(
-      createCategory({
+      updateCategory({
+        id: category.data._id,
         name: formData.categoryName,
         jwt: localStorage.getItem("jwt"),
       })
     );
-    onClose();
     console.log(data);
+    onClose();
   };
 
   const handleInputChange = (e) => {
@@ -39,18 +60,20 @@ const CreateFoodCategoryForm = ({ onClose }) => {
     });
   };
 
+  //console.log("Category >>>", category.name);
+
   return (
     <div className="">
       <div className="p-5">
-        <h1 className="text-gray-400 text-center text-xl pb-10">
-          Thêm mới danh mục
+        <h1 className="text-orange-600 text-center text-xl pb-10">
+          Sửa danh mục
         </h1>
         <form className="space-y-5" onSubmit={handleSubmit}>
           <TextField
             fullWidth
             id="categoryName"
             name="categoryName"
-            label="Tên danh mục"
+            label="Food Category"
             variant="outlined"
             onChange={handleInputChange}
             value={formData.categoryName}
@@ -61,7 +84,7 @@ const CreateFoodCategoryForm = ({ onClose }) => {
             type="submit"
             style={{ color: "#fff", backgroundColor: "#ff7d01" }}
           >
-            Thêm mới
+            Sửa danh mục
           </Button>
         </form>
       </div>
@@ -69,4 +92,4 @@ const CreateFoodCategoryForm = ({ onClose }) => {
   );
 };
 
-export default CreateFoodCategoryForm;
+export default UpdateFoodCategoryForm;

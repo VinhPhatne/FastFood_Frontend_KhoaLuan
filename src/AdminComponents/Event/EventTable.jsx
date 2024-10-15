@@ -15,9 +15,6 @@ import {
   TextField,
   Typography,
   InputAdornment,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
 import CreateIcon from "@mui/icons-material/Create";
 import SearchIcon from "@mui/icons-material/Search";
@@ -25,14 +22,13 @@ import ClearIcon from "@mui/icons-material/Clear";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  deleteCategory,
-  getCategories,
-  getCategoryById,
-} from "../../components/State/Category/Action";
+  deleteEvent,
+  getEvents,
+  getEventById,
+} from "../../components/State/Event/Action";
 import { Delete } from "@mui/icons-material";
-import CreateFoodCategoryForm from "./CreateFoodCategoryForm";
-import { Dialog } from "@mantine/core";
-import UpdateFoodCategoryForm from "./UpdateFoodCategoryForm";
+import CreateEventForm from "./CreateEventForm";
+import UpdateEventForm from "./UpdateEventForm";
 
 const style = {
   position: "absolute",
@@ -46,74 +42,63 @@ const style = {
   p: 4,
 };
 
-const FoodCategoryTable = () => {
+const EventTable = () => {
   const dispatch = useDispatch();
-  const { categories } = useSelector(
-    (state) => state.categoryReducer.categories
-  );
+  const { events } = useSelector((state) => state.eventReducer.events); 
 
   const jwt = localStorage.getItem("jwt");
 
   const [open, setOpen] = useState(false);
+  const [openEditModal, setOpenEditModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredCategories, setFilteredCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [filteredEvents, setFilteredEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [openFormModal, setOpenFormModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
   useEffect(() => {
-    dispatch(getCategories({ jwt }));
+    dispatch(getEvents({ jwt }));
   }, [dispatch, jwt]);
 
   useEffect(() => {
-    const filtered = categories?.filter((item) =>
+    const filtered = events?.filter((item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    setFilteredCategories(filtered || []);
-  }, [categories, searchTerm]);
+    setFilteredEvents(filtered || []);
+  }, [events, searchTerm]);
 
   const handleClearSearch = () => setSearchTerm("");
 
   const handleOpenFormModal = async (id) => {
-    const response = await dispatch(getCategoryById({ id: id, jwt: jwt }));
+    const response = await dispatch(getEventById({ id, jwt }));
     if (response) {
-      setSelectedCategory(response);
+      setSelectedEvent(response);
     } else {
       console.error("Response không hợp lệ:", response);
     }
-
-    setOpenFormModal(true);
+    setOpenEditModal(true);
   };
 
   const handleCloseFormModal = () => {
-    setSelectedCategory(null);
-    setOpenFormModal(false);
+    setSelectedEvent(null);
+    setOpenEditModal(false);
   };
 
   const handleOpenDeleteModal = (id) => {
     setDeleteId(id);
-    console.log("Open delete modal for ID:", id);
     setOpenDeleteModal(true);
   };
 
   const handleDelete = async () => {
-    await dispatch(deleteCategory({ id: deleteId, jwt }));
+    await dispatch(deleteEvent({ id: deleteId, jwt }));
     setOpenDeleteModal(false);
   };
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   return (
-    <Box
-      sx={{
-        width: "95%",
-        margin: "0px auto",
-        marginTop: "100px",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <Box sx={{ width: "95%", margin: "0px auto", marginTop: "100px" }}>
       {/* Search and Create Button Section */}
       <Box
         sx={{
@@ -159,36 +144,32 @@ const FoodCategoryTable = () => {
       {/* Table Section */}
       <Card sx={{ boxShadow: "0 3px 5px rgba(0,0,0,0.1)" }}>
         <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="Food Category Table">
+          <Table sx={{ minWidth: 650 }} aria-label="Event Table">
             <TableHead sx={{ backgroundColor: "#fdba74" }}>
               <TableRow>
-                <TableCell align="left" sx={{ color: "#000" }}>
-                  Id
-                </TableCell>
-                <TableCell align="left" sx={{ color: "#000" }}>
-                  Name
-                </TableCell>
-                <TableCell align="center" sx={{ color: "#000" }}>
-                  Active
-                </TableCell>
-                <TableCell align="right" sx={{ color: "#000" }}>
-                  Action
-                </TableCell>
+                <TableCell align="left">Id</TableCell>
+                <TableCell align="left">Name</TableCell>
+                <TableCell align="center">Giảm giá</TableCell>
+                <TableCell align="right">Ngày hết hạn</TableCell>
+                <TableCell align="center">Active</TableCell>
+                <TableCell align="right">Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredCategories?.length > 0 ? (
-                filteredCategories.map((item, index) => (
+              {filteredEvents.length > 0 ? (
+                filteredEvents.map((item, index) => (
                   <TableRow
                     key={item._id}
-                    sx={{
-                      "&:hover": { backgroundColor: "#FFF3E0" },
-                    }}
+                    sx={{ "&:hover": { backgroundColor: "#FFF3E0" } }}
                   >
                     <TableCell component="th" scope="row">
                       {index + 1}
                     </TableCell>
                     <TableCell align="left">{item.name}</TableCell>
+                    <TableCell align="center">
+                      {item.discountPercent} %
+                    </TableCell>
+                    <TableCell align="right">{item.expDate}</TableCell>
                     <TableCell align="center">
                       {item.isActive ? "Active" : "Inactive"}
                     </TableCell>
@@ -216,8 +197,8 @@ const FoodCategoryTable = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} align="center">
-                    <Typography>No categories available</Typography>
+                  <TableCell colSpan={4} align="center">
+                    <Typography>No events available</Typography>
                   </TableCell>
                 </TableRow>
               )}
@@ -227,10 +208,10 @@ const FoodCategoryTable = () => {
       </Card>
 
       {/* Modal Section */}
-      <Modal open={openFormModal} onClose={handleCloseFormModal}>
+      <Modal open={openEditModal} onClose={handleCloseFormModal}>
         <Box sx={style}>
-          <UpdateFoodCategoryForm
-            category={selectedCategory}
+          <UpdateEventForm
+            event={selectedEvent}
             onClose={handleCloseFormModal}
           />
         </Box>
@@ -239,51 +220,21 @@ const FoodCategoryTable = () => {
       <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
         <Box sx={style}>
           <Typography variant="h6">Xác nhận xóa</Typography>
-          <Typography>
-            {" "}
-            Bạn có chắc chắn muốn xóa danh mục này không?
-          </Typography>
+          <Typography>Bạn có chắc chắn muốn xóa sự kiện này không?</Typography>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-            <Button
-              className="w-20"
-              style={{
-                //backgroundColor: "#1565c0",
-                color: "#000",
-                marginRight: "8px",
-                fontWeight: "400",
-                border: "0.5px solid black",
-              }}
-              onClick={() => setOpenDeleteModal(false)}
-            >
-              Hủy
-            </Button>
-            <Button
-              className="w-24"
-              style={{
-                backgroundColor: "#ff7d01",
-                color: "#fff",
-                fontWeight: "500",
-              }}
-              onClick={handleDelete}
-            >
-              Xóa
-            </Button>
+            <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
+            <Button onClick={handleDelete}>Xóa</Button>
           </Box>
         </Box>
       </Modal>
 
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
+      <Modal open={open} onClose={() => setOpen(false)}>
         <Box sx={style}>
-          <CreateFoodCategoryForm onClose={handleClose} />
+          <CreateEventForm onClose={() => setOpen(false)} />
         </Box>
       </Modal>
     </Box>
   );
 };
 
-export default FoodCategoryTable;
+export default EventTable;

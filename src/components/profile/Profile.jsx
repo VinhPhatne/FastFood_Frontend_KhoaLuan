@@ -1,16 +1,15 @@
 import React, { useEffect } from "react";
-import AdminSideBar from "./AdminSideBar";
 import { Route, Routes } from "react-router-dom";
 //import FoodCategory from "../FoodCategory/FoodCategory";
 import { useDispatch, useSelector } from "react-redux";
-import FoodCategory from "../Category/FoodCategory";
-import CreateProductForm from "../Product/CreateProductForm";
-import Product from "../Product/Product";
-import AdminHeader from "./AdminHeader";
-import Event from "../Event/Event";
+import Header from "../header/Header";
+import UserProfile from "./UserProfile";
+import ProfileSideBar from "./ProfileSideBar";
+import ChangePassword from "./ChangePassword";
+import Footer from "../footer/Footer";
 //import { getRestaurantsCategory } from "../../component/State/Restaurant/Action";
 
-const Admin = () => {
+const Profile = () => {
   const dispatch = useDispatch();
   const jwt = localStorage.getItem("jwt");
   //const { restaurant } = useSelector((store) => store);
@@ -33,22 +32,21 @@ const Admin = () => {
 
   return (
     <div>
-      <AdminHeader />
-      <div className="lg:flex ">
-        <div className="lg:w-[15%]">
-          <AdminSideBar handleClose={handleClose} />
+      <Header />
+      <div className="lg:flex h-1/3">
+        <div className="ml-48 w-1/3 h-1/3">
+          <ProfileSideBar handleClose={handleClose} />
         </div>
-        <div className="lg:w-[85%]">
+        <div className="w-2/3 mr-28 h-1/3 mt-28">
           <Routes>
-            <Route path="category" element={<FoodCategory />} />
-            <Route path="/product" element={<Product />} />
-            <Route path="/product/create" element={<CreateProductForm />} />
-            <Route path="/event" element={<Event />} />
+            <Route path="/" element={<UserProfile />} />
+            <Route path="/change-password" element={<ChangePassword />} />
           </Routes>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
 
-export default Admin;
+export default Profile;
