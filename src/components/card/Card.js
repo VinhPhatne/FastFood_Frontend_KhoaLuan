@@ -27,8 +27,6 @@ const Card = () => {
     dispatch(getProducts({ jwt }));
   }, [dispatch, jwt]);
 
- 
-
   const [showPrevArrow, setShowPrevArrow] = useState(false);
   const [showNextArrow, setShowNextArrow] = useState(true);
 
@@ -171,7 +169,8 @@ const Card = () => {
               </div>
 
               <div id={category._id} className={styles.container}>
-                {products.filter((item) => item.category._id === category._id)
+                {Array.isArray(products) &&
+                products.filter((item) => item.category._id === category._id)
                   .length > 0 ? (
                   products
                     .filter((item) => item.category._id === category._id)
