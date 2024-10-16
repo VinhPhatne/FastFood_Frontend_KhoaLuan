@@ -23,9 +23,7 @@ const rooteReducer = combineReducers({
   productReducer: productReducer,
   eventReducer: eventReducer,
   userReducer: userReducer,
-
   voucherReducer : voucherReducer,
-
   billReducer: billReducer,
 
 

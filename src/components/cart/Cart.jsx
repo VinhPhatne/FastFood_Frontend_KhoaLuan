@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -8,12 +9,16 @@ const Cart = () => {
   const jwt = localStorage.getItem("jwt");
   const [cart, setCart] = useState([]);
 
+  const [voucher, setVoucher] = useState(""); // State cho mã voucher
+  const [discount, setDiscount] = useState(0); // State cho tiền giảm giá
+  const [voucherError, setVoucherError] = useState(""); // State cho lỗi nếu có
+
   useEffect(() => {
     const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
     setCart(savedCart);
   }, [jwt]);
 
-   console.log("cart", cart);
+  console.log("cart", cart);
 
   const handleIncrease = (id) => {
     const updatedCart = cart.map((item) =>
@@ -47,6 +52,25 @@ const Cart = () => {
 
   const shippingFee = totalPrice > 0 ? 10000 : 0;
   const finalTotal = totalPrice + shippingFee;
+
+  const handleApplyVoucher = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/v1/voucher/getcode?code=${voucher}`
+      );
+
+      if (response.data && response.data.discountAmount) {
+        setDiscount(response.data.discountAmount);
+        setVoucherError("");
+      } else {
+        setVoucherError("Mã giảm giá không hợp lệ");
+        setDiscount(0);
+      }
+    } catch (error) {
+      setVoucherError("Có lỗi xảy ra khi áp dụng mã giảm giá");
+      console.error(error);
+    }
+  };
 
   return (
     <div class="container mx-auto p-8 mt-24 mb-12">
@@ -112,12 +136,20 @@ const Cart = () => {
                 <p>Bạn có Mã giảm giá?</p>
                 <input
                   type="text"
+                  value={voucher}
+                  onChange={(e) => setVoucher(e.target.value)}
                   placeholder="Mã giảm giá *"
                   className="w-full border rounded px-4 py-2 mt-2"
                 />
-                <button className="mt-2 w-full bg-black text-white py-2 rounded hover:bg-gray-800">
+                <button
+                  onClick={handleApplyVoucher}
+                  className="mt-2 w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+                >
                   Áp dụng
                 </button>
+                {voucherError && (
+                  <p className="text-red-500 mt-2">{voucherError}</p>
+                )}
               </div>
 
               <div className="space-y-2">

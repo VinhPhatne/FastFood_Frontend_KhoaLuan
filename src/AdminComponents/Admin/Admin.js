@@ -9,14 +9,11 @@ import Product from "../Product/Product";
 import AdminHeader from "./AdminHeader";
 import Event from "../Event/Event";
 import Account from "../Account/Account";
-
-import EventTable from "../Voucher/VoucherTable";
-
 import UpdateProductForm from "../Product/UpdateProductForm";
 import CreateAccountForm from "../Account/CreateAccountForm";
 import Bill from "../Bill/Bill";
 import BillDetailTable from "../Bill/BillDetailTable";
-
+import Voucher from "../Voucher/Voucher";
 
 const Admin = () => {
   const dispatch = useDispatch();
@@ -54,9 +51,7 @@ const Admin = () => {
             <Route path="/product/:id" element={<UpdateProductForm />} />
             <Route path="/event" element={<Event />} />
             <Route path="/account" element={<Account />} />
-
-            <Route path="/voucher" element={<EventTable/>} />
-
+            <Route path="/voucher" element={<Voucher />} />
             <Route path="/bill" element={<Bill />} />
             <Route path="/bill/:id" element={<BillDetailTable />} />
           </Routes>

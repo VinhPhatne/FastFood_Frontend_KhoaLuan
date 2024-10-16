@@ -28,13 +28,14 @@ import {
 } from "../../components/State/Event/Action";
 
 import {
+  getVoucherById,
   getVouchers,
-
-
 } from "../../components/State/voucher/Action";
 import { Delete } from "@mui/icons-material";
-import CreateEventForm from "./CreateEventForm";
-import UpdateEventForm from "./UpdateEventForm";
+import CreateEventForm from "./CreateVoucherForm";
+import UpdateEventForm from "./UpdateVoucherForm";
+import UpdateVoucherForm from "./UpdateVoucherForm";
+import CreateVoucherForm from "./CreateVoucherForm";
 
 const style = {
   position: "absolute",
@@ -50,7 +51,7 @@ const style = {
 
 const VoucherTable = () => {
   const dispatch = useDispatch();
-  const { vouchers } = useSelector((state) => state.voucherReducer.vouchers); 
+  const vouchers = useSelector((state) => state.voucherReducer?.voucher || []);
 
   const jwt = localStorage.getItem("jwt");
 
@@ -58,21 +59,30 @@ const VoucherTable = () => {
   const [openEditModal, setOpenEditModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   dispatch(getVouchers({ jwt }));
+  // }, [dispatch, jwt]);
+
+  const fetchVouchers = () => {
     dispatch(getVouchers({ jwt }));
+  };
+
+  useEffect(() => {
+    fetchVouchers();
   }, [dispatch, jwt]);
-  console.log("check", vouchers);
+
+  console.log("vouchers>>", vouchers.voucher);
 
   const handleClearSearch = () => setSearchTerm("");
 
   const handleOpenFormModal = async (id) => {
-    const response = await dispatch(getEventById({ id, jwt }));
+    const response = await dispatch(getVoucherById({ id, jwt }));
     if (response) {
-      setSelectedEvent(response);
+      setSelectedVoucher(response);
     } else {
       console.error("Response không hợp lệ:", response);
     }
@@ -80,7 +90,7 @@ const VoucherTable = () => {
   };
 
   const handleCloseFormModal = () => {
-    setSelectedEvent(null);
+    setSelectedVoucher(null);
     setOpenEditModal(false);
   };
 
@@ -92,6 +102,7 @@ const VoucherTable = () => {
   const handleDelete = async () => {
     await dispatch(deleteEvent({ id: deleteId, jwt }));
     setOpenDeleteModal(false);
+    fetchVouchers();
   };
 
   const handleOpen = () => setOpen(true);
@@ -155,20 +166,18 @@ const VoucherTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredEvents.length > 0 ? (
-                filteredEvents.map((item, index) => (
+              {Array.isArray(vouchers.voucher) &&
+              vouchers.voucher.length > 0 ? (
+                vouchers.voucher.map((item, index) => (
                   <TableRow
                     key={item._id}
                     sx={{ "&:hover": { backgroundColor: "#FFF3E0" } }}
                   >
                     <TableCell component="th" scope="row">
-                      {index + 1}
+                      {item.code}
                     </TableCell>
                     <TableCell align="left">{item.name}</TableCell>
-                    <TableCell align="center">
-                      {item.discountPercent} %
-                    </TableCell>
-                    <TableCell align="right">{item.expDate}</TableCell>
+                    <TableCell align="center">{item.discount} đ</TableCell>
                     <TableCell align="center">
                       {item.isActive ? "Active" : "Inactive"}
                     </TableCell>
@@ -197,7 +206,7 @@ const VoucherTable = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={4} align="center">
-                    <Typography>No events available</Typography>
+                    <Typography>No Voucher available</Typography>
                   </TableCell>
                 </TableRow>
               )}
@@ -209,8 +218,9 @@ const VoucherTable = () => {
       {/* Modal Section */}
       <Modal open={openEditModal} onClose={handleCloseFormModal}>
         <Box sx={style}>
-          <UpdateEventForm
-            event={selectedEvent}
+          <UpdateVoucherForm
+            onSuccess={fetchVouchers}
+            voucher={selectedVoucher}
             onClose={handleCloseFormModal}
           />
         </Box>
@@ -229,7 +239,10 @@ const VoucherTable = () => {
 
       <Modal open={open} onClose={() => setOpen(false)}>
         <Box sx={style}>
-          <CreateEventForm onClose={() => setOpen(false)} />
+          <CreateVoucherForm
+            onSuccess={fetchVouchers}
+            onClose={() => setOpen(false)}
+          />
         </Box>
       </Modal>
     </Box>

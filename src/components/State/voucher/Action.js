@@ -21,11 +21,11 @@ export const getVouchers =
   ({ jwt }) =>
   async (dispatch) => {
     try {
-      const { data } = await api.get(`${API_URL}/v1/voucher/list`, {
+      const response = await api.get(`${API_URL}/v1/voucher/list`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
-      console.log("getVouchers", data);
-      dispatch({ type: GET_VOUCHERS, payload: data });
+      console.log("getVouchers", response.data);
+      dispatch({ type: GET_VOUCHERS, payload: response.data });
     } catch (error) {
       console.error("Error fetching voucher:", error);
     }
@@ -33,16 +33,16 @@ export const getVouchers =
 
 // Tạo mới sự kiện
 export const createVoucher =
-  ({ name, discountPercent, expDate, jwt }) =>
+  ({ code, name, discount, jwt }) =>
   async (dispatch) => {
     dispatch({ type: CREATE_VOUCHER_REQUEST });
     try {
       const { data } = await api.post(
         `${API_URL}/v1/voucher/create`,
-        { name, discountPercent, expDate },
+        { code, name, discount },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
-      console.log("createvoucher", data);
+      console.log("createVoucher", data);
       dispatch({ type: CREATE_VOUCHER_SUCCESS, payload: data });
     } catch (error) {
       console.error("Error creating VOUCHER:", error);
@@ -51,14 +51,14 @@ export const createVoucher =
   };
 
 // Cập nhật sự kiện theo id
-export const updateVOUCHER =
-  ({ id, name, discountPercent, expDate, jwt }) =>
+export const updateVoucher =
+  ({ id, code, name, discount, jwt }) =>
   async (dispatch) => {
     dispatch({ type: UPDATE_VOUCHER_REQUEST });
     try {
       const { data } = await api.put(
         `${API_URL}/v1/voucher/${id}`,
-        { name, discountPercent, expDate },
+        { code, name, discount },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
       console.log("updateVOUCHER", data);
