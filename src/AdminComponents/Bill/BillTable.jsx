@@ -5,6 +5,7 @@ import {
   CardHeader,
   IconButton,
   Modal,
+  Pagination,
   Paper,
   Table,
   TableBody,
@@ -46,71 +47,66 @@ const BillTable = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { bills } = useSelector((state) => state.billReducer.bills);
-  console.log("bills", bills);
+  const { bills } = useSelector((state) => state.billReducer);
+  const [currentPage, setCurrentPage] = useState(1);
   const jwt = localStorage.getItem("jwt");
 
-  const [open, setOpen] = useState(false);
-  const [openEditModal, setOpenEditModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredBills, setFilteredBills] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+
   const [deleteId, setDeleteId] = useState(null);
+  const handlePageChange = (event, value) => {
+    const params = new URLSearchParams(location.search);
+    const accountId = params.get("accountId");
+
+    if (accountId) {
+      params.set("accountId", accountId);
+    }
+    setCurrentPage(value);
+
+    dispatch(
+      getBills({
+
+        page: value,
+        accountId,
+
+      })
+    );
+  };
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+
+    const params = new URLSearchParams(location.search);
+    const accountId = params.get("accountId");
+    console.log("check param", accountId)
+    if (searchTerm) {
+      params.set("phone", searchTerm);
+    }
+
+
+    dispatch(getBills(1, accountId, searchTerm));
+  };
 
   const [searchParams] = useSearchParams();
 
   const params = new URLSearchParams(location.search);
-    const search = params.get("search");
+  const search = params.get("search");
 
   const handleRowClick = (id) => {
     navigate(`/admin/bill/${id}`);
   };
 
   useEffect(() => {
-    dispatch(getBills());
+    const params = new URLSearchParams(location.search);
+    const accountId = params.get("accountId");
+    console.log("check param", accountId);
+    dispatch(getBills(1, accountId));
   }, [dispatch]);
-
-  // useEffect(() => {
-  //   const filtered = bills?.filter((item) =>
-  //     item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  //   );
-  //   setFilteredBills(filtered || []);
-  // }, [bills, searchTerm]);
 
   const handleClearSearch = () => setSearchTerm("");
 
-  const handleOpenFormModal = async (id) => {
-    const response = await dispatch(getEventById({ id, jwt }));
-    if (response) {
-      setSelectedEvent(response);
-    } else {
-      console.error("Response không hợp lệ:", response);
-    }
-    setOpenEditModal(true);
-  };
-
-  const handleCloseFormModal = () => {
-    setSelectedEvent(null);
-    setOpenEditModal(false);
-  };
-
-  const handleOpenDeleteModal = (id) => {
-    setDeleteId(id);
-    setOpenDeleteModal(true);
-  };
-
-  const handleDelete = async () => {
-    await dispatch(deleteEvent({ id: deleteId, jwt }));
-    setOpenDeleteModal(false);
-  };
-
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
   return (
     <Box sx={{ width: "95%", margin: "0px auto", marginTop: "100px" }}>
-      {/* Search and Create Button Section */}
       <Box
         sx={{
           display: "flex",
@@ -133,7 +129,7 @@ const BillTable = () => {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton onClick={() => setSearchTerm(searchTerm)}>
+                <IconButton  onClick={handleSearch}>
                   <SearchIcon />
                 </IconButton>
                 <IconButton onClick={handleClearSearch}>
@@ -143,13 +139,7 @@ const BillTable = () => {
             ),
           }}
         />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => handleOpen()}
-        >
-          Thêm mới
-        </Button>
+    
       </Box>
 
       {/* Table Section */}
@@ -160,6 +150,7 @@ const BillTable = () => {
               <TableRow>
                 <TableCell align="left">Id</TableCell>
                 <TableCell align="left">Tên người nhận</TableCell>
+                <TableCell align="left">Số điện thoại</TableCell>
                 <TableCell align="center">Giá trị đơn hàng</TableCell>
                 <TableCell align="right">Ngày tạo</TableCell>
                 <TableCell align="center">Trạng thái thanh toán</TableCell>
@@ -167,8 +158,8 @@ const BillTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {Array.isArray(bills) && bills.length > 0 ? (
-                bills.map((item, index) => (
+              {Array.isArray(bills.bills) && bills.bills.length > 0 ? (
+                bills.bills.map((item, index) => (
                   <TableRow
                     key={item._id}
                     sx={{ "&:hover": { backgroundColor: "#FFF3E0" } }}
@@ -178,6 +169,8 @@ const BillTable = () => {
                       {index + 1}
                     </TableCell>
                     <TableCell align="left">{item.fullName}</TableCell>
+                    
+                    <TableCell align="left">{item.phone_shipment}</TableCell>
                     <TableCell align="center">{item.total_price} đ</TableCell>
                     <TableCell align="right">
                       {new Date(item.createdAt).toLocaleDateString()}
@@ -188,17 +181,13 @@ const BillTable = () => {
                     <TableCell align="right">
                       <IconButton
                         color="error"
-                        onClick={() => {
-                          handleOpenFormModal(item._id);
-                        }}
+                        
                       >
                         <CreateIcon />
                       </IconButton>
                       <IconButton
                         color="error"
-                        onClick={() => {
-                          handleOpenDeleteModal(item._id);
-                        }}
+                        
                       >
                         <Delete />
                       </IconButton>
@@ -217,32 +206,22 @@ const BillTable = () => {
         </TableContainer>
       </Card>
 
-      {/* Modal Section */}
-      {/* <Modal open={openEditModal} onClose={handleCloseFormModal}>
-        <Box sx={style}>
-          <UpdateEventForm
-            event={selectedEvent}
-            onClose={handleCloseFormModal}
+      {Array.isArray(bills.bills) && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "20px",
+          }}
+        >
+          <Pagination
+            count={bills.pagination.totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
           />
         </Box>
-      </Modal>
-
-      <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
-        <Box sx={style}>
-          <Typography variant="h6">Xác nhận xóa</Typography>
-          <Typography>Bạn có chắc chắn muốn xóa sự kiện này không?</Typography>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-            <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
-            <Button onClick={handleDelete}>Xóa</Button>
-          </Box>
-        </Box>
-      </Modal>
-
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <Box sx={style}>
-          <CreateEventForm onClose={() => setOpen(false)} />
-        </Box>
-      </Modal> */}
+      )}
     </Box>
   );
 };

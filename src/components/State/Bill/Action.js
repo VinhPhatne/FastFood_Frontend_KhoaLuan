@@ -13,18 +13,24 @@ import {
 } from "./ActionType";
 import { API_URL } from "../../config/api";
 
-export const getBills = () => async (dispatch) => {
+export const getBills = (page = 1, accountId, phone) => async (dispatch) => {
   try {
-    const response = await axios.get(`${API_URL}/v1/bill/list`);
+    const response = await axios.get(`${API_URL}/v1/bill/list`, {
+      params: {
+        page: page,
+        accountId: accountId,
+        phone: phone
+      },
+    });
     console.log("getBills", response.data.data);
     dispatch({
       type: GET_BILLS_SUCCESS,
       payload: response.data.data,
+      // paganition: response.data.data
     });
   } catch (error) {
     dispatch({
       type: GET_BILLS_FAILURE,
-      // payload: error.response?.data?.message || "Failed to fetch bills",
     });
   }
 };
