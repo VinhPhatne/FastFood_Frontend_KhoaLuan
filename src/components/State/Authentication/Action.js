@@ -87,13 +87,11 @@ export const loginUser = (reqData) => async (dispatch) => {
 };
 
 export const getUserProfile = () => async (dispatch) => {
-  const jwt = localStorage.getItem("jwt"); // Lấy JWT từ localStorage
+  const jwt = localStorage.getItem("jwt");
   if (!jwt) {
-    // Nếu không có JWT, dispatch một action hoặc xử lý theo ý muốn
     console.log("No JWT found");
-    return; // Thoát khỏi hàm nếu không có JWT
+    return; 
   }
-
   dispatch({ type: GET_USER_REQUEST });
   try {
     const { data } = await axios.get(`${API_URL}/v1/account/profile`, {

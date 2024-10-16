@@ -15,7 +15,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import { uploadImageToCloudinary } from "../util/UploadToCloudaniry";
 import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "../../components/State/Category/Action";
-import { createProduct } from "../../components/State/Product/Action";
+import {
+  createProduct,
+  getProductById,
+  updateProduct,
+} from "../../components/State/Product/Action";
+import { useNavigate, useParams } from "react-router-dom";
 
 const initialValues = {
   name: "",
@@ -24,13 +29,53 @@ const initialValues = {
   picture: "",
 };
 
-const CreateProductForm = () => {
+const UpdateProductForm = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { id } = useParams();
+
+  const [selectedProduct, setSelectedProduct] = useState("");
+  const [formData, setFormData] = useState({
+    categoryName: "",
+    categoryId: "",
+  });
+
+  console.log("id", id);
   const jwt = localStorage.getItem("jwt");
 
   const { categories } = useSelector(
     (state) => state.categoryReducer.categories
   );
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await dispatch(getProductById({ id, jwt }));
+        if (response) {
+          setSelectedProduct(response.data);
+          // Điền dữ liệu vào formik
+          const category = categories.find(
+            (cat) => cat._id === response.data.category
+          );
+          formik.setValues({
+            name: response.data.name || "",
+            description: response.data.description || "",
+            price: response.data.price || "",
+            picture: response.data.picture || "",
+            category: category || "",
+          });
+        } else {
+          console.error("Response không hợp lệ:", response);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy sản phẩm:", error);
+      }
+    };
+
+    fetchProduct();
+  }, [dispatch, id, jwt]);
+
+  console.log("selectedProduct", selectedProduct);
 
   useEffect(() => {
     dispatch(getCategories({ jwt }));
@@ -44,19 +89,19 @@ const CreateProductForm = () => {
       const productData = {
         ...values,
         price: parseFloat(values.price),
+        picture: values.picture,
+        name: values.name,
+        description: values.description,
         category: values.category || null,
-        picture: values.picture || "",
       };
       dispatch(
-        createProduct({
-          price: parseFloat(values.price),
-          picture: values.picture,
-          name: values.name,
-          description: values.description,
-          category: values.category || null,
+        updateProduct({
+          id,
+          productData,
         })
       );
       console.log("data ----", values);
+      navigate("/admin/product");
     },
   });
 
@@ -76,7 +121,7 @@ const CreateProductForm = () => {
     <div className="flex items-center justify-center min-h-screen py-10 px-5">
       <div className="lg:max-w-4xl w-full">
         <h1 className="font-bold text-2xl text-center py-2">
-          Thêm mới sản phẩm
+          Cập nhật sản phẩm
         </h1>
         <form onSubmit={formik.handleSubmit} className="space-y-4">
           <Grid container spacing={2} justifyContent="flex-start">
@@ -144,7 +189,7 @@ const CreateProductForm = () => {
                   variant="outlined"
                   onChange={formik.handleChange}
                   value={formik.values.name}
-                  sx={{ maxWidth: "100%" }} 
+                  sx={{ maxWidth: "100%" }}
                 />
               </div>
             </Grid>
@@ -181,7 +226,7 @@ const CreateProductForm = () => {
                   variant="outlined"
                   onChange={formik.handleChange}
                   value={formik.values.price}
-                  sx={{ maxWidth: "100%" }} 
+                  sx={{ maxWidth: "100%" }}
                 />
               </div>
             </Grid>
@@ -228,7 +273,7 @@ const CreateProductForm = () => {
                 type="submit"
                 sx={{ maxWidth: "400px" }}
               >
-                Thêm mới
+                Cập nhật
               </Button>
             </div>
           </Grid>
@@ -238,4 +283,4 @@ const CreateProductForm = () => {
   );
 };
 
-export default CreateProductForm;
+export default UpdateProductForm;

@@ -6,9 +6,11 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 const CreateEventForm = ({ onClose }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     eventName: "",
@@ -30,6 +32,7 @@ const CreateEventForm = ({ onClose }) => {
         jwt: localStorage.getItem("jwt"),
       })
     );
+    navigate("/admin/event");
     onClose();
     console.log(data);
   };
