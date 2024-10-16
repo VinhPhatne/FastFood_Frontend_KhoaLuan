@@ -10,6 +10,7 @@ import { Divider, Drawer, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "../../components/State/Authentication/Action";
+import DiscountIcon from '@mui/icons-material/Discount';
 // import { logout } from "../../component/State/Authentication/Action";
 
 const menu = [
@@ -19,7 +20,7 @@ const menu = [
   { title: "Product", icon: <ShopTwoIcon />, path: "/product" },
   { title: "Food Category", icon: <CategoryIcon />, path: "/category" },
   { title: "Events", icon: <EventIcon />, path: "/event" },
-  { title: "Details", icon: <AdminPanelSettingsIcon />, path: "/details" },
+  { title: "Voucher", icon: <DiscountIcon />, path: "/voucher" },
   { title: "Logout", icon: <LogoutIcon />, path: "/" },
 ];
 

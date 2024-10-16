@@ -9,6 +9,7 @@ import Product from "../Product/Product";
 import AdminHeader from "./AdminHeader";
 import Event from "../Event/Event";
 import Account from "../Account/Account";
+import EventTable from "../Voucher/VoucherTable";
 //import { getRestaurantsCategory } from "../../component/State/Restaurant/Action";
 
 const Admin = () => {
@@ -46,6 +47,7 @@ const Admin = () => {
             <Route path="/product/create" element={<CreateProductForm />} />
             <Route path="/event" element={<Event />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/voucher" element={<EventTable/>} />
           </Routes>
         </div>
       </div>
