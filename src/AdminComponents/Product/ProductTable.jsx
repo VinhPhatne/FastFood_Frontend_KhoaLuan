@@ -235,7 +235,7 @@ const ProductTable = () => {
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead
               sx={{
-                backgroundColor: "#fdba74", // Set background color to #FFF3E0
+                backgroundColor: "#fdba74", 
               }}
             >
               {" "}
@@ -282,10 +282,10 @@ const ProductTable = () => {
                         src={item.picture}
                         alt={item.name}
                         style={{
-                          width: "100px", // Đặt chiều rộng
-                          height: "auto", // Tự động tính chiều cao theo tỷ lệ
-                          objectFit: "cover", // Giữ nguyên tỷ lệ và cắt ảnh nếu cần
-                          borderRadius: "8px", // Bo tròn góc ảnh (nếu muốn)
+                          width: "100px", 
+                          height: "auto",
+                          objectFit: "cover", 
+                          borderRadius: "8px", 
                         }}
                       />
                     </TableCell>

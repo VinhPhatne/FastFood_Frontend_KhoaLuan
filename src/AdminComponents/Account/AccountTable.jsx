@@ -34,7 +34,11 @@ import {
   getProductsListPage,
 } from "../../components/State/Product/Action";
 import { getCategories } from "../../components/State/Category/Action";
-import { deleteUser, getUserById, getUsers } from "../../components/State/User/Action";
+import {
+  deleteUser,
+  getUserById,
+  getUsers,
+} from "../../components/State/User/Action";
 import UpdateAccountForm from "./UpdateAccountForm";
 import CreateAccountForm from "./CreateAccountForm";
 
@@ -284,9 +288,11 @@ const AccountTable = () => {
                 accounts.accounts.map((user) => (
                   <TableRow
                     key={user._id}
+                    onClick={() => navigate(`/admin/bill?accountId=${user._id}`)} 
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
                       "&:hover": { backgroundColor: "#FFF3E0" },
+                      cursor: "pointer",
                     }}
                   >
                     <TableCell component="th" scope="row">
@@ -298,8 +304,8 @@ const AccountTable = () => {
                     <TableCell align="right">
                       <IconButton
                         color="primary"
-                        onClick={() => {
-                          console.log("IDDDD", user._id);
+                        onClick={(e) => {
+                          e.stopPropagation(); 
                           handleOpenFormModal(user._id);
                         }}
                       >
@@ -307,8 +313,8 @@ const AccountTable = () => {
                       </IconButton>
                       <IconButton
                         color="error"
-                        onClick={() => {
-                          console.log("IDDDD", user._id);
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent row click
                           handleOpenDeleteModal(user._id);
                         }}
                       >
