@@ -18,6 +18,8 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Modal,
+  Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useEffect, useState } from "react";
@@ -32,7 +34,21 @@ import {
   getProductsListPage,
 } from "../../components/State/Product/Action";
 import { getCategories } from "../../components/State/Category/Action";
-import { getUsers } from "../../components/State/User/Action";
+import { deleteUser, getUserById, getUsers } from "../../components/State/User/Action";
+import UpdateAccountForm from "./UpdateAccountForm";
+import CreateAccountForm from "./CreateAccountForm";
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 450,
+  bgcolor: "background.paper",
+  border: "none",
+  boxShadow: 24,
+  p: 4,
+};
 
 const AccountTable = () => {
   const jwt = localStorage.getItem("jwt");
@@ -46,6 +62,13 @@ const AccountTable = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
+
+  const [open, setOpen] = useState(false);
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [filteredEvents, setFilteredEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const { accounts, isLoading } = useSelector((state) => state.userReducer);
   console.log("user", accounts);
@@ -106,6 +129,34 @@ const AccountTable = () => {
     setCurrentPage(page);
     dispatch(getUsers({ jwt, page }));
   }, [dispatch]);
+
+  const handleOpenFormModal = async (id) => {
+    const response = await dispatch(getUserById({ id, jwt }));
+    if (response) {
+      setSelectedEvent(response);
+    } else {
+      console.error("Response không hợp lệ:", response);
+    }
+    setOpenEditModal(true);
+  };
+
+  const handleCloseFormModal = () => {
+    setSelectedEvent(null);
+    setOpenEditModal(false);
+  };
+
+  const handleOpenDeleteModal = (id) => {
+    setDeleteId(id);
+    setOpenDeleteModal(true);
+  };
+
+  const handleDelete = async () => {
+    await dispatch(deleteUser({ id: deleteId, jwt }));
+    setOpenDeleteModal(false);
+  };
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   return (
     <Box
@@ -185,7 +236,7 @@ const AccountTable = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => navigate("create")}
+          onClick={() => handleOpen()}
           sx={{
             ml: "auto",
             height: "40px",
@@ -247,11 +298,20 @@ const AccountTable = () => {
                     <TableCell align="right">
                       <IconButton
                         color="primary"
-                        onClick={() => navigate(`/edit/${user._id}`)}
+                        onClick={() => {
+                          console.log("IDDDD", user._id);
+                          handleOpenFormModal(user._id);
+                        }}
                       >
                         <Edit />
                       </IconButton>
-                      <IconButton color="error">
+                      <IconButton
+                        color="error"
+                        onClick={() => {
+                          console.log("IDDDD", user._id);
+                          handleOpenDeleteModal(user._id);
+                        }}
+                      >
                         <Delete />
                       </IconButton>
                     </TableCell>
@@ -268,6 +328,33 @@ const AccountTable = () => {
           </Table>
         </TableContainer>
       </Card>
+
+      {/* Modal Section */}
+      <Modal open={openEditModal} onClose={handleCloseFormModal}>
+        <Box sx={style}>
+          <UpdateAccountForm
+            account={selectedEvent}
+            onClose={handleCloseFormModal}
+          />
+        </Box>
+      </Modal>
+
+      <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
+        <Box sx={style}>
+          <Typography variant="h6">Xác nhận xóa</Typography>
+          <Typography>Bạn có chắc chắn muốn xóa sự kiện này không?</Typography>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+            <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
+            <Button onClick={handleDelete}>Xóa</Button>
+          </Box>
+        </Box>
+      </Modal>
+
+      <Modal open={open} onClose={() => setOpen(false)}>
+        <Box sx={style}>
+          <CreateAccountForm onClose={() => setOpen(false)} />
+        </Box>
+      </Modal>
 
       {Array.isArray(accounts.accounts) && (
         <Box

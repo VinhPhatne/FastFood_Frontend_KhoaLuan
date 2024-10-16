@@ -28,6 +28,7 @@ import { Delete, Edit } from "@mui/icons-material";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  getProductById,
   getProducts,
   getProductsListPage,
 } from "../../components/State/Product/Action";
@@ -37,15 +38,18 @@ const ProductTable = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
+
+  const { categories } = useSelector(
+    (state) => state.categoryReducer.categories
+  );
   const { products } = useSelector((state) => state.productReducer);
+  const jwt = localStorage.getItem("jwt");
+
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState("");
   const [isSell, setIsSell] = useState("");
-  const { categories } = useSelector(
-    (state) => state.categoryReducer.categories
-  );
 
   const handleSearch = () => {
     setCurrentPage(1);
@@ -62,7 +66,12 @@ const ProductTable = () => {
     }
     navigate(`?${params.toString()}`);
     dispatch(
-      getProductsListPage({ jwt, search: searchTerm, cateId: selectedCategory, isSelling: isSell })
+      getProductsListPage({
+        jwt,
+        search: searchTerm,
+        cateId: selectedCategory,
+        isSelling: isSell,
+      })
     );
   };
   const handleClearSearch = () => {
@@ -78,11 +87,10 @@ const ProductTable = () => {
     const page = 1;
     setCurrentPage(page);
     dispatch(getProductsListPage({ jwt, page, search }));
-
   };
   const handleIsSellChange = (event) => {
     setIsSell(event.target.value);
-  }
+  };
 
   const handlePageChange = (event, value) => {
     const params = new URLSearchParams(location.search);
@@ -101,7 +109,15 @@ const ProductTable = () => {
     setCurrentPage(value);
     setSearchParams(params.toString());
     const jwt = localStorage.getItem("jwt");
-    dispatch(getProductsListPage({ jwt, page: value, search, cateId, isSelling: isSell }));
+    dispatch(
+      getProductsListPage({
+        jwt,
+        page: value,
+        search,
+        cateId,
+        isSelling: isSell,
+      })
+    );
   };
 
   const handleCategoryChange = (event) => {
@@ -109,13 +125,12 @@ const ProductTable = () => {
   };
 
   useEffect(() => {
-    const jwt = localStorage.getItem("jwt");
     const pageFromParams = searchParams.get("page");
     const page = pageFromParams ? parseInt(pageFromParams, 10) : currentPage;
     setCurrentPage(page);
     dispatch(getProductsListPage({ jwt, page }));
     dispatch(getCategories({ jwt }));
-  }, [dispatch]);
+  }, [dispatch, jwt]);
 
   return (
     <Box
@@ -181,11 +196,10 @@ const ProductTable = () => {
         <FormControl sx={{ minWidth: 150, marginLeft: 2 }}>
           <InputLabel>Trạng thái bán</InputLabel>
           <Select
-            value={isSell} 
-            onChange={handleIsSellChange} 
+            value={isSell}
+            onChange={handleIsSellChange}
             label="Trạng thái bán"
           >
-         
             <MenuItem value={true}>Đang bán</MenuItem>
             <MenuItem value={false}>Ngừng bán</MenuItem>{" "}
             {/* False: Ngừng bán */}
@@ -287,10 +301,26 @@ const ProductTable = () => {
                       )}
                     </TableCell>
                     <TableCell align="right">
-                      <IconButton color="error">
-                        <Edit />
-                        <Delete />
+                      <IconButton
+                        color="error"
+                        // onClick={() => {
+                        //   console.log("IDDDD", item._id);
+                        //   //handleUpdate(item._id);
+                        // }}
+
+                        onClick={() => navigate(`${item._id}`)}
+                      >
+                        <CreateIcon />
                       </IconButton>
+                      {/* <IconButton
+                        color="error"
+                        onClick={() => {
+                          console.log("IDDDD", item._id);
+                          handleOpenDeleteModal(item._id);
+                        }}
+                      >
+                        <Delete />
+                      </IconButton> */}
                     </TableCell>
                   </TableRow>
                 ))
@@ -311,9 +341,9 @@ const ProductTable = () => {
           }}
         >
           <Pagination
-            count={products.pagination.totalPages} 
+            count={products.pagination.totalPages}
             page={currentPage}
-            onChange={handlePageChange} // Xử lý khi thay đổi trang
+            onChange={handlePageChange}
             color="primary"
           />
         </Box>

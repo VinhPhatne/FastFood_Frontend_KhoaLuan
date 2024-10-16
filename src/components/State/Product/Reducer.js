@@ -7,12 +7,15 @@ import {
   UPDATE_PRODUCT_FAILURE,
   GET_PRODUCTS_BY_CATEGORY_SUCCESS,
   GET_PRODUCTS_BY_CATEGORY_FAILURE,
+  GET_PRODUCT_BY_ID_SUCCESS,
 } from "./ActionType";
 
 const initialState = {
   products: [],
   productsByCategory: {},
   error: null,
+  selectedProduct: null,
+
 };
 
 const productReducer = (state = initialState, action) => {
@@ -65,6 +68,12 @@ const productReducer = (state = initialState, action) => {
       return {
         ...state,
         error: action.payload,
+      };
+
+    case GET_PRODUCT_BY_ID_SUCCESS:
+      return {
+        ...state,
+        selectedProduct: action.payload,
       };
     default:
       return state;

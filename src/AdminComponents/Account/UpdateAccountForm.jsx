@@ -6,14 +6,29 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { createUser } from "../../components/State/User/Action";
+import {
+  updateUser,
+  updateUserProfile,
+} from "../../components/State/User/Action";
 
-const CreateAccountForm = ({ onClose }) => {
+const UpdateAccountForm = ({ account, onClose }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (account) {
+      setFormData({
+        fullname: account.data.fullname || "",
+        phonenumber: account.data.phonenumber || "",
+        password: account.data.password || "",
+      });
+    }
+  }, [account]);
+
+  console.log("account", account);
 
   const [formData, setFormData] = useState({
     fullname: "",
@@ -21,7 +36,7 @@ const CreateAccountForm = ({ onClose }) => {
     password: "",
     address: "",
     email: "",
-    role: "", // 1 = admin, 2 = manager, 3 = customer
+    role: "",
   });
 
   const handleSubmit = (e) => {
@@ -35,8 +50,11 @@ const CreateAccountForm = ({ onClose }) => {
       // role: formData.role,
     };
     dispatch(
-      createUser({
-        ...accountData,
+      updateUser(account.data._id, {
+        fullname: formData.fullname,
+        phonenumber: formData.phonenumber,
+        email: formData.email,
+        password: formData.password,
       })
     );
     navigate("/admin/account");
@@ -56,7 +74,7 @@ const CreateAccountForm = ({ onClose }) => {
     <div className="">
       <div className="p-5">
         <h1 className="text-orange-600 font-semibold text-center text-2xl pb-10">
-          Tạo tài khoản mới
+          Cập nhật tài khoản
         </h1>
         <form className="space-y-5" onSubmit={handleSubmit}>
           <TextField
@@ -83,7 +101,7 @@ const CreateAccountForm = ({ onClose }) => {
             name="password"
             label="Mật khẩu"
             variant="outlined"
-            type="password" 
+            type="password"
             onChange={handleInputChange}
             value={formData.password}
           />
@@ -126,7 +144,7 @@ const CreateAccountForm = ({ onClose }) => {
             type="submit"
             style={{ color: "#fff", backgroundColor: "#ff7d01" }}
           >
-            Tạo tài khoản
+            Cập nhật
           </Button>
         </form>
       </div>
@@ -134,4 +152,4 @@ const CreateAccountForm = ({ onClose }) => {
   );
 };
 
-export default CreateAccountForm;
+export default UpdateAccountForm;

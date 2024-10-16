@@ -7,6 +7,7 @@ import UserProfile from "../components/profile/UserProfile";
 import ChangePassword from "../components/profile/ChangePassword";
 import Profile from "../components/profile/Profile";
 import Cart from "../components/cart/Cart";
+import Checkout from "../components/cart/Checkout";
 
 const CustomerRoute = () => {
   return (
@@ -28,6 +29,7 @@ const CustomerRoute = () => {
         <Route path="/" element={<Home />} />
         <Route path="/profile/*" element={<Profile />} />
         <Route path="/cart/*" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
         {/* <Route path="/profile/change-password" element={<ChangePassword />} /> */}
       </Routes>
     </div>

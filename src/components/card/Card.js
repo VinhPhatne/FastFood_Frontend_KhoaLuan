@@ -27,6 +27,8 @@ const Card = () => {
     dispatch(getProducts({ jwt }));
   }, [dispatch, jwt]);
 
+ 
+
   const [showPrevArrow, setShowPrevArrow] = useState(false);
   const [showNextArrow, setShowNextArrow] = useState(true);
 

@@ -14,6 +14,9 @@ import {
   DELETE_USER_FAILURE,
   GET_USER_BY_ID_SUCCESS,
   GET_USER_BY_ID_FAILURE,
+  CREATE_USER_REQUEST,
+  CREATE_USER_SUCCESS,
+  CREATE_USER_FAILURE,
 } from "./ActionType";
 import { api, API_URL } from "../../config/api";
 
@@ -42,6 +45,25 @@ export const getUsers =
       });
     }
   };
+
+export const createUser = (reqData) => async (dispatch) => {
+  dispatch({ type: CREATE_USER_REQUEST });
+  try {
+    const { data } = await axios.post(`${API_URL}/v1/account/create`, {
+      fullname: reqData.fullname,
+      phonenumber: reqData.phonenumber,
+      password: reqData.password,
+      // role: reqData.role,
+      // email: reqData.email,
+      // address: reqData.address,
+    });
+    console.log("User created successfully", data);
+    dispatch({ type: CREATE_USER_SUCCESS, payload: data });
+  } catch (error) {
+    console.log(error);
+    dispatch({ type: CREATE_USER_FAILURE, payload: error.message });
+  }
+};
 
 // export const getUsersListPage =
 //   ({ jwt, page = 1, search, state, role }) =>
@@ -82,9 +104,9 @@ export const getUserById =
       });
       dispatch({
         type: GET_USER_BY_ID_SUCCESS,
-        payload: response.data.accounts,
+        payload: response.data,
       });
-      return response.data.accounts;
+      return response.data;
     } catch (error) {
       console.error("Error fetching category by ID:", error);
       dispatch({ type: GET_USER_BY_ID_FAILURE, payload: error });
@@ -115,6 +137,22 @@ export const updateUserProfile = (id, reqData) => async (dispatch) => {
         },
       }
     );
+    console.log("Updated user profile", data);
+    dispatch({ type: UPDATE_USER_SUCCESS, payload: data });
+  } catch (error) {
+    console.log(error);
+    dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
+  }
+};
+
+export const updateUser = (id, reqData) => async (dispatch) => {
+  dispatch({ type: UPDATE_USER_REQUEST });
+  try {
+    const { data } = await axios.put(`${API_URL}/v1/account/${id}`, {
+      fullname: reqData.fullname,
+      phonenumber: reqData.phonenumber,
+      email: reqData.email,
+    });
     console.log("Updated user profile", data);
     dispatch({ type: UPDATE_USER_SUCCESS, payload: data });
   } catch (error) {
