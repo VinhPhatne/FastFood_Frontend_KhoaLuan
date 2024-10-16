@@ -8,6 +8,7 @@ import {
   CHANGE_PASSWORD_SUCCESS,
   CHANGE_PASSWORD_FAILURE,
   CHANGE_PASSWORD_REQUEST,
+  CREATE_USER_SUCCESS,
 } from "./ActionType";
 
 const initialState = {
@@ -32,6 +33,7 @@ export const userReducer = (state = initialState, action) => {
       };
 
     case UPDATE_USER_SUCCESS:
+    case CREATE_USER_SUCCESS:
       return {
         ...state,
         isLoading: false,
@@ -60,8 +62,6 @@ export const userReducer = (state = initialState, action) => {
   }
 };
 
-
-
 // export const toggleUserState = ({ id, jwt, state }) => async (dispatch) => {
 //   dispatch({ type: DELETE_USER_REQUEST });
 //   try {
@@ -81,4 +81,3 @@ export const userReducer = (state = initialState, action) => {
 //     dispatch({ type: DELETE_USER_FAILURE });
 //   }
 // };
-

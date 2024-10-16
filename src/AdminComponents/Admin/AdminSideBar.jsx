@@ -14,7 +14,7 @@ import { logout } from "../../components/State/Authentication/Action";
 
 const menu = [
   { title: "Dashboard", icon: <Dashboard />, path: "/" },
-  { title: "Orders", icon: <ShoppingBag />, path: "/orders" },
+  { title: "Orders", icon: <ShoppingBag />, path: "/bill" },
   { title: "Account", icon: <ShoppingBag />, path: "/account" },
   { title: "Product", icon: <ShopTwoIcon />, path: "/product" },
   { title: "Food Category", icon: <CategoryIcon />, path: "/category" },
@@ -30,7 +30,7 @@ const AdminSideBar = ({ handleClose }) => {
   const dispatch = useDispatch();
 
   const handleNavigate = (item) => {
-    setActiveItem(item.title); 
+    setActiveItem(item.title);
     navigate(`/admin${item.path}`);
     if (item.title === "Logout") {
       navigate("/");

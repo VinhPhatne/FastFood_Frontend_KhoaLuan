@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
+  const navigate = useNavigate();
+
   const jwt = localStorage.getItem("jwt");
   const [cart, setCart] = useState([]);
 
@@ -9,6 +12,8 @@ const Cart = () => {
     const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
     setCart(savedCart);
   }, [jwt]);
+
+   console.log("cart", cart);
 
   const handleIncrease = (id) => {
     const updatedCart = cart.map((item) =>
@@ -133,6 +138,7 @@ const Cart = () => {
               <button
                 className="mt-6 w-full text-white py-3 rounded-lg font-semibold hover:bg-orange-700"
                 style={{ backgroundColor: "#ff7d01" }}
+                onClick={() => navigate("/checkout")}
               >
                 Thanh toán {finalTotal.toLocaleString()} đ
               </button>

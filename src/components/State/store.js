@@ -5,6 +5,7 @@ import { categoryReducer } from "./Category/Reducer";
 import productReducer from "./Product/Reducer";
 import { eventReducer } from "./Event/Reducer";
 import { userReducer } from "./User/Reducer";
+import { billReducer } from "./Bill/Reducer";
 // import { restaurantReducer } from "./Restaurant/Reducer";
 // import { menuItemReducer } from "./Menu/Reducer";
 // import { cartReducer } from "./Cart/Reducer";
@@ -18,6 +19,7 @@ const rooteReducer = combineReducers({
   productReducer: productReducer,
   eventReducer: eventReducer,
   userReducer: userReducer,
+  billReducer: billReducer,
 
   // restaurant: restaurantReducer,
   // menu: menuItemReducer,
