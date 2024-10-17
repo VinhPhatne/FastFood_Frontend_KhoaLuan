@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUserProfile } from "../State/Authentication/Action";
 import { createBill } from "../State/Bill/Action";
 import { Button, TextField } from "@mui/material";
+import { useLocation } from "react-router-dom";
 
 const Checkout = () => {
   const jwt = localStorage.getItem("jwt");
@@ -15,6 +16,13 @@ const Checkout = () => {
     note: "",
   });
   const dispatch = useDispatch();
+
+  const { state } = useLocation();
+  const { discount, voucherId, finalTotal } = state || {};
+
+  console.log("discount", discount);
+  console.log("voucher", voucherId);
+  console.log("finalTotal", finalTotal);
 
   const userProfile = useSelector((state) => state.auth.user);
 
@@ -69,7 +77,7 @@ const Checkout = () => {
   );
 
   const shippingFee = totalPrice > 0 ? 10000 : 0;
-  const finalTotal = totalPrice + shippingFee;
+  //const finalTotal = totalPrice + shippingFee;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -80,6 +88,7 @@ const Checkout = () => {
       ship: shippingFee,
       total_price: finalTotal,
       isPaid: false,
+      voucher: voucherId,
       lineItems: cart.map((item) => ({
         product: item.id,
         quantity: item.quantity,
@@ -223,6 +232,12 @@ const Checkout = () => {
                   <span>Phí giao hàng</span>
                   <span>{shippingFee.toLocaleString()} đ</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Giảm giá</span>
+                    <span>-{discount.toLocaleString()} đ</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold text-xl">
                   <span>Tổng thanh toán</span>
                   <span>{finalTotal.toLocaleString()} đ</span>

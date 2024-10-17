@@ -12,6 +12,7 @@ const Cart = () => {
   const [voucher, setVoucher] = useState(""); // State cho mã voucher
   const [discount, setDiscount] = useState(0); // State cho tiền giảm giá
   const [voucherError, setVoucherError] = useState(""); // State cho lỗi nếu có
+  const [voucherId, setVoucherId] = useState(null);
 
   useEffect(() => {
     const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
@@ -51,25 +52,40 @@ const Cart = () => {
   );
 
   const shippingFee = totalPrice > 0 ? 10000 : 0;
-  const finalTotal = totalPrice + shippingFee;
+  // const finalTotal = totalPrice + shippingFee;
+  const finalTotal = Math.max(totalPrice + shippingFee - discount, 0);
 
   const handleApplyVoucher = async () => {
     try {
       const response = await axios.get(
         `http://localhost:8080/v1/voucher/getcode?code=${voucher}`
       );
-
-      if (response.data && response.data.discountAmount) {
-        setDiscount(response.data.discountAmount);
+      console.log("response", response);
+      if (response.data && response.data.data) {
+        setDiscount(response.data.data.discount);
+        setVoucherId(response.data.data._id);
         setVoucherError("");
       } else {
         setVoucherError("Mã giảm giá không hợp lệ");
         setDiscount(0);
+        setVoucherId(null);
       }
     } catch (error) {
       setVoucherError("Có lỗi xảy ra khi áp dụng mã giảm giá");
       console.error(error);
     }
+  };
+
+  console.log("discount", discount);
+
+  const handleCheckout = () => {
+    navigate("/checkout", {
+      state: {
+        discount, // Truyền giá trị discount
+        voucherId, // Truyền mã voucher
+        finalTotal, // Tổng thanh toán sau giảm giá
+      },
+    });
   };
 
   return (
@@ -161,6 +177,12 @@ const Cart = () => {
                   <span>Phí giao hàng</span>
                   <span>{shippingFee.toLocaleString()} đ</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Giảm giá</span>
+                    <span>-{discount.toLocaleString()} đ</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold">
                   <span>Tổng thanh toán</span>
                   <span>{finalTotal.toLocaleString()} đ</span>
@@ -170,7 +192,7 @@ const Cart = () => {
               <button
                 className="mt-6 w-full text-white py-3 rounded-lg font-semibold hover:bg-orange-700"
                 style={{ backgroundColor: "#ff7d01" }}
-                onClick={() => navigate("/checkout")}
+                onClick={handleCheckout}
               >
                 Thanh toán {finalTotal.toLocaleString()} đ
               </button>

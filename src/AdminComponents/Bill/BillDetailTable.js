@@ -3,23 +3,37 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getBillById } from "../../components/State/Bill/Action";
 import { useParams } from "react-router-dom";
+import { getVoucherById } from "../../components/State/voucher/Action";
 
 const BillDetailTable = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
   const jwt = localStorage.getItem("jwt");
   const [billData, setBillData] = useState(null);
+  const [voucherDiscount, setVoucherDiscount] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       const response = await dispatch(getBillById({ id, jwt }));
       setBillData(response.data);
+
+      if (response.data?.voucher) {
+        const voucherResponse = await dispatch(
+          getVoucherById({ id: response.data?.voucher, jwt })
+        );
+        console.log("voucherResponse", voucherResponse);
+        if (voucherResponse) {
+          setVoucherDiscount(voucherResponse.data?.discount);
+          console.log("OK");
+        }
+      }
     };
 
     fetchData();
   }, [dispatch, id, jwt]);
 
-  console.log("billData", billData);
+  console.log("billData", billData?.voucher);
+  console.log("voucherDiscount", voucherDiscount);
 
   let totalPrice;
 
@@ -34,7 +48,7 @@ const BillDetailTable = () => {
   return (
     <Box sx={{ width: "95%", margin: "0px auto", marginTop: "100px" }}>
       <h1 style={{ color: "#ff7d01" }} className="text-3xl font-bold mb-6">
-        CHI TIẾT HÓA ĐƠN 
+        CHI TIẾT HÓA ĐƠN
       </h1>
       <div className="flex justify-between">
         <div className="w-1/2 border rounded-lg p-6 mr-6">
@@ -164,6 +178,12 @@ const BillDetailTable = () => {
                   <span>Phí giao hàng</span>
                   <span>{billData?.ship?.toLocaleString()} đ</span>
                 </div>
+                {voucherDiscount > 0 && (
+                  <div className="flex justify-between">
+                    <span>Giảm giá Voucher</span>
+                    <span>-{voucherDiscount.toLocaleString()} đ</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold text-xl">
                   <span>Tổng thanh toán </span>
                   <span>{billData?.total_price?.toLocaleString()} đ</span>
