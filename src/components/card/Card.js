@@ -13,7 +13,8 @@ import { getCategories } from "../State/Category/Action";
 import { getProducts, getProductsByCategory } from "../State/Product/Action";
 import Cookies from "js-cookie";
 import { notification } from "antd";
-
+import { Modal, InputNumber, Button } from "antd";
+import "./productModal.css"; // Import your CSS for styling
 const Card = () => {
   const dispatch = useDispatch();
   const { categories } = useSelector(
@@ -31,6 +32,19 @@ const Card = () => {
   const [showNextArrow, setShowNextArrow] = useState(true);
 
   const [categoryProducts, setCategoryProducts] = useState({});
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const showModal = (product) => {
+    setSelectedProduct(product);
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    setSelectedProduct(null);
+  };
 
   useEffect(() => {
     dispatch(getCategories({ jwt }));
@@ -58,6 +72,10 @@ const Card = () => {
       setStartIndex(startIndex - 1);
     }
   };
+  const handleAddToCartModal = (product) => {
+    handleAddToCart(product);
+    setQuantity(1);
+  };
 
   const handleAddToCart = (product) => {
     if (!jwt) {
@@ -84,7 +102,7 @@ const Card = () => {
           name: product.name,
           price: product.price,
           picture: product.picture,
-          quantity: 1,
+          quantity: quantity,
         },
       ];
     }
@@ -175,7 +193,10 @@ const Card = () => {
                   products
                     .filter((item) => item.category._id === category._id)
                     .map((item) => (
-                      <div className={styles.item}>
+                      <div
+                        className={styles.item}
+                        onClick={() => showModal(item)}
+                      >
                         <img
                           className={styles.img}
                           src={item.picture}
@@ -194,7 +215,10 @@ const Card = () => {
                           </div>
                           <button
                             className={styles.addToCartButton}
-                            onClick={() => handleAddToCart(item)}
+                            onClick={(e) => {
+                              e.stopPropagation(); 
+                              handleAddToCart(item); 
+                            }}
                           >
                             Thêm vào giỏ hàng
                           </button>
@@ -211,6 +235,55 @@ const Card = () => {
           <p>No categories available</p>
         )}
       </div>
+
+      <Modal
+        visible={isModalVisible}
+        onCancel={handleCancel}
+        footer={null}
+        width={1200}
+      >
+        {selectedProduct && (
+          <div className="modal-content">
+            <div className="modal-left">
+              <img
+                src={selectedProduct.picture}
+                alt={selectedProduct.name}
+                className="product-image"
+              />
+            </div>
+            <div className="modal-right">
+              <h2 className="product-title">{selectedProduct.name}</h2>
+              <p className="product-description">
+                {selectedProduct.description}
+              </p>
+              <div className="product-price">
+                <strong>{selectedProduct.price} đ</strong>
+              </div>
+              <div className="quantity-selector">
+                <span>Số lượng:</span>
+                <InputNumber
+                  min={1}
+                  defaultValue={1}
+                  value={quantity}
+                  onChange={(value) => setQuantity(value)}
+                />
+              </div>
+              <Button
+                type="primary"
+                className="add-to-cart-button"
+                onClick={() => {
+                  if (selectedProduct) {
+                    handleAddToCartModal({ ...selectedProduct, quantity });
+                    setIsModalVisible(false);
+                  }
+                }}
+              >
+                Thêm vào giỏ hàng
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
