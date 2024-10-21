@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUserProfile } from "../State/Authentication/Action";
 import { createBill } from "../State/Bill/Action";
 import { Button, TextField } from "@mui/material";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Checkout = () => {
   const jwt = localStorage.getItem("jwt");
@@ -16,6 +16,7 @@ const Checkout = () => {
     note: "",
   });
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { state } = useLocation();
   const { discount, voucherId, finalTotal } = state || {};
@@ -98,7 +99,10 @@ const Checkout = () => {
       account: userProfile._id,
     };
 
-    dispatch(createBill(billData));
+    dispatch(createBill(billData)).then(() => {
+      Cookies.remove(jwt);
+      navigate("/success"); 
+    });
   };
 
   const handleInputChange = (e) => {

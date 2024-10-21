@@ -93,9 +93,9 @@ const Header = () => {
   const handleSwitchToLogin = () => setActiveForm("login");
 
   const menuItems = [
-    { label: "Menu" },
-    { label: "Khuyến Mãi" },
-    { label: "Giới thiệu" },
+    { label: "Menu", path: "/" },
+    { label: "Khuyến Mãi", path: "/" },
+    { label: "Giới thiệu", path: "/about" },
   ];
 
   const userMenu = (
@@ -128,7 +128,10 @@ const Header = () => {
               <li
                 key={item.label}
                 className={activeTab === item.label ? styles.active : ""}
-                onClick={() => setActiveTab(item.label)}
+                onClick={() => {
+                  setActiveTab(item.label);
+                  navigate(item.path);
+                }}
               >
                 {item.label}
               </li>

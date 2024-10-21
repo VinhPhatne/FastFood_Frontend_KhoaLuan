@@ -13,7 +13,7 @@ const CreateVoucherForm = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
-    name: "", 
+    name: "",
     discount: "",
     code: "",
     //expDate: null,
@@ -30,8 +30,8 @@ const CreateVoucherForm = ({ onClose, onSuccess }) => {
         jwt: localStorage.getItem("jwt"),
       })
     ).then(() => {
-      onSuccess(); 
-      onClose(); 
+      onSuccess();
+      onClose();
     });
   };
 

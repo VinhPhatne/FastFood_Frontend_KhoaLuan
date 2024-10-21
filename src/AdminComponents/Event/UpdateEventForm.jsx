@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 
 //import { createeventAction } from "../../component/State/Restaurant/Action";
 
-const UpdateEventForm = ({ event, onClose }) => {
+const UpdateEventForm = ({ event, onClose, onSuccess }) => {
   //const {restaurant} = useSelector(store => store)
 
   const dispatch = useDispatch();
@@ -48,10 +48,10 @@ const UpdateEventForm = ({ event, onClose }) => {
         expDate: format(formData.expDate, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
         jwt: localStorage.getItem("jwt"),
       })
-    );
-    console.log(data);
-    navigate("/admin/event");
-    onClose();
+    ).then(() => {
+      onSuccess();
+      onClose();
+    });
   };
 
   const handleInputChange = (e) => {

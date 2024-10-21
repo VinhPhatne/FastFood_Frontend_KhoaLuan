@@ -8,7 +8,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
-const CreateEventForm = ({ onClose }) => {
+const CreateEventForm = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -31,10 +31,10 @@ const CreateEventForm = ({ onClose }) => {
         expDate: data.expDate,
         jwt: localStorage.getItem("jwt"),
       })
-    );
-    navigate("/admin/event");
-    onClose();
-    console.log(data);
+    ).then(() => {
+      onSuccess();
+      onClose();
+    });
   };
 
   const handleInputChange = (e) => {
@@ -49,7 +49,7 @@ const CreateEventForm = ({ onClose }) => {
     <div className="">
       <div className="p-5">
         <h1 className="text-orange-600 font-semibold text-center text-2xl pb-10">
-          Thêm mới sự kiện 
+          Thêm mới sự kiện
         </h1>
         <form className="space-y-5" onSubmit={handleSubmit}>
           <TextField

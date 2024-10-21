@@ -11,7 +11,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { createUser } from "../../components/State/User/Action";
 
-const CreateAccountForm = ({ onClose }) => {
+const CreateAccountForm = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -38,10 +38,10 @@ const CreateAccountForm = ({ onClose }) => {
       createUser({
         ...accountData,
       })
-    );
-    navigate("/admin/account");
-    onClose();
-    console.log(accountData);
+    ).then(() => {
+      onSuccess();
+      onClose();
+    });
   };
 
   const handleInputChange = (e) => {
@@ -83,7 +83,7 @@ const CreateAccountForm = ({ onClose }) => {
             name="password"
             label="Mật khẩu"
             variant="outlined"
-            type="password" 
+            type="password"
             onChange={handleInputChange}
             value={formData.password}
           />

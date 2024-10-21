@@ -24,7 +24,7 @@ const Home = () => {
       <Expert />
       <Experter />
       <Suggest /> */}
-      <Footer />
+     
     </div>
 
     // <div>

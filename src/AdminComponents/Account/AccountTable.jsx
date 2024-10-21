@@ -77,6 +77,10 @@ const AccountTable = () => {
   const { accounts, isLoading } = useSelector((state) => state.userReducer);
   console.log("user", accounts);
 
+  const fetchAccounts = () => {
+    dispatch(getUsers({ jwt, page: currentPage }));
+  };
+
   const handleSearch = () => {
     setCurrentPage(1);
     const params = new URLSearchParams();
@@ -157,6 +161,7 @@ const AccountTable = () => {
   const handleDelete = async () => {
     await dispatch(deleteUser({ id: deleteId, jwt }));
     setOpenDeleteModal(false);
+    fetchAccounts();
   };
 
   const handleOpen = () => setOpen(true);
@@ -288,7 +293,9 @@ const AccountTable = () => {
                 accounts.accounts.map((user) => (
                   <TableRow
                     key={user._id}
-                    onClick={() => navigate(`/admin/bill?accountId=${user._id}`)} 
+                    onClick={() =>
+                      navigate(`/admin/bill?accountId=${user._id}`)
+                    }
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
                       "&:hover": { backgroundColor: "#FFF3E0" },
@@ -305,7 +312,7 @@ const AccountTable = () => {
                       <IconButton
                         color="primary"
                         onClick={(e) => {
-                          e.stopPropagation(); 
+                          e.stopPropagation();
                           handleOpenFormModal(user._id);
                         }}
                       >
@@ -339,6 +346,7 @@ const AccountTable = () => {
       <Modal open={openEditModal} onClose={handleCloseFormModal}>
         <Box sx={style}>
           <UpdateAccountForm
+            onSuccess={fetchAccounts}
             account={selectedEvent}
             onClose={handleCloseFormModal}
           />
@@ -358,7 +366,10 @@ const AccountTable = () => {
 
       <Modal open={open} onClose={() => setOpen(false)}>
         <Box sx={style}>
-          <CreateAccountForm onClose={() => setOpen(false)} />
+          <CreateAccountForm
+            onSuccess={fetchAccounts}
+            onClose={() => setOpen(false)}
+          />
         </Box>
       </Modal>
 
