@@ -15,6 +15,11 @@ import {
   TextField,
   Typography,
   InputAdornment,
+  List,
+  ListItem,
+  FormControlLabel,
+  Checkbox,
+  Grid,
 } from "@mui/material";
 import CreateIcon from "@mui/icons-material/Create";
 import SearchIcon from "@mui/icons-material/Search";
@@ -29,6 +34,8 @@ import {
 import { Delete } from "@mui/icons-material";
 import CreateEventForm from "./CreateEventForm";
 import UpdateEventForm from "./UpdateEventForm";
+import { getProductsByCategory } from "../../components/State/Product/Action";
+import { getCategories } from "../../components/State/Category/Action";
 
 const style = {
   position: "absolute",
@@ -44,9 +51,19 @@ const style = {
 
 const EventTable = () => {
   const dispatch = useDispatch();
-  const { events } = useSelector((state) => state.eventReducer.events); 
+  const { events } = useSelector((state) => state.eventReducer.events);
+  const { categories } = useSelector(
+    (state) => state.categoryReducer.categories
+  );
+
+  console.log("categories", categories);
 
   const jwt = localStorage.getItem("jwt");
+
+  const [openProductModal, setOpenProductModal] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState(new Set());
+  const [currentEventId, setCurrentEventId] = useState(null);
 
   const [open, setOpen] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
@@ -56,8 +73,17 @@ const EventTable = () => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   dispatch(getEvents({ jwt }));
+  // }, [dispatch, jwt]);
+
+  const fetchEvents = () => {
     dispatch(getEvents({ jwt }));
+  };
+
+  useEffect(() => {
+    fetchEvents();
+    fetchProductsAndCategories();
   }, [dispatch, jwt]);
 
   useEffect(() => {
@@ -92,10 +118,49 @@ const EventTable = () => {
   const handleDelete = async () => {
     await dispatch(deleteEvent({ id: deleteId, jwt }));
     setOpenDeleteModal(false);
+    fetchEvents();
   };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const fetchProductsAndCategories = async () => {
+    const response = await dispatch(getCategories({ jwt }));
+    console.log("response", response);
+    setProducts(response || []);
+  };
+
+  const handleOpenProductModal = async (eventId) => {
+    setCurrentEventId(eventId);
+    await fetchProductsAndCategories();
+    setOpenProductModal(true);
+  };
+
+  const handleCloseProductModal = () => {
+    setOpenProductModal(false);
+    setSelectedProducts(new Set()); // Reset lựa chọn
+  };
+
+  // Xử lý khi chọn checkbox
+  const handleToggleProduct = (productId) => {
+    setSelectedProducts((prev) => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(productId)) {
+        newSelected.delete(productId);
+      } else {
+        newSelected.add(productId);
+      }
+      return newSelected;
+    });
+  };
+
+  const handleSaveProducts = async () => {
+    const selectedProductArray = Array.from(selectedProducts);
+    // Gọi API hoặc dispatch action để lưu sản phẩm vào sự kiện
+    console.log("Sản phẩm được chọn:", selectedProductArray);
+    // Sau đó đóng Modal
+    handleCloseProductModal();
+  };
 
   return (
     <Box sx={{ width: "95%", margin: "0px auto", marginTop: "100px" }}>
@@ -192,6 +257,12 @@ const EventTable = () => {
                       >
                         <Delete />
                       </IconButton>
+                      <Button
+                        variant="outlined"
+                        onClick={() => handleOpenProductModal(item._id)}
+                      >
+                        Quản lý sản phẩm
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -207,11 +278,83 @@ const EventTable = () => {
         </TableContainer>
       </Card>
 
+      {/* Modal quản lý sản phẩm */}
+      <Modal open={openProductModal} onClose={handleCloseProductModal}>
+        <Box sx={{ ...style, width: 600 }}>
+          <Typography variant="h6" mb={2}>
+            Chọn sản phẩm cho sự kiện
+          </Typography>
+          <Box
+            sx={{
+              maxHeight: 400, // Giới hạn chiều cao tối đa
+              overflowY: "auto", // Kích hoạt cuộn dọc nếu vượt quá
+              paddingRight: 2, // Thêm padding để tránh thanh cuộn che nội dung
+            }}
+          >
+            {categories.map((category) => (
+              <Box key={category._id} mb={3}>
+                <Typography variant="subtitle1" gutterBottom>
+                  {category.name}
+                </Typography>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)", // Tối đa 3 sản phẩm mỗi hàng
+                    gap: 2,
+                  }}
+                >
+                  {category.products.map((product) => (
+                    <Box
+                      key={product._id}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        border: "1px solid #ddd",
+                        borderRadius: 2,
+                        padding: 2,
+                      }}
+                    >
+                      <img
+                        src={product.picture}
+                        alt={product.name}
+                        style={{
+                          width: "100%",
+                          height: 80,
+                          objectFit: "cover",
+                        }}
+                      />
+                      <Typography variant="body1" mt={1}>
+                        {product.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Giá: {product.currentPrice.toLocaleString()} VND
+                      </Typography>
+                      <Checkbox
+                        checked={selectedProducts.has(product._id)}
+                        onChange={() => handleToggleProduct(product._id)}
+                      />
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            ))}
+          </Box>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+            <Button onClick={handleCloseProductModal}>Hủy</Button>
+            <Button variant="contained" onClick={handleSaveProducts}>
+              Lưu
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+
       {/* Modal Section */}
       <Modal open={openEditModal} onClose={handleCloseFormModal}>
         <Box sx={style}>
           <UpdateEventForm
             event={selectedEvent}
+            onSuccess={fetchEvents}
             onClose={handleCloseFormModal}
           />
         </Box>
@@ -230,7 +373,10 @@ const EventTable = () => {
 
       <Modal open={open} onClose={() => setOpen(false)}>
         <Box sx={style}>
-          <CreateEventForm onClose={() => setOpen(false)} />
+          <CreateEventForm
+            onSuccess={fetchEvents}
+            onClose={() => setOpen(false)}
+          />
         </Box>
       </Modal>
     </Box>

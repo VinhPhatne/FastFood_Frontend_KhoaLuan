@@ -60,8 +60,12 @@ const FoodCategoryTable = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  useEffect(() => {
+  const fetchCategories = () => {
     dispatch(getCategories({ jwt }));
+  };
+
+  useEffect(() => {
+    fetchCategories();
   }, [dispatch, jwt]);
 
   useEffect(() => {
@@ -98,6 +102,7 @@ const FoodCategoryTable = () => {
   const handleDelete = async () => {
     await dispatch(deleteCategory({ id: deleteId, jwt }));
     setOpenDeleteModal(false);
+    fetchCategories();
   };
   return (
     <Box
@@ -227,6 +232,7 @@ const FoodCategoryTable = () => {
           <UpdateFoodCategoryForm
             category={selectedCategory}
             onClose={handleCloseFormModal}
+            onSuccess={fetchCategories}
           />
         </Box>
       </Modal>
@@ -274,7 +280,10 @@ const FoodCategoryTable = () => {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <CreateFoodCategoryForm onClose={handleClose} />
+          <CreateFoodCategoryForm
+            onSuccess={fetchCategories}
+            onClose={handleClose}
+          />
         </Box>
       </Modal>
     </Box>

@@ -6,7 +6,7 @@ import {
   getCategories,
 } from "../../components/State/Category/Action";
 
-const CreateFoodCategoryForm = ({ onClose }) => {
+const CreateFoodCategoryForm = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
@@ -26,9 +26,10 @@ const CreateFoodCategoryForm = ({ onClose }) => {
         name: formData.categoryName,
         jwt: localStorage.getItem("jwt"),
       })
-    );
-    onClose();
-    console.log(data);
+    ).then(() => {
+      onSuccess();
+      onClose();
+    });
   };
 
   const handleInputChange = (e) => {

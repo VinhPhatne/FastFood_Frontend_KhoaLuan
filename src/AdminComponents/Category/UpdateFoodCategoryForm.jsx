@@ -8,7 +8,7 @@ import {
 } from "../../components/State/Category/Action";
 //import { createCategoryAction } from "../../component/State/Restaurant/Action";
 
-const UpdateFoodCategoryForm = ({ category, onClose }) => {
+const UpdateFoodCategoryForm = ({ category, onClose, onSuccess }) => {
   //const {restaurant} = useSelector(store => store)
 
   const dispatch = useDispatch();
@@ -47,9 +47,10 @@ const UpdateFoodCategoryForm = ({ category, onClose }) => {
         name: formData.categoryName,
         jwt: localStorage.getItem("jwt"),
       })
-    );
-    console.log(data);
-    onClose();
+    ).then(() => {
+      onSuccess();
+      onClose();
+    });
   };
 
   const handleInputChange = (e) => {

@@ -14,7 +14,7 @@ import {
   updateUserProfile,
 } from "../../components/State/User/Action";
 
-const UpdateAccountForm = ({ account, onClose }) => {
+const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -56,10 +56,10 @@ const UpdateAccountForm = ({ account, onClose }) => {
         email: formData.email,
         password: formData.password,
       })
-    );
-    navigate("/admin/account");
-    onClose();
-    console.log(accountData);
+    ).then(() => {
+      onSuccess();
+      onClose();
+    });
   };
 
   const handleInputChange = (e) => {

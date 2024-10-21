@@ -63,10 +63,6 @@ const VoucherTable = () => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  // useEffect(() => {
-  //   dispatch(getVouchers({ jwt }));
-  // }, [dispatch, jwt]);
-
   const fetchVouchers = () => {
     dispatch(getVouchers({ jwt }));
   };
