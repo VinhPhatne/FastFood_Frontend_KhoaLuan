@@ -117,15 +117,16 @@
             display: flex;
             gap: 8px;
 
-            span:first-child {
+            span {
               font-size: 20px;
               font-weight: bold;
               color: #ff7d01;
             }
 
-            span:last-child {
-              font-size: 18px;
+            .discountPrice {
               text-decoration: line-through;
+              color: #707070;
+              font-size: 18px;
               margin-top: 2px;
             }
           }

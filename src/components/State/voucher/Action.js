@@ -87,20 +87,20 @@ export const getVoucherById =
     }
   };
 
-// Xóa mềm sự kiện (đặt isActive thành false)
-// export const deleteEvent =
-//   ({ id, jwt }) =>
-//   async (dispatch) => {
-//     dispatch({ type: DELETE_EVENT_REQUEST });
-//     try {
-//       await api.put(
-//         `${API_URL}/v1/event/delete/${id}`,
-//         { isActive: false },
-//         { headers: { Authorization: `Bearer ${jwt}` } }
-//       );
-//       dispatch({ type: DELETE_EVENT_SUCCESS, payload: id });
-//     } catch (error) {
-//       console.error("Error deleting event:", error);
-//       dispatch({ type: DELETE_EVENT_FAILURE });
-//     }
-//   };
+//Xóa mềm sự kiện (đặt isActive thành false)
+export const deleteVoucher =
+  ({ id, jwt }) =>
+  async (dispatch) => {
+    dispatch({ type: DELETE_VOUCHER_REQUEST });
+    try {
+      await api.put(
+        `${API_URL}/v1/voucher/${id}`,
+        { isActive: false },
+        { headers: { Authorization: `Bearer ${jwt}` } }
+      );
+      dispatch({ type: DELETE_VOUCHER_SUCCESS, payload: id });
+    } catch (error) {
+      console.error("Error deleting voucher:", error);
+      dispatch({ type: DELETE_VOUCHER_FAILURE });
+    }
+  };
