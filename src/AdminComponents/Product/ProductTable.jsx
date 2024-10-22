@@ -18,6 +18,8 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Modal,
+  Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useEffect, useState } from "react";
@@ -28,11 +30,24 @@ import { Delete, Edit } from "@mui/icons-material";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  deleteProduct,
   getProductById,
   getProducts,
   getProductsListPage,
 } from "../../components/State/Product/Action";
 import { getCategories } from "../../components/State/Category/Action";
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 450,
+  bgcolor: "background.paper",
+  border: "none",
+  boxShadow: 24,
+  p: 4,
+};
 
 const ProductTable = () => {
   const navigate = useNavigate();
@@ -50,6 +65,8 @@ const ProductTable = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState("");
   const [isSell, setIsSell] = useState("");
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const handleSearch = () => {
     setCurrentPage(1);
@@ -131,6 +148,16 @@ const ProductTable = () => {
     dispatch(getProductsListPage({ jwt, page }));
     dispatch(getCategories({ jwt }));
   }, [dispatch, jwt]);
+
+  const handleOpenDeleteModal = (id) => {
+    setDeleteId(id);
+    setOpenDeleteModal(true);
+  };
+
+  const handleDelete = async () => {
+    await dispatch(deleteProduct({ id: deleteId, jwt }));
+    setOpenDeleteModal(false);
+  };
 
   return (
     <Box
@@ -235,7 +262,7 @@ const ProductTable = () => {
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead
               sx={{
-                backgroundColor: "#fdba74", 
+                backgroundColor: "#fdba74",
               }}
             >
               {" "}
@@ -282,10 +309,10 @@ const ProductTable = () => {
                         src={item.picture}
                         alt={item.name}
                         style={{
-                          width: "100px", 
+                          width: "100px",
                           height: "auto",
-                          objectFit: "cover", 
-                          borderRadius: "8px", 
+                          objectFit: "cover",
+                          borderRadius: "8px",
                         }}
                       />
                     </TableCell>
@@ -312,7 +339,7 @@ const ProductTable = () => {
                       >
                         <CreateIcon />
                       </IconButton>
-                      {/* <IconButton
+                      <IconButton
                         color="error"
                         onClick={() => {
                           console.log("IDDDD", item._id);
@@ -320,7 +347,7 @@ const ProductTable = () => {
                         }}
                       >
                         <Delete />
-                      </IconButton> */}
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))
@@ -348,6 +375,17 @@ const ProductTable = () => {
           />
         </Box>
       )}
+
+      <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
+        <Box sx={style}>
+          <Typography variant="h6">Xác nhận xóa</Typography>
+          <Typography>Bạn có chắc chắn muốn xóa sản phẩm này không?</Typography>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+            <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
+            <Button onClick={handleDelete}>Xóa</Button>
+          </Box>
+        </Box>
+      </Modal>
     </Box>
   );
 };

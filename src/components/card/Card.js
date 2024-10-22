@@ -188,10 +188,14 @@ const Card = () => {
 
               <div id={category._id} className={styles.container}>
                 {Array.isArray(products) &&
-                products.filter((item) => item.category._id === category._id)
-                  .length > 0 ? (
+                products.filter(
+                  (item) => item.category._id === category._id && item.isSelling
+                ).length > 0 ? (
                   products
-                    .filter((item) => item.category._id === category._id)
+                    .filter(
+                      (item) =>
+                        item.category._id === category._id && item.isSelling
+                    )
                     .map((item) => (
                       <div
                         className={styles.item}
@@ -209,15 +213,28 @@ const Card = () => {
                           </div>
                           <div className={styles.footer}>
                             <div className={styles.cost}>
-                              <span>{item.price} đ</span>
-                              <span>{item.originalPrice} </span>
+                              {/* <span>{item.price} đ</span>
+                              <span className={styles.discountPrice}>
+                                {item.currentPrice}{" "}
+                              </span> */}
+
+                              {item.price !== item.currentPrice ? (
+                                <>
+                                  <span>{item.price} đ</span>
+                                  <span className={styles.discountPrice}>
+                                    {item.currentPrice}{" "}
+                                  </span>
+                                </>
+                              ) : (
+                                <span>{item.currentPrice} đ</span>
+                              )}
                             </div>
                           </div>
                           <button
                             className={styles.addToCartButton}
                             onClick={(e) => {
-                              e.stopPropagation(); 
-                              handleAddToCart(item); 
+                              e.stopPropagation();
+                              handleAddToCart(item);
                             }}
                           >
                             Thêm vào giỏ hàng

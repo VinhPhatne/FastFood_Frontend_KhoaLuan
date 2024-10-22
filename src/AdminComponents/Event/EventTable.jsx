@@ -154,12 +154,54 @@ const EventTable = () => {
     });
   };
 
+  const updateEventProducts = async (eventId, selectedProductArray) => {
+    try {
+      // Tạo payload chứa danh sách sản phẩm
+      const payload = {
+        eventId: eventId,
+        products: selectedProductArray,
+      };
+
+      // Gửi request cập nhật
+      const response = await fetch(`/api/events/${eventId}/updateProducts`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwt}`, // Authorization với JWT token
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update products");
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error updating event products:", error);
+      return null;
+    }
+  };
+
   const handleSaveProducts = async () => {
     const selectedProductArray = Array.from(selectedProducts);
-    // Gọi API hoặc dispatch action để lưu sản phẩm vào sự kiện
-    console.log("Sản phẩm được chọn:", selectedProductArray);
-    // Sau đó đóng Modal
-    handleCloseProductModal();
+
+    // Gọi API update Event với danh sách sản phẩm
+    // const result = await updateEventProducts(currentEventId, selectedProductArray);
+
+    // if (result) {
+    //   console.log("Event products updated successfully:", result);
+    //   // Đóng modal sau khi thành công
+    //   handleCloseProductModal();
+    //   // Cập nhật danh sách sự kiện
+    //   fetchEvents();
+    // } else {
+    //   console.error("Failed to update event products");
+    // }
+
+    console.log("selected product", selectedProductArray);
+    console.log("currentEventId", currentEventId);
   };
 
   return (
@@ -280,65 +322,67 @@ const EventTable = () => {
 
       {/* Modal quản lý sản phẩm */}
       <Modal open={openProductModal} onClose={handleCloseProductModal}>
-        <Box sx={{ ...style, width: 600 }}>
+        <Box sx={{ ...style, width: 800 }}>
           <Typography variant="h6" mb={2}>
             Chọn sản phẩm cho sự kiện
           </Typography>
           <Box
             sx={{
-              maxHeight: 400, // Giới hạn chiều cao tối đa
-              overflowY: "auto", // Kích hoạt cuộn dọc nếu vượt quá
-              paddingRight: 2, // Thêm padding để tránh thanh cuộn che nội dung
+              maxHeight: 500, 
+              overflowY: "auto",
+              paddingRight: 2,
             }}
           >
-            {categories.map((category) => (
-              <Box key={category._id} mb={3}>
-                <Typography variant="subtitle1" gutterBottom>
-                  {category.name}
-                </Typography>
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)", // Tối đa 3 sản phẩm mỗi hàng
-                    gap: 2,
-                  }}
-                >
-                  {category.products.map((product) => (
-                    <Box
-                      key={product._id}
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        border: "1px solid #ddd",
-                        borderRadius: 2,
-                        padding: 2,
-                      }}
-                    >
-                      <img
-                        src={product.picture}
-                        alt={product.name}
-                        style={{
-                          width: "100%",
-                          height: 80,
-                          objectFit: "cover",
+            {Array.isArray(categories) &&
+              categories.length > 0 &&
+              categories.map((category) => (
+                <Box key={category._id} mb={3}>
+                  <Typography variant="subtitle1" gutterBottom>
+                    {category.name}
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(4, 1fr)", // Cập nhật để hiển thị 4 sản phẩm mỗi hàng
+                      gap: 2,
+                    }}
+                  >
+                    {category.products.map((product) => (
+                      <Box
+                        key={product._id}
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          border: "1px solid #ddd",
+                          borderRadius: 2,
+                          padding: 2,
                         }}
-                      />
-                      <Typography variant="body1" mt={1}>
-                        {product.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Giá: {product.currentPrice.toLocaleString()} VND
-                      </Typography>
-                      <Checkbox
-                        checked={selectedProducts.has(product._id)}
-                        onChange={() => handleToggleProduct(product._id)}
-                      />
-                    </Box>
-                  ))}
+                      >
+                        <img
+                          src={product.picture}
+                          alt={product.name}
+                          style={{
+                            width: "100%",
+                            height: 100, // Tăng chiều cao ảnh để cân đối hơn
+                            objectFit: "cover",
+                          }}
+                        />
+                        <Typography variant="body1" mt={1}>
+                          {product.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Giá: {product.currentPrice.toLocaleString()} VND
+                        </Typography>
+                        <Checkbox
+                          checked={selectedProducts.has(product._id)}
+                          onChange={() => handleToggleProduct(product._id)}
+                        />
+                      </Box>
+                    ))}
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              ))}
           </Box>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
             <Button onClick={handleCloseProductModal}>Hủy</Button>

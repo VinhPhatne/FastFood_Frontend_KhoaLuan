@@ -11,6 +11,7 @@ import Checkout from "../components/cart/Checkout";
 import Footer from "../components/footer/Footer";
 import PaymentSuccess from "../components/cart/PaymentSuccess";
 import AboutUs from "../components/AboutMe/AboutUs";
+import OTP from "../components/otp/OTP";
 
 const CustomerRoute = () => {
   return (
@@ -23,6 +24,7 @@ const CustomerRoute = () => {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/success" element={<PaymentSuccess />} />
         <Route path="/about" element={<AboutUs />} />
+        <Route path="/otp" element={<OTP />} />
       </Routes>
       <Footer />
     </div>

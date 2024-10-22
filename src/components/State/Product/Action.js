@@ -10,6 +10,12 @@ import {
   GET_PRODUCTS_BY_CATEGORY_FAILURE,
   GET_PRODUCT_BY_ID_SUCCESS,
   GET_PRODUCT_BY_ID_FAILURE,
+  DELETE_PRODUCT_REQUEST,
+  DELETE_PRODUCT_SUCCESS,
+  DELETE_PRODUCT_FAILURE,
+  UNBLOCK_PRODUCT_SUCCESS,
+  UNBLOCK_PRODUCT_REQUEST,
+  UNBLOCK_PRODUCT_FAILURE,
 } from "./ActionType";
 import { API_URL, api } from "../../config/api";
 
@@ -129,5 +135,41 @@ export const getProductById =
       console.error("Error fetching category by ID:", error);
       dispatch({ type: GET_PRODUCT_BY_ID_FAILURE, payload: error });
       return null;
+    }
+  };
+
+// Xóa mềm sự kiện (đặt isSelling  thành false)
+export const deleteProduct =
+  ({ id, jwt }) =>
+  async (dispatch) => {
+    dispatch({ type: DELETE_PRODUCT_REQUEST });
+    try {
+      await api.put(
+        `${API_URL}/v1/product/delete/${id}`,
+        { isSelling: false },
+        { headers: { Authorization: `Bearer ${jwt}` } }
+      );
+      dispatch({ type: DELETE_PRODUCT_SUCCESS, payload: id });
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      dispatch({ type: DELETE_PRODUCT_FAILURE });
+    }
+  };
+
+// Xóa mềm sự kiện (đặt isActive thành false)
+export const unBlockProduct =
+  ({ id, jwt }) =>
+  async (dispatch) => {
+    dispatch({ type: UNBLOCK_PRODUCT_REQUEST });
+    try {
+      await api.put(
+        `${API_URL}/v1/event/delete/${id}`,
+        { isActive: false },
+        { headers: { Authorization: `Bearer ${jwt}` } }
+      );
+      dispatch({ type: UNBLOCK_PRODUCT_SUCCESS, payload: id });
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      dispatch({ type: UNBLOCK_PRODUCT_FAILURE });
     }
   };

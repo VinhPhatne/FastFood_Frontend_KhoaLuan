@@ -44,7 +44,6 @@ const Profile = () => {
           </Routes>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

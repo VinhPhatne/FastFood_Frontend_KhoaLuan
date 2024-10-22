@@ -28,6 +28,7 @@ import {
 } from "../../components/State/Event/Action";
 
 import {
+  deleteVoucher,
   getVoucherById,
   getVouchers,
 } from "../../components/State/voucher/Action";
@@ -92,11 +93,14 @@ const VoucherTable = () => {
 
   const handleOpenDeleteModal = (id) => {
     setDeleteId(id);
+    console.log("setDeleteId", deleteId);
+    console.log("id", id);
     setOpenDeleteModal(true);
   };
 
   const handleDelete = async () => {
-    await dispatch(deleteEvent({ id: deleteId, jwt }));
+    console.log("setDeleteId>>>", deleteId);
+    await dispatch(deleteVoucher({ id: deleteId, jwt }));
     setOpenDeleteModal(false);
     fetchVouchers();
   };
@@ -225,7 +229,7 @@ const VoucherTable = () => {
       <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
         <Box sx={style}>
           <Typography variant="h6">Xác nhận xóa</Typography>
-          <Typography>Bạn có chắc chắn muốn xóa sự kiện này không?</Typography>
+          <Typography>Bạn có chắc chắn muốn xóa voucher này không?</Typography>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
             <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
             <Button onClick={handleDelete}>Xóa</Button>
