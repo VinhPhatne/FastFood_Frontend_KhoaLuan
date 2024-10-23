@@ -10,7 +10,7 @@ import { Divider, Drawer, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "../../components/State/Authentication/Action";
-import DiscountIcon from '@mui/icons-material/Discount';
+import DiscountIcon from "@mui/icons-material/Discount";
 // import { logout } from "../../component/State/Authentication/Action";
 
 const menu = [
@@ -21,6 +21,7 @@ const menu = [
   { title: "Food Category", icon: <CategoryIcon />, path: "/category" },
   { title: "Events", icon: <EventIcon />, path: "/event" },
   { title: "Voucher", icon: <DiscountIcon />, path: "/voucher" },
+  { title: "Import", icon: <DiscountIcon />, path: "/import" },
   { title: "Logout", icon: <LogoutIcon />, path: "/" },
 ];
 
@@ -49,7 +50,7 @@ const AdminSideBar = ({ handleClose }) => {
         anchor="left"
         sx={{ backgroundColor: "#FAF3E0", marginTop: "20px" }}
       >
-        <div className="w-[70vw] lg:w-[14vw] h-screen flex flex-col justify-center text-l space-y-[1rem]">
+        <div className="w-[70vw] lg:w-[14vw] h-screen flex flex-col justify-center text-l space-y-[0.8rem]">
           {menu.map((item, i) => (
             <React.Fragment key={item.title}>
               <div

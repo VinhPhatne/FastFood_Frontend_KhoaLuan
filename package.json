@@ -29,6 +29,7 @@
     "axios": "^1.7.7",
     "date-fns": "^2.29.3",
     "dayjs": "^1.11.13",
+    "recharts": "^2.1.10",
     "embla-carousel-react": "^7.1.0",
     "formik": "^2.4.6",
     "js-cookie": "^3.0.5",

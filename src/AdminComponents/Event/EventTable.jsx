@@ -156,18 +156,15 @@ const EventTable = () => {
 
   const updateEventProducts = async (eventId, selectedProductArray) => {
     try {
-      // Tạo payload chứa danh sách sản phẩm
       const payload = {
         eventId: eventId,
         products: selectedProductArray,
       };
-
-      // Gửi request cập nhật
-      const response = await fetch(`/api/events/${eventId}/updateProducts`, {
+      const response = await fetch(`http://localhost:8080/v1/event/${eventId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`, // Authorization với JWT token
+          Authorization: `Bearer ${jwt}`, 
         },
         body: JSON.stringify(payload),
       });
@@ -187,18 +184,18 @@ const EventTable = () => {
   const handleSaveProducts = async () => {
     const selectedProductArray = Array.from(selectedProducts);
 
-    // Gọi API update Event với danh sách sản phẩm
-    // const result = await updateEventProducts(currentEventId, selectedProductArray);
+    //Gọi API update Event với danh sách sản phẩm
+    const result = await updateEventProducts(currentEventId, selectedProductArray);
 
-    // if (result) {
-    //   console.log("Event products updated successfully:", result);
-    //   // Đóng modal sau khi thành công
-    //   handleCloseProductModal();
-    //   // Cập nhật danh sách sự kiện
-    //   fetchEvents();
-    // } else {
-    //   console.error("Failed to update event products");
-    // }
+    if (result) {
+      console.log("Event products updated successfully:", result);
+      // Đóng modal sau khi thành công
+      handleCloseProductModal();
+      // Cập nhật danh sách sự kiện
+      fetchEvents();
+    } else {
+      console.error("Failed to update event products");
+    }
 
     console.log("selected product", selectedProductArray);
     console.log("currentEventId", currentEventId);
@@ -364,7 +361,7 @@ const EventTable = () => {
                           alt={product.name}
                           style={{
                             width: "100%",
-                            height: 100, // Tăng chiều cao ảnh để cân đối hơn
+                            height: 100,
                             objectFit: "cover",
                           }}
                         />

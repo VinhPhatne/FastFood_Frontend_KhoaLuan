@@ -9,6 +9,7 @@ import { userReducer } from "./User/Reducer";
 import { voucherReducer } from "./voucher/Reducer";
 
 import { billReducer } from "./Bill/Reducer";
+import { ingredientReducer } from "./Import/Reducer";
 
 // import { restaurantReducer } from "./Restaurant/Reducer";
 // import { menuItemReducer } from "./Menu/Reducer";
@@ -25,6 +26,7 @@ const rooteReducer = combineReducers({
   userReducer: userReducer,
   voucherReducer : voucherReducer,
   billReducer: billReducer,
+  ingredientReducer: ingredientReducer,
 
 
   // restaurant: restaurantReducer,
