@@ -213,16 +213,11 @@ const Card = () => {
                           </div>
                           <div className={styles.footer}>
                             <div className={styles.cost}>
-                              {/* <span>{item.price} đ</span>
-                              <span className={styles.discountPrice}>
-                                {item.currentPrice}{" "}
-                              </span> */}
-
                               {item.price !== item.currentPrice ? (
                                 <>
-                                  <span>{item.price} đ</span>
+                                  <span>{item.currentPrice} đ</span>
                                   <span className={styles.discountPrice}>
-                                    {item.currentPrice}{" "}
+                                    {item.price}{" "}
                                   </span>
                                 </>
                               ) : (

@@ -14,6 +14,8 @@ import CreateAccountForm from "../Account/CreateAccountForm";
 import Bill from "../Bill/Bill";
 import BillDetailTable from "../Bill/BillDetailTable";
 import Voucher from "../Voucher/Voucher";
+import StockIn from "../StockIn/StockIn";
+import Dashboard from "../DashBoard/Dashboard";
 
 const Admin = () => {
   const dispatch = useDispatch();
@@ -47,11 +49,13 @@ const Admin = () => {
           <Routes>
             <Route path="category" element={<FoodCategory />} />
             <Route path="/product" element={<Product />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="/product/create" element={<CreateProductForm />} />
             <Route path="/product/:id" element={<UpdateProductForm />} />
             <Route path="/event" element={<Event />} />
             <Route path="/account" element={<Account />} />
             <Route path="/voucher" element={<Voucher />} />
+            <Route path="/import" element={<StockIn />} />
             <Route path="/bill" element={<Bill />} />
             <Route path="/bill/:id" element={<BillDetailTable />} />
           </Routes>
