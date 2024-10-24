@@ -8,6 +8,8 @@ import {
   GET_BILLS_BY_ACCOUNT_SUCCESS,
   GET_BILLS_BY_ACCOUNT_FAILURE,
   GET_BILL_BY_ID_SUCCESS,
+  GET_REVENUE_SUCCESS,
+  GET_REVENUE_FAILURE,
 } from "./ActionType";
 
 const initialState = {
@@ -15,6 +17,7 @@ const initialState = {
   billsByAccount: {},
   error: null,
   selectedBill: null,
+  data: [],
 };
 
 export const billReducer = (state = initialState, action) => {
@@ -73,6 +76,10 @@ export const billReducer = (state = initialState, action) => {
         ...state,
         selectedBill: action.payload,
       };
+    case GET_REVENUE_SUCCESS:
+      return { ...state, data: action.payload, error: null };
+    case GET_REVENUE_FAILURE:
+      return { ...state, error: action.payload };
     default:
       return state;
   }

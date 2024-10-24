@@ -103,6 +103,7 @@ const Checkout = () => {
 
     dispatch(createBill(billData)).then(() => {
       Cookies.remove(jwt);
+      dispatch(getUserProfile());
       navigate("/success");
     });
   };
