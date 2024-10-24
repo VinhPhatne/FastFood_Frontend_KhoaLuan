@@ -12,6 +12,8 @@ import {
   GET_BILL_BY_ID_FAILURE,
   GET_REVENUE_SUCCESS,
   GET_REVENUE_FAILURE,
+  GET_PRODUCT_SALE_SUCCESS,
+  GET_PRODUCT_SALE_FAILURE,
 } from "./ActionType";
 import { API_URL } from "../../config/api";
 
@@ -127,5 +129,21 @@ export const getRevenue = (year) => async (dispatch) => {
   } catch (error) {
     console.error("Error fetching revenue data:", error);
     dispatch({ type: GET_REVENUE_FAILURE, payload: error.message });
+  }
+};
+
+export const getProductSale = () => async (dispatch) => {
+  try {
+    const response = await axios.get(`${API_URL}/v1/bill/get-product-sale`);
+    dispatch({
+      type: GET_PRODUCT_SALE_SUCCESS,
+      payload: response.data.data.productSale,
+    });
+  } catch (error) {
+    console.error("Error fetching product sale data:", error);
+    dispatch({
+      type: GET_PRODUCT_SALE_FAILURE,
+      payload: error.message,
+    });
   }
 };
