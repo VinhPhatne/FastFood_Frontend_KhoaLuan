@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { getUserProfile } from "../State/Authentication/Action";
 
 const Cart = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const jwt = localStorage.getItem("jwt");
   const [cart, setCart] = useState([]);
@@ -13,13 +16,24 @@ const Cart = () => {
   const [discount, setDiscount] = useState(0); // State cho tiền giảm giá
   const [voucherError, setVoucherError] = useState(""); // State cho lỗi nếu có
   const [voucherId, setVoucherId] = useState(null);
+  const [pointsUsed, setPointsUsed] = useState(0); // State để nhập điểm
+  const [pointsError, setPointsError] = useState(""); // State để thông báo lỗi
 
   useEffect(() => {
     const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
     setCart(savedCart);
   }, [jwt]);
 
-  console.log("cart", cart);
+  useEffect(() => {
+    if (jwt) {
+      dispatch(getUserProfile());
+    }
+  }, [dispatch, jwt]);
+
+  const userProfile = useSelector((state) => state.auth.user);
+  const userPoints = userProfile.point;
+
+  console.log("userPoints", userPoints);
 
   const handleIncrease = (id) => {
     const updatedCart = cart.map((item) =>
@@ -52,8 +66,10 @@ const Cart = () => {
   );
 
   const shippingFee = totalPrice > 0 ? 10000 : 0;
-  // const finalTotal = totalPrice + shippingFee;
-  const finalTotal = Math.max(totalPrice + shippingFee - discount, 0);
+  const finalTotal = Math.max(
+    totalPrice + shippingFee - discount - pointsUsed,
+    0
+  );
 
   const handleApplyVoucher = async () => {
     try {
@@ -76,14 +92,24 @@ const Cart = () => {
     }
   };
 
-  console.log("discount", discount);
+  const handlePointsChange = (e) => {
+    const value = parseInt(e.target.value) || 0;
+    if (value > userPoints) {
+      setPointsError("Số điểm nhập vượt quá số điểm bạn đang có");
+      setPointsUsed(0);
+    } else {
+      setPointsError("");
+      setPointsUsed(value);
+    }
+  };
 
   const handleCheckout = () => {
     navigate("/checkout", {
       state: {
-        discount, // Truyền giá trị discount
-        voucherId, // Truyền mã voucher
-        finalTotal, // Tổng thanh toán sau giảm giá
+        discount,
+        voucherId,
+        pointsUsed,
+        finalTotal,
       },
     });
   };
@@ -168,6 +194,20 @@ const Cart = () => {
                 )}
               </div>
 
+              <div className="mb-4">
+                <p>Dùng điểm thưởng</p>
+                <input
+                  type="number"
+                  value={pointsUsed}
+                  onChange={handlePointsChange}
+                  placeholder={`Bạn có ${userPoints} điểm`}
+                  className="w-full border rounded px-4 py-2 mt-2"
+                />
+                {pointsError && (
+                  <p className="text-red-500 mt-2">{pointsError}</p>
+                )}
+              </div>
+
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Tổng đơn hàng</span>
@@ -181,6 +221,12 @@ const Cart = () => {
                   <div className="flex justify-between text-green-600">
                     <span>Giảm giá</span>
                     <span>-{discount.toLocaleString()} đ</span>
+                  </div>
+                )}
+                {pointsUsed > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Điểm đã dùng</span>
+                    <span>-{pointsUsed.toLocaleString()} đ</span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold">
