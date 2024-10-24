@@ -19,11 +19,12 @@ const Checkout = () => {
   const navigate = useNavigate();
 
   const { state } = useLocation();
-  const { discount, voucherId, finalTotal } = state || {};
+  const { discount, voucherId, finalTotal, pointsUsed } = state || {};
 
   console.log("discount", discount);
   console.log("voucher", voucherId);
   console.log("finalTotal", finalTotal);
+  console.log("pointsUsed", pointsUsed);
 
   const userProfile = useSelector((state) => state.auth.user);
 
@@ -88,6 +89,7 @@ const Checkout = () => {
       phone_shipment: formData.phone,
       ship: shippingFee,
       total_price: finalTotal,
+      pointDiscount: pointsUsed,
       isPaid: false,
       voucher: voucherId,
       lineItems: cart.map((item) => ({
@@ -101,7 +103,7 @@ const Checkout = () => {
 
     dispatch(createBill(billData)).then(() => {
       Cookies.remove(jwt);
-      navigate("/success"); 
+      navigate("/success");
     });
   };
 
@@ -240,6 +242,12 @@ const Checkout = () => {
                   <div className="flex justify-between text-green-600">
                     <span>Giảm giá</span>
                     <span>-{discount.toLocaleString()} đ</span>
+                  </div>
+                )}
+                {pointsUsed > 0 && (
+                  <div className="flex justify-between text-blue-600">
+                    <span>Điểm đã dùng</span>
+                    <span>-{pointsUsed.toLocaleString()} đ</span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold text-xl">
