@@ -74,31 +74,33 @@ export default function RecentOrders() {
 				<table className="w-full text-gray-700">
 					<thead>
 						<tr>
-							<th>ID</th>
-							<th>Product ID</th>
-							<th>Customer Name</th>
-							<th>Order Date</th>
-							<th>Order Total</th>
-							<th>Shipping Address</th>
-							<th>Order Status</th>
+						<th className="text-center">ID</th>
+							<th className="text-center">Product ID</th>
+							<th className="text-left">Customer Name</th>
+							<th className="text-right">Order Date</th>
+							<th className="text-center">Order Total</th>
+							<th className="text-left">Shipping Address</th>
+							<th className="text-center">Order Status</th>
 						</tr>
 					</thead>
 					<tbody>
-						{recentOrderData.map((order) => (
+					{recentOrderData.map((order) => (
 							<tr key={order.id}>
-								<td>
+								<td className="text-center">
 									<Link to={`/order/${order.id}`}>#{order.id}</Link>
 								</td>
-								<td>
+								<td className="text-center">
 									<Link to={`/product/${order.product_id}`}>#{order.product_id}</Link>
 								</td>
-								<td>
+								<td className="text-left">
 									<Link to={`/customer/${order.customer_id}`}>{order.customer_name}</Link>
 								</td>
-								<td>{format(new Date(order.order_date), 'dd MMM yyyy')}</td>
-								<td>{order.order_total}</td>
-								<td>{order.shipment_address}</td>
-								<td>{getOrderStatus(order.current_order_status)}</td>
+								<td className="text-right">
+									{format(new Date(order.order_date), 'dd MMM yyyy')}
+								</td>
+								<td className="text-center">{order.order_total}</td>
+								<td className="text-left">{order.shipment_address}</td>
+								<td className="text-center">{getOrderStatus(order.current_order_status)}</td>
 							</tr>
 						))}
 					</tbody>
