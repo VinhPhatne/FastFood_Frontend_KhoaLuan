@@ -31,7 +31,7 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-5" style={{ height: "500px" }}>
+    <div className="flex flex-col items-center justify-center p-5 mt-28" style={{ height: "500px" }}>
       <h2 className="text-2xl font-semibold mb-6">Đổi Mật Khẩu</h2>
       <Form
         form={form}

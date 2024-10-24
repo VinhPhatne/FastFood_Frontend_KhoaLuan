@@ -35,7 +35,7 @@ const UserProfile = () => {
 
   return (
     <div
-      className="flex flex-col items-center justify-center h-screen p-5"
+      className="flex flex-col items-center justify-center h-screen p-5 mt-28"
       style={{ height: "500px" }}
     >
       <h2 className="text-2xl font-semibold mb-6">Thông tin tài khoản</h2>
