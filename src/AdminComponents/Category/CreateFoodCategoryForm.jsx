@@ -5,6 +5,7 @@ import {
   createCategory,
   getCategories,
 } from "../../components/State/Category/Action";
+import { notification } from "antd";
 
 const CreateFoodCategoryForm = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
@@ -13,7 +14,7 @@ const CreateFoodCategoryForm = ({ onClose, onSuccess }) => {
     categoryName: "",
     restaurantId: "",
   });
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
     const data = {
       name: formData.categoryName,
@@ -21,16 +22,21 @@ const CreateFoodCategoryForm = ({ onClose, onSuccess }) => {
         id: 1,
       },
     };
-    dispatch(
+    try {
+      await dispatch(
       createCategory({
         name: formData.categoryName,
         jwt: localStorage.getItem("jwt"),
       })
-    ).then(() => {
-      onSuccess();
-      onClose();
-    });
-  };
+    );
+    onSuccess();
+    notification.success({ message: "Thêm mới thành công!" });
+    onClose();
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Thêm mới thất bại";
+    notification.error({ errorMessage });
+  }
+};
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

@@ -71,8 +71,6 @@ const recentOrderData = [
 export default function RecentOrders() {
   const dispatch = useDispatch();
   const { productSales, error } = useSelector((state) => state.billReducer);
-
-  console.log("productSales", productSales);
   useEffect(() => {
     dispatch(getProductSale());
   }, [dispatch]);

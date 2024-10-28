@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { createUser } from "../../components/State/User/Action";
+import { notification } from "antd";
 
 const CreateAccountForm = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
@@ -24,24 +25,26 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
     role: "", // 1 = admin, 2 = manager, 3 = customer
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const accountData = {
       fullname: formData.fullname,
       phonenumber: formData.phonenumber,
       password: formData.password,
-      // address: formData.address,
-      // email: formData.email,
-      // role: formData.role,
     };
-    dispatch(
-      createUser({
-        ...accountData,
-      })
-    ).then(() => {
+    try {
+      await dispatch(
+        createUser({
+          ...accountData,
+        })
+      );
       onSuccess();
+      notification.success({ message: "Thêm mới thành công!" });
       onClose();
-    });
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Thêm mới thất bại";
+      notification.error({ errorMessage });
+    }
   };
 
   const handleInputChange = (e) => {

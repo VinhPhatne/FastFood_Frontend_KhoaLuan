@@ -5,7 +5,7 @@ import { getBillById } from "../../components/State/Bill/Action";
 import { useParams } from "react-router-dom";
 import { getVoucherById } from "../../components/State/voucher/Action";
 
-const BillDetailTable = () => {
+const BillDetail = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
   const jwt = localStorage.getItem("jwt");
@@ -43,8 +43,18 @@ const BillDetailTable = () => {
   }
 
   return (
-    <Box sx={{ width: "95%", margin: "0px auto", marginTop: "100px" }}>
-      <h1 style={{ color: "#ff7d01" }} className="text-3xl font-bold mb-6">
+    <Box
+      sx={{
+        width: "100%",
+        margin: "0px auto",
+        marginTop: "120px",
+        paddingLeft: "20px",
+      }}
+    >
+      <h1
+        style={{ color: "#ff7d01" }}
+        className="text-3xl text-center font-bold mb-6"
+      >
         CHI TIẾT HÓA ĐƠN
       </h1>
       <div className="flex justify-between">
@@ -194,4 +204,4 @@ const BillDetailTable = () => {
   );
 };
 
-export default BillDetailTable;
+export default BillDetail;

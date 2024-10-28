@@ -90,7 +90,8 @@ const Bill = () => {
   const search = params.get("search");
 
   const handleRowClick = (id) => {
-    navigate(`/admin/bill/${id}`);
+    console.log("id", id);
+    navigate(`/profile/orders/bill/${id}`);
   };
 
   useEffect(() => {
@@ -106,7 +107,7 @@ const Bill = () => {
     <Box
       sx={{
         width: "100%",
-        marginTop: "100px",
+        marginTop: "50px",
         marginLeft: "60px",
         display: "flex",
         flexDirection: "column",
@@ -120,7 +121,7 @@ const Bill = () => {
         sx={{
           marginBottom: "20px",
           display: "flex",
-          justifyContent: 'flex-start',
+          justifyContent: "flex-start",
           alignItems: "start",
         }}
       >

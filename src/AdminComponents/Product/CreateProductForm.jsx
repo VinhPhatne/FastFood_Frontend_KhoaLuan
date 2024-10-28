@@ -16,6 +16,8 @@ import { uploadImageToCloudinary } from "../util/UploadToCloudaniry";
 import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "../../components/State/Category/Action";
 import { createProduct } from "../../components/State/Product/Action";
+import { notification } from "antd";
+import { useNavigate } from "react-router-dom";
 
 const initialValues = {
   name: "",
@@ -26,6 +28,7 @@ const initialValues = {
 
 const CreateProductForm = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const jwt = localStorage.getItem("jwt");
 
   const { categories } = useSelector(
@@ -47,16 +50,24 @@ const CreateProductForm = () => {
         category: values.category || null,
         picture: values.picture || "",
       };
-      dispatch(
-        createProduct({
-          price: parseFloat(values.price),
-          picture: values.picture,
-          name: values.name,
-          description: values.description,
-          category: values.category || null,
-        })
-      );
-      console.log("data ----", values);
+      try {
+        dispatch(
+          createProduct({
+            price: parseFloat(values.price),
+            picture: values.picture,
+            name: values.name,
+            description: values.description,
+            category: values.category || null,
+          })
+        );
+        navigate("/admin/product");
+        notification.success({ message: "Thêm mới thành công!" });
+        console.log("data ----", values);
+      } catch (error) {
+        const errorMessage =
+          error.response?.data?.message || "Thêm mới thất bại";
+        notification.error({ errorMessage });
+      }
     },
   });
 
@@ -144,7 +155,7 @@ const CreateProductForm = () => {
                   variant="outlined"
                   onChange={formik.handleChange}
                   value={formik.values.name}
-                  sx={{ maxWidth: "100%" }} 
+                  sx={{ maxWidth: "100%" }}
                 />
               </div>
             </Grid>
@@ -181,7 +192,7 @@ const CreateProductForm = () => {
                   variant="outlined"
                   onChange={formik.handleChange}
                   value={formik.values.price}
-                  sx={{ maxWidth: "100%" }} 
+                  sx={{ maxWidth: "100%" }}
                 />
               </div>
             </Grid>

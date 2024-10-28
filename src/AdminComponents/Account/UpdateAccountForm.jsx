@@ -13,6 +13,7 @@ import {
   updateUser,
   updateUserProfile,
 } from "../../components/State/User/Action";
+import { notification } from "antd";
 
 const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
   const dispatch = useDispatch();
@@ -39,7 +40,7 @@ const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
     role: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const accountData = {
       fullname: formData.fullname,
@@ -49,17 +50,22 @@ const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
       // email: formData.email,
       // role: formData.role,
     };
-    dispatch(
-      updateUser(account.data._id, {
-        fullname: formData.fullname,
-        phonenumber: formData.phonenumber,
-        email: formData.email,
-        password: formData.password,
-      })
-    ).then(() => {
+    try {
+      await dispatch(
+        updateUser(account.data._id, {
+          fullname: formData.fullname,
+          phonenumber: formData.phonenumber,
+          email: formData.email,
+          password: formData.password,
+        })
+      );
       onSuccess();
+      notification.success({ message: "Cập nhật thành công!" });
       onClose();
-    });
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Cập nhật thất bại";
+      notification.error({ errorMessage });
+    }
   };
 
   const handleInputChange = (e) => {

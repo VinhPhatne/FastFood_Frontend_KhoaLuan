@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Home from "../components/Home";
 import Header from "../components/header/Header";
 import UserProfile from "../components/profile/UserProfile";
@@ -12,8 +12,14 @@ import Footer from "../components/footer/Footer";
 import PaymentSuccess from "../components/cart/PaymentSuccess";
 import AboutUs from "../components/AboutMe/AboutUs";
 import OTP from "../components/otp/OTP";
+import { useSelector } from "react-redux";
+import BillDetail from "../components/profile/BillDetail";
 
 const CustomerRoute = () => {
+  // const { role } = useSelector((state) => state.auth);
+  // if (role !== 2) {
+  //   return <Navigate to="/admin" replace />;
+  // }
   return (
     <div>
       <Header />

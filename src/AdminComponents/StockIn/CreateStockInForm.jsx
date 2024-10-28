@@ -8,6 +8,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { createIngredient } from "../../components/State/Import/Action";
+import { notification } from "antd";
 
 const CreateStockInForm = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
@@ -20,9 +21,10 @@ const CreateStockInForm = ({ onClose, onSuccess }) => {
     price: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit =async (e) => {
     e.preventDefault();
-    dispatch(
+    try {
+      await dispatch(
       createIngredient({
         name: formData.name,
         unit: formData.unit,
@@ -30,11 +32,15 @@ const CreateStockInForm = ({ onClose, onSuccess }) => {
         price: formData.price,
         jwt: localStorage.getItem("jwt"),
       })
-    ).then(() => {
-      onSuccess();
-      onClose();
-    });
-  };
+    );
+    onSuccess();
+    notification.success({ message: "Thêm mới thành công!" });
+    onClose();
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Thêm mới thất bại";
+    notification.error({ errorMessage });
+  }
+};
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

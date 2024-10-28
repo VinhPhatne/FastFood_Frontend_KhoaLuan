@@ -13,6 +13,13 @@ import {
   REGISTER_FAILURE,
   REGISTER_REQUEST,
   REGISTER_SUCCESS,
+  SEND_OTP_REQUEST,
+  SEND_OTP_SUCCESS,
+  SEND_OTP_FAILURE,
+  VERIFY_OTP_REQUEST,
+  VERIFY_OTP_SUCCESS,
+  VERIFY_OTP_FAILURE,
+  SET_ROLE,
 } from "./ActionType";
 import { API_URL, api } from "../../config/api";
 import { notification } from "antd";
@@ -21,7 +28,7 @@ export const registerUser = (reqData) => async (dispatch) => {
   dispatch({ type: REGISTER_REQUEST });
   try {
     const { data } = await axios.post(
-      `${API_URL}/v1/account/register`,
+      `${API_URL}/v1/account/create`,
       //reqData.userData
       {
         phonenumber: reqData.phonenumber,
@@ -62,6 +69,7 @@ export const loginUser = (reqData) => async (dispatch) => {
     if (data.accountLogin.access_token) {
       localStorage.setItem("jwt", data.accountLogin.access_token);
     }
+
     // if (data.role === "ROLE_RESTAURANT_OWNER") {
     //   reqData.navigate("/admin/restaurants");
     // } else {
@@ -69,7 +77,8 @@ export const loginUser = (reqData) => async (dispatch) => {
     // }
 
     const role = data.accountLogin.account.role;
-
+    // Lưu role vào localStorage
+    localStorage.setItem("role", role);
     if (role === 1) {
       reqData.navigate("/admin");
     } else if (role === 2) {
@@ -90,7 +99,7 @@ export const getUserProfile = () => async (dispatch) => {
   const jwt = localStorage.getItem("jwt");
   if (!jwt) {
     console.log("No JWT found");
-    return; 
+    return;
   }
   dispatch({ type: GET_USER_REQUEST });
   try {
@@ -134,3 +143,61 @@ export const logout = () => async (dispatch) => {
     console.log(error);
   }
 };
+
+export const sendOtp = (reqData) => async (dispatch) => {
+  dispatch({ type: SEND_OTP_REQUEST });
+  try {
+    const { data } = await axios.post(`${API_URL}/v1/account/send-otp`, {
+      phonenumber: reqData.phonenumber,
+      email: reqData.email,
+      password: reqData.password,
+      fullname: reqData.fullname,
+    });
+    console.log("OTP sent", data);
+
+    dispatch({ type: SEND_OTP_SUCCESS, payload: data });
+    notification.success({
+      message: "OTP đã được gửi thành công!",
+    });
+  } catch (error) {
+    console.log(error);
+    dispatch({ type: SEND_OTP_FAILURE, payload: error.message });
+    notification.error({
+      message: "Gửi OTP thất bại!",
+      description: error.message,
+    });
+  }
+};
+
+export const verifyOtp = (reqData) => async (dispatch) => {
+  dispatch({ type: VERIFY_OTP_REQUEST });
+  try {
+    const { data } = await axios.post(`${API_URL}/v1/account/verify-otp`, {
+      phonenumber: reqData.phonenumber,
+      email: reqData.email,
+      password: reqData.password,
+      fullname: reqData.fullname,
+      otp: reqData.otp,
+    });
+    console.log("OTP verified", data);
+
+    dispatch({ type: VERIFY_OTP_SUCCESS, payload: data.jwt });
+    localStorage.setItem("jwt", data.jwt);
+    notification.success({
+      message: "Xác thực OTP thành công!",
+    });
+    reqData.navigate("/"); // Điều hướng sau khi xác thực thành công
+  } catch (error) {
+    console.log(error);
+    dispatch({ type: VERIFY_OTP_FAILURE, payload: error.message });
+    notification.error({
+      message: "Xác thực OTP thất bại!",
+      description: error.message,
+    });
+  }
+};
+
+export const setUserRole = (role) => ({
+  type: SET_ROLE,
+  payload: role,
+}); 

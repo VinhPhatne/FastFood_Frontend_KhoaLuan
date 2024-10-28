@@ -7,18 +7,10 @@ import { getUserProfile, logout } from "../State/Authentication/Action";
 import { notification, Avatar } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 
-const menu = [
-  { title: "Thông tin tài khoản", icon: <Dashboard />, path: "/" },
-  {
-    title: "Thay đổi mật khẩu",
-    icon: <ShoppingBag />,
-    path: "/change-password",
-  },
-  { title: "Lịch sử đơn hàng", icon: <Dashboard />, path: "/orders" },
-];
+//navigate(`/admin/bill?accountId=${user._id}`)
 
 const ProfileSideBar = () => {
-  const [activeItem, setActiveItem] = useState(menu[0].title);
+  const [activeItem, setActiveItem] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -36,6 +28,20 @@ const ProfileSideBar = () => {
   };
 
   const userProfile = useSelector((state) => state.auth.user);
+
+  const menu = [
+    { title: "Thông tin tài khoản", icon: <Dashboard />, path: "/" },
+    {
+      title: "Thay đổi mật khẩu",
+      icon: <ShoppingBag />,
+      path: "/change-password",
+    },
+    {
+      title: "Lịch sử đơn hàng",
+      icon: <Dashboard />,
+      path: userProfile ? `/orders?accountId=${userProfile._id}` : "#",
+    },
+  ];
 
   useEffect(() => {
     dispatch(getUserProfile());

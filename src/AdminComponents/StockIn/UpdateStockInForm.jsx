@@ -2,6 +2,7 @@ import { Button, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateIngredient } from "../../components/State/Import/Action";
+import { notification } from "antd";
 
 const UpdateStockInForm = ({ event, onClose, onSuccess }) => {
   const dispatch = useDispatch();
@@ -24,21 +25,26 @@ const UpdateStockInForm = ({ event, onClose, onSuccess }) => {
     }
   }, [event]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(
-      updateIngredient({
-        id: event._id,
-        name: formData.name,
-        unit: formData.unit,
-        quantity: formData.quantity,
-        price: formData.price,
-        jwt: localStorage.getItem("jwt"),
-      })
-    ).then(() => {
+    try {
+      await dispatch(
+        updateIngredient({
+          id: event._id,
+          name: formData.name,
+          unit: formData.unit,
+          quantity: formData.quantity,
+          price: formData.price,
+          jwt: localStorage.getItem("jwt"),
+        })
+      );
       onSuccess();
+      notification.success({ message: "Cập nhật thành công!" });
       onClose();
-    });
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Cập nhật thất bại";
+      notification.error({ errorMessage });
+    }
   };
 
   const handleInputChange = (e) => {

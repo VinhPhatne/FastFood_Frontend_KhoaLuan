@@ -7,6 +7,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { notification } from "antd";
 
 const CreateEventForm = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
@@ -17,24 +18,29 @@ const CreateEventForm = ({ onClose, onSuccess }) => {
     discountPercent: "",
     expDate: null,
   });
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const data = {
       name: formData.eventName,
       discountPercent: formData.discountPercent,
       expDate: formData.expDate ? format(formData.expDate, "yyyy/MM/dd") : "",
     };
-    dispatch(
-      createEvent({
-        name: formData.eventName,
-        discountPercent: formData.discountPercent,
-        expDate: data.expDate,
-        jwt: localStorage.getItem("jwt"),
-      })
-    ).then(() => {
+    try {
+      await dispatch(
+        createEvent({
+          name: formData.eventName,
+          discountPercent: formData.discountPercent,
+          expDate: data.expDate,
+          jwt: localStorage.getItem("jwt"),
+        })
+      );
       onSuccess();
+      notification.success({ message: "Thêm mới thành công!" });
       onClose();
-    });
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Thêm mới thất bại";
+      notification.error({ errorMessage });
+    }
   };
 
   const handleInputChange = (e) => {

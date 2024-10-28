@@ -21,6 +21,7 @@ import {
   updateProduct,
 } from "../../components/State/Product/Action";
 import { useNavigate, useParams } from "react-router-dom";
+import { notification } from "antd";
 
 const initialValues = {
   name: "",
@@ -94,14 +95,21 @@ const UpdateProductForm = () => {
         description: values.description,
         category: values.category || null,
       };
-      dispatch(
-        updateProduct({
-          id,
-          productData,
-        })
-      );
-      console.log("data ----", values);
-      navigate("/admin/product");
+      try {
+        dispatch(
+          updateProduct({
+            id,
+            productData,
+          })
+        );
+        console.log("data ----", values);
+        navigate("/admin/product");
+        notification.success({ message: "Cập nhật thành công!" });
+      } catch (error) {
+        const errorMessage =
+          error.response?.data?.message || "Cập nhật thất bại";
+        notification.error({ errorMessage });
+      }
     },
   });
 

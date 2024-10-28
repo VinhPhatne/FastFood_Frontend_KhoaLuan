@@ -1,10 +1,13 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Admin from "../AdminComponents/Admin/Admin";
 
 const AdminRoute = () => {
-  //const { restaurant } = useSelector((store) => store);
+  // const { role } = useSelector((state) => state.auth);
+  // if (role !== 1) {
+  //   return <Navigate to="/" replace />;
+  // }
 
   return (
     <div>

@@ -117,12 +117,12 @@ export const getRevenue = (year) => async (dispatch) => {
     const response = await axios.get(`${API_URL}/v1/bill/getrevenue`, {
       params: { year },
     });
+    console.log("CHECK", response.data);
     const transformedData = response.data.data.map((item) => ({
       name: new Date(2024, item.month - 1).toLocaleString("default", {
         month: "short",
       }),
-      Income: item.totalRevenue,
-      Expense: 3000,
+      Income: item.totalRevenue || 0,
     }));
 
     dispatch({ type: GET_REVENUE_SUCCESS, payload: transformedData });
