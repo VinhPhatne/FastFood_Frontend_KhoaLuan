@@ -13,6 +13,8 @@ import {
   DELETE_INGREDIENT_REQUEST,
   DELETE_INGREDIENT_SUCCESS,
   DELETE_INGREDIENT_FAILURE,
+  GET_EXPENSE_SUCCESS,
+  GET_EXPENSE_FAILURE,
 } from "./ActionType";
 import { API_URL, api } from "../../config/api";
 
@@ -100,3 +102,22 @@ export const deleteIngredient =
       dispatch({ type: DELETE_INGREDIENT_FAILURE });
     }
   };
+
+export const getExpense = (year) => async (dispatch) => {
+  try {
+    const response = await axios.get(`${API_URL}/v1/ingredient/getexpenses`, {
+      params: { year },
+    });
+    const transformedData = response.data.data.map((item) => ({
+      name: new Date(2024, item.month - 1).toLocaleString("default", {
+        month: "short",
+      }),
+      Expense: item.totalExpense,
+    }));
+
+    dispatch({ type: GET_EXPENSE_SUCCESS, payload: transformedData });
+  } catch (error) {
+    console.error("Error fetching Expense data:", error);
+    dispatch({ type: GET_EXPENSE_FAILURE, payload: error.message });
+  }
+};

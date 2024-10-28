@@ -6,6 +6,7 @@ import UserProfile from "./UserProfile";
 import ProfileSideBar from "./ProfileSideBar";
 import ChangePassword from "./ChangePassword";
 import Bill from "./Bill";
+import BillDetail from "./BillDetail";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -24,7 +25,8 @@ const Profile = () => {
             <Route path="/" element={<UserProfile />} />
             <Route path="/change-password" element={<ChangePassword />} />
             <Route path="/orders" element={<Bill />} />
-          </Routes>
+            <Route path="/orders/bill/:id" element={<BillDetail/>} />
+            </Routes>
         </div>
       </div>
     </div>

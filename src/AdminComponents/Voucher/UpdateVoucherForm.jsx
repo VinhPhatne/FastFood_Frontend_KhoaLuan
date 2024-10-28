@@ -5,6 +5,7 @@ import { updateVoucher } from "../../components/State/voucher/Action";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { notification } from "antd";
 
 const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
   const dispatch = useDispatch();
@@ -27,21 +28,26 @@ const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
     }
   }, [voucher]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(
-      updateVoucher({
-        id: voucher.data._id,
-        code: formData.code,
-        name: formData.name,
-        discount: formData.discount,
-        //expDate: formData.expDate,
-        jwt: localStorage.getItem("jwt"),
-      })
-    ).then(() => {
+    try {
+      await dispatch(
+        updateVoucher({
+          id: voucher.data._id,
+          code: formData.code,
+          name: formData.name,
+          discount: formData.discount,
+          //expDate: formData.expDate,
+          jwt: localStorage.getItem("jwt"),
+        })
+      );
       onSuccess();
+      notification.success({ message: "Cập nhật thành công!" });
       onClose();
-    });
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Cập nhật thất bại";
+      notification.error({ errorMessage });
+    }
   };
 
   const handleInputChange = (e) => {

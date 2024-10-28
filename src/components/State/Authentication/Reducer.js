@@ -12,6 +12,13 @@ import {
   REGISTER_FAILURE,
   REGISTER_REQUEST,
   REGISTER_SUCCESS,
+  SEND_OTP_REQUEST,
+  SEND_OTP_SUCCESS,
+  SEND_OTP_FAILURE,
+  VERIFY_OTP_REQUEST,
+  VERIFY_OTP_SUCCESS,
+  VERIFY_OTP_FAILURE,
+  SET_ROLE,
 } from "./ActionType";
 //import { isPresentInFavorites } from "../../config/logic";
 
@@ -22,6 +29,7 @@ const initialState = {
   jwt: null,
   favorites: [],
   success: null,
+  role: 2,
 };
 
 export const authReducer = (state = initialState, action) => {
@@ -29,17 +37,22 @@ export const authReducer = (state = initialState, action) => {
     case REGISTER_REQUEST:
     case LOGIN_REQUEST:
     case GET_USER_REQUEST:
-    case ADD_TO_FAVORITE_REQUEST:
+    case SEND_OTP_REQUEST:
+    case VERIFY_OTP_REQUEST:
       return { ...state, isLoading: true, error: null, success: null };
 
     case LOGIN_SUCCESS:
     case REGISTER_SUCCESS:
+    case VERIFY_OTP_SUCCESS:
       return {
         ...state,
         isLoading: false,
         jwt: action.payload,
-        success: "Register success",
+        success: "Action success",
       };
+
+    case SEND_OTP_SUCCESS:
+      return { ...state, isLoading: false, success: "OTP sent successfully" };
 
     case GET_USER_SUCCESS:
       return {
@@ -66,12 +79,17 @@ export const authReducer = (state = initialState, action) => {
     case LOGIN_FAILURE:
     case GET_USER_FAILURE:
     case ADD_TO_FAVORITE_FAILURE:
+    case SEND_OTP_FAILURE:
+    case VERIFY_OTP_FAILURE:
       return {
         ...state,
         isLoading: false,
         error: action.payload,
         success: null,
       };
+
+    case SET_ROLE:
+      return { ...state, role: action.payload };
 
     default:
       return state;

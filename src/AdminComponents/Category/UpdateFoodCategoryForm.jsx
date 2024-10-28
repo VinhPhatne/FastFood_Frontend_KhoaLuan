@@ -6,6 +6,7 @@ import {
   getCategories,
   updateCategory,
 } from "../../components/State/Category/Action";
+import { notification } from "antd";
 //import { createCategoryAction } from "../../component/State/Restaurant/Action";
 
 const UpdateFoodCategoryForm = ({ category, onClose, onSuccess }) => {
@@ -16,10 +17,7 @@ const UpdateFoodCategoryForm = ({ category, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     categoryName: "",
     categoryId: "",
-    // restaurantId: "",
   });
-
-  console.log("CHECK >>>", category.data.name);
 
   useEffect(() => {
     if (category) {
@@ -33,24 +31,26 @@ const UpdateFoodCategoryForm = ({ category, onClose, onSuccess }) => {
     }
   }, [category]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const data = {
       name: formData.categoryName,
-      // restaurantId: {
-      //   id: 1,
-      // },
     };
-    dispatch(
-      updateCategory({
-        id: category.data._id,
-        name: formData.categoryName,
-        jwt: localStorage.getItem("jwt"),
-      })
-    ).then(() => {
+    try {
+      await dispatch(
+        updateCategory({
+          id: category.data._id,
+          name: formData.categoryName,
+          jwt: localStorage.getItem("jwt"),
+        })
+      );
       onSuccess();
+      notification.success({ message: "Cập nhật thành công!" });
       onClose();
-    });
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Cập nhật thất bại";
+      notification.error({ errorMessage });
+    }
   };
 
   const handleInputChange = (e) => {

@@ -7,6 +7,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { format, isValid, parse } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { notification } from "antd";
 
 //import { createeventAction } from "../../component/State/Restaurant/Action";
 
@@ -33,14 +34,15 @@ const UpdateEventForm = ({ event, onClose, onSuccess }) => {
     }
   }, [event]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit =async (e) => {
     e.preventDefault();
     const data = {
       name: formData.eventName,
       discountPercent: formData.discountPercent,
       expDate: formData.expDate,
     };
-    dispatch(
+    try {
+      await dispatch(
       updateEvent({
         id: event.data._id,
         name: formData.eventName,
@@ -48,11 +50,15 @@ const UpdateEventForm = ({ event, onClose, onSuccess }) => {
         expDate: format(formData.expDate, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
         jwt: localStorage.getItem("jwt"),
       })
-    ).then(() => {
-      onSuccess();
-      onClose();
-    });
-  };
+    );
+    onSuccess();
+    notification.success({ message: "Cập nhật thành công!" });
+    onClose();
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || "Cập nhật thất bại";
+    notification.error({ errorMessage });
+  }
+};
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

@@ -8,6 +8,7 @@ import {
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { notification } from "antd";
 
 const CreateVoucherForm = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
@@ -19,20 +20,25 @@ const CreateVoucherForm = ({ onClose, onSuccess }) => {
     //expDate: null,
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(
-      createVoucher({
-        code: formData.code,
-        name: formData.name,
-        discount: formData.discount,
-        //expDate: formData.expDate,
-        jwt: localStorage.getItem("jwt"),
-      })
-    ).then(() => {
+    try {
+      await dispatch(
+        createVoucher({
+          code: formData.code,
+          name: formData.name,
+          discount: formData.discount,
+          //expDate: formData.expDate,
+          jwt: localStorage.getItem("jwt"),
+        })
+      );
       onSuccess();
+      notification.success({ message: "Thêm mới thành công!" });
       onClose();
-    });
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Thêm mới thất bại";
+      notification.error({ errorMessage });
+    }
   };
 
   const handleInputChange = (e) => {
