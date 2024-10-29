@@ -249,11 +249,23 @@ const Card = () => {
       </div>
 
       <Modal
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
         width={1200}
       >
+        {/* <div
+          style={{
+            textAlign: "center",
+            marginBottom: "15px",
+            fontSize: "24px",
+            fontWeight: "bold",
+            // color: "#ff7d01",
+
+          }}
+        >
+          Chi tiết sản phẩm
+        </div> */}
         {selectedProduct && (
           <div className="modal-content">
             <div className="modal-left">
