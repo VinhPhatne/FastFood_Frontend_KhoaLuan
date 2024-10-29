@@ -17,8 +17,7 @@ import {
 } from "./ActionType";
 import { API_URL } from "../../config/api";
 
-export const getBills =
-  (page = 1, accountId, phone) =>
+export const getBills = ({page = 1, accountId, phone}) =>
   async (dispatch) => {
     try {
       const response = await axios.get(`${API_URL}/v1/bill/list`, {
