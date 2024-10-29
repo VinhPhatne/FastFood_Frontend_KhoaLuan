@@ -62,7 +62,7 @@ const BillTable = () => {
       params.set("accountId", accountId);
     }
     setCurrentPage(value);
-
+    console.log("page", value)
     dispatch(
       getBills({
 
