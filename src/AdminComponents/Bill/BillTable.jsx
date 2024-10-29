@@ -84,7 +84,7 @@ const BillTable = () => {
     }
 
 
-    dispatch(getBills(1, accountId, searchTerm));
+    dispatch(getBills( {page: 1, accountId, searchTerm } ));
   };
 
   const [searchParams] = useSearchParams();
@@ -100,7 +100,7 @@ const BillTable = () => {
     const params = new URLSearchParams(location.search);
     const accountId = params.get("accountId");
     console.log("check param", accountId);
-    dispatch(getBills(1, accountId));
+    dispatch(getBills({ page: 1, accountId }));
   }, [dispatch]);
 
   const handleClearSearch = () => setSearchTerm("");
