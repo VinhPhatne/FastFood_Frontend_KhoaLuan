@@ -94,7 +94,7 @@ export const deleteEvent =
     dispatch({ type: DELETE_EVENT_REQUEST });
     try {
       await api.put(
-        `${API_URL}/v1/event/delete/${id}`,
+        `${API_URL}/v1/event/${id}`,
         { isActive: false },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
