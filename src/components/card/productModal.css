@@ -2,11 +2,15 @@
     display: flex;
     flex-direction: row;
     width: 1000px; 
+    
   }
   
   .modal-content {
     display: flex;
     width: 100%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+
   }
   
   .modal-left {
@@ -25,9 +29,9 @@
     flex: 1.2; 
     padding-left: 15px; 
     padding-right: 15px; 
-    background-color: beige;
+    background-color: #FFF3E0;
     margin-left: 20px;
-    margin-right: 20px;
+    /* margin-right: 20px; */
   }
   
   .product-title {
