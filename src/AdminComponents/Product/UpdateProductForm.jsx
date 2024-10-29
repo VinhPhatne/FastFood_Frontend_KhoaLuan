@@ -108,7 +108,7 @@ const UpdateProductForm = () => {
       } catch (error) {
         const errorMessage =
           error.response?.data?.message || "Cập nhật thất bại";
-        notification.error({ errorMessage });
+          notification.error({ message: errorMessage });
       }
     },
   });

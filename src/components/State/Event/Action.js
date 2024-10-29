@@ -44,9 +44,11 @@ export const createEvent =
       );
       console.log("createEvent", data);
       dispatch({ type: CREATE_EVENT_SUCCESS, payload: data });
+      return data;
     } catch (error) {
       console.error("Error creating event:", error);
       dispatch({ type: CREATE_EVENT_FAILURE });
+      throw error;
     }
   };
 
@@ -66,6 +68,7 @@ export const updateEvent =
     } catch (error) {
       console.error("Error updating event:", error);
       dispatch({ type: UPDATE_EVENT_FAILURE });
+      throw error;
     }
   };
 

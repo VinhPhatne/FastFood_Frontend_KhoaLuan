@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdOutlineKeyboardDoubleArrowRight } from "react-icons/md";
 import styles from "./Card.module.scss";
@@ -22,10 +22,12 @@ const Card = () => {
   );
   const { productsByCategory } = useSelector((state) => state.productReducer);
   const { products } = useSelector((state) => state.productReducer);
-  const jwt = localStorage.getItem("jwt");
+  const jwt = useMemo(() => localStorage.getItem("jwt"), []);
   useEffect(() => {
-    dispatch(getCategories({ jwt }));
-    dispatch(getProducts({ jwt }));
+    if (jwt) {
+      dispatch(getCategories({ jwt }));
+      dispatch(getProducts({ jwt }));
+    }
   }, [dispatch, jwt]);
 
   const [showPrevArrow, setShowPrevArrow] = useState(false);
@@ -119,7 +121,7 @@ const Card = () => {
       <div className="border-b-2 sticky top-16 z-10 pt-10 py-4 bg-white mb-10 ">
         {startIndex > 0 && (
           <button
-            className="absolute left-[180px] top-1/2 transform -translate-y-1/2 px-2 py-1 text-2xl font-bold text-black hover:text-orange-600"
+            className="absolute left-[180px] top-1/2 transform -translate-y-1/2 px-2 py-1 mt-2 text-3xl font-bold text-black hover:text-orange-600"
             onClick={handlePrev}
           >
             {"<"}
@@ -129,6 +131,7 @@ const Card = () => {
         <ul className="flex justify-between items-center max-w-screen-lg mx-auto px-4 overflow-hidden">
           {Array.isArray(categories) &&
             categories
+              .filter((category) => category.isActive)
               .slice(startIndex, startIndex + visibleCount)
               .map((category) => (
                 <li
@@ -159,9 +162,9 @@ const Card = () => {
               ))}
         </ul>
         {Array.isArray(categories) &&
-          startIndex + visibleCount < categories.length && (
+          startIndex + visibleCount < categories.length - 2 && (
             <button
-              className="absolute right-[180px] top-1/2 transform -translate-y-1/2 px-2 py-1 text-2xl font-bold text-black hover:text-orange-600"
+              className="absolute right-[180px] top-1/2 transform -translate-y-1/2 px-2 py-1 mt-2 text-3xl font-bold text-black hover:text-orange-600"
               onClick={handleNext}
             >
               {">"}
@@ -171,78 +174,83 @@ const Card = () => {
 
       <div>
         {Array.isArray(categories) && categories.length > 0 ? (
-          categories.map((category) => (
-            <div key={category._id} className={styles.card}>
-              <div className={styles.content}>
-                <div className={styles.left}>
-                  <p>{category.name}</p>
+          categories
+            .filter((category) => category.isActive)
+            .map((category) => (
+              <div key={category._id} className={styles.card}>
+                <div className={styles.content}>
+                  <div className={styles.left}>
+                    <p>{category.name}</p>
+                  </div>
+                  <div
+                    className={styles.right}
+                    onClick={() => handleRedirect(category._id)}
+                  >
+                    <p>Xem thêm </p>
+                    <MdOutlineKeyboardDoubleArrowRight
+                      className={styles.icon}
+                    />
+                  </div>
                 </div>
-                <div
-                  className={styles.right}
-                  onClick={() => handleRedirect(category._id)}
-                >
-                  <p>Xem thêm </p>
-                  <MdOutlineKeyboardDoubleArrowRight className={styles.icon} />
-                </div>
-              </div>
 
-              <div id={category._id} className={styles.container}>
-                {Array.isArray(products) &&
-                products.filter(
-                  (item) => item.category._id === category._id && item.isSelling
-                ).length > 0 ? (
-                  products
-                    .filter(
-                      (item) =>
-                        item.category._id === category._id && item.isSelling
-                    )
-                    .map((item) => (
-                      <div
-                        className={styles.item}
-                        onClick={() => showModal(item)}
-                      >
-                        <img
-                          className={styles.img}
-                          src={item.picture}
-                          alt={item.name}
-                        />
-                        <div className={styles.course}>
-                          <p className={styles.title}>{item.name}</p>
-                          <div className={styles.info}>
-                            <p>{item.description}</p>
-                          </div>
-                          <div className={styles.footer}>
-                            <div className={styles.cost}>
-                              {item.price !== item.currentPrice ? (
-                                <>
-                                  <span>{item.currentPrice} đ</span>
-                                  <span className={styles.discountPrice}>
-                                    {item.price}{" "}
-                                  </span>
-                                </>
-                              ) : (
-                                <span>{item.currentPrice} đ</span>
-                              )}
+                <div id={category._id} className={styles.container}>
+                  {Array.isArray(products) &&
+                  products.filter(
+                    (item) =>
+                      item.category._id === category._id && item.isSelling
+                  ).length > 0 ? (
+                    products
+                      .filter(
+                        (item) =>
+                          item.category._id === category._id && item.isSelling
+                      )
+                      .map((item) => (
+                        <div
+                          className={styles.item}
+                          onClick={() => showModal(item)}
+                        >
+                          <img
+                            className={styles.img}
+                            src={item.picture}
+                            alt={item.name}
+                          />
+                          <div className={styles.course}>
+                            <p className={styles.title}>{item.name}</p>
+                            <div className={styles.info}>
+                              <p>{item.description}</p>
                             </div>
+                            <div className={styles.footer}>
+                              <div className={styles.cost}>
+                                {item.price !== item.currentPrice ? (
+                                  <>
+                                    <span>{item.currentPrice} đ</span>
+                                    <span className={styles.discountPrice}>
+                                      {item.price}{" "}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span>{item.currentPrice} đ</span>
+                                )}
+                              </div>
+                            </div>
+                            <button
+                              className={styles.addToCartButton}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToCart(item);
+                              }}
+                            >
+                              Thêm vào giỏ hàng
+                            </button>
                           </div>
-                          <button
-                            className={styles.addToCartButton}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddToCart(item);
-                            }}
-                          >
-                            Thêm vào giỏ hàng
-                          </button>
                         </div>
-                      </div>
-                    ))
-                ) : (
-                  <p>No products available for this category</p>
-                )}
+                      ))
+                  ) : (
+                    <p>No products available for this category</p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))
+            ))
         ) : (
           <p>No categories available</p>
         )}

@@ -18,7 +18,14 @@ export const categoryReducer = (state = initialState, action) => {
       return { ...state, categories: action.payload };
 
     case CREATE_CATEGORY_SUCCESS:
-      return { ...state, categories: [...state.categories, action.payload] };
+      console.log("State categories before concat:", state.categories);
+      console.log("Action payload:", action.payload);
+      return {
+        ...state,
+        categories: Array.isArray(state.categories)
+          ? state.categories.concat(action.payload)
+          : [action.payload],
+      };
 
     case UPDATE_CATEGORY_SUCCESS:
       return {

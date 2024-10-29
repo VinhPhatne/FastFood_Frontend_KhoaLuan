@@ -14,6 +14,7 @@ import { loginUser } from "../State/Authentication/Action";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../config/api";
+import { LOGIN_SUCCESS } from "../State/Authentication/ActionType";
 
 const LoginForm = ({
   isModalVisible,
@@ -27,22 +28,23 @@ const LoginForm = ({
   const [isOtpModalVisible, setIsOtpModalVisible] = useState(false);
   const [resetInfo, setResetInfo] = useState({});
 
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     try {
-      handleCancel();
-      dispatch(
+      const resultAction = await dispatch(
         loginUser({
           userData: { phoneNumber: values.email, password: values.password },
           navigate,
         })
       );
+      if (resultAction) {
+        handleCancel();
+      }
     } catch (error) {
-      const message = error.response?.data?.message || "Đăng nhập thất bại";
+      const message =
+        error.response?.data?.message || error.message || "Đăng nhập thất bại";
       console.error(error);
       notification.error({ message });
     }
-    //handleLoginSuccess();
-    // navigate("/")
   };
 
   const openForgotPasswordModal = () => {

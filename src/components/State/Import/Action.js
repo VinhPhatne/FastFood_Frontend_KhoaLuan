@@ -49,6 +49,7 @@ export const createIngredient =
     } catch (error) {
       console.error("Error creating Ingredient:", error);
       dispatch({ type: CREATE_INGREDIENT_FAILURE });
+      throw error;
     }
   };
 
@@ -68,6 +69,7 @@ export const updateIngredient =
     } catch (error) {
       console.error("Error updating event:", error);
       dispatch({ type: UPDATE_INGREDIENT_FAILURE });
+      throw error;
     }
   };
 

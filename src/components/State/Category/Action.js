@@ -50,9 +50,11 @@ export const createCategory =
       );
       console.log("createCategory", data);
       dispatch({ type: CREATE_CATEGORY_SUCCESS, payload: data });
+      return data;
     } catch (error) {
       console.log("error", error);
       dispatch({ type: CREATE_CATEGORY_FAILURE });
+      throw error;
     }
   };
 

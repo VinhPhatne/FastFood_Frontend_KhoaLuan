@@ -44,9 +44,11 @@ export const createVoucher =
       );
       console.log("createVoucher", data);
       dispatch({ type: CREATE_VOUCHER_SUCCESS, payload: data });
+      return data;
     } catch (error) {
       console.error("Error creating VOUCHER:", error);
       dispatch({ type: CREATE_VOUCHER_FAILURE });
+      throw error;
     }
   };
 
@@ -66,6 +68,7 @@ export const updateVoucher =
     } catch (error) {
       console.error("Error updating VOUCHER:", error);
       dispatch({ type: UPDATE_VOUCHER_FAILURE });
+      throw error;
     }
   };
 

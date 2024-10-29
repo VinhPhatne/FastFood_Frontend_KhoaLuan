@@ -66,7 +66,7 @@ const CreateProductForm = () => {
       } catch (error) {
         const errorMessage =
           error.response?.data?.message || "Thêm mới thất bại";
-        notification.error({ errorMessage });
+          notification.error({ message: errorMessage });
       }
     },
   });
