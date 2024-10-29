@@ -17,8 +17,12 @@ export const voucherReducer = (state = initialState, action) => {
       return { ...state, voucher: action.payload };
 
     case CREATE_VOUCHER_SUCCESS:
-      return { ...state, voucher: [...state.voucher, action.payload] };
-
+      return {
+        ...state,
+        voucher: Array.isArray(state.voucher)
+          ? state.voucher.concat(action.payload)
+          : [action.payload],
+      };
     case UPDATE_VOUCHER_SUCCESS:
       return {
         ...state,

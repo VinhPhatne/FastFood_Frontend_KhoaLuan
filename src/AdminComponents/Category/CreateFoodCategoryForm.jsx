@@ -14,29 +14,28 @@ const CreateFoodCategoryForm = ({ onClose, onSuccess }) => {
     categoryName: "",
     restaurantId: "",
   });
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = {
-      name: formData.categoryName,
-      restaurantId: {
-        id: 1,
-      },
-    };
     try {
-      await dispatch(
-      createCategory({
-        name: formData.categoryName,
-        jwt: localStorage.getItem("jwt"),
-      })
-    );
-    onSuccess();
-    notification.success({ message: "Thêm mới thành công!" });
-    onClose();
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || "Thêm mới thất bại";
-    notification.error({ errorMessage });
-  }
-};
+      const result = await dispatch(
+        createCategory({
+          name: formData.categoryName,
+          jwt: localStorage.getItem("jwt"),
+        })
+      );
+
+      console.log("result", result);
+  
+      if (result) {
+        onSuccess();
+        notification.success({ message: "Thêm mới thành công!" });
+        onClose();
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Thêm mới thất bại";
+      notification.error({ message: errorMessage });
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

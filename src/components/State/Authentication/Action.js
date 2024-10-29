@@ -90,8 +90,12 @@ export const loginUser = (reqData) => async (dispatch) => {
       message: "Đăng nhập thành công",
     });
   } catch (error) {
-    console.log(error);
-    dispatch({ type: LOGIN_FAILURE, payload: error.message });
+    console.log("ER",error);
+    const message = error.response?.data?.message || "Đăng nhập thất bại";
+    dispatch({ type: LOGIN_FAILURE, payload: message });
+    notification.error({
+      message,
+    });
   }
 };
 

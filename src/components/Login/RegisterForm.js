@@ -49,6 +49,7 @@ const RegisterForm = ({ isModalVisible, handleCancel, switchToLogin }) => {
       const message = error.response?.data?.message || "Gửi OTP thất bại!";
       console.error(error);
       notification.error({ message });
+      throw error;
     }
   };
 
@@ -249,10 +250,7 @@ const RegisterForm = ({ isModalVisible, handleCancel, switchToLogin }) => {
             rules={[{ required: true, message: "Vui lòng nhập OTP!" }]}
             className={styles["form-item"]}
           >
-            <InputNumber
-              style={{ width: "100%" }}
-              placeholder="Nhập OTP"
-            />
+            <InputNumber style={{ width: "100%" }} placeholder="Nhập OTP" />
           </Form.Item>
 
           <Form.Item>

@@ -17,8 +17,12 @@ export const eventReducer = (state = initialState, action) => {
       return { ...state, events: action.payload };
 
     case CREATE_EVENT_SUCCESS:
-      return { ...state, events: [...state.events, action.payload] };
-
+      return {
+        ...state,
+        events: Array.isArray(state.events)
+          ? state.events.concat(action.payload)
+          : [action.payload],
+      };
     case UPDATE_EVENT_SUCCESS:
       return {
         ...state,

@@ -53,6 +53,7 @@ export const createUser = (reqData) => async (dispatch) => {
       fullname: reqData.fullname,
       phonenumber: reqData.phonenumber,
       password: reqData.password,
+      email: reqData.email,
       // role: reqData.role,
       // email: reqData.email,
       // address: reqData.address,
@@ -62,6 +63,7 @@ export const createUser = (reqData) => async (dispatch) => {
   } catch (error) {
     console.log(error);
     dispatch({ type: CREATE_USER_FAILURE, payload: error.message });
+    throw error;
   }
 };
 
@@ -158,6 +160,7 @@ export const updateUser = (id, reqData) => async (dispatch) => {
   } catch (error) {
     console.log(error);
     dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
+    throw error;
   }
 };
 

@@ -26,7 +26,7 @@ const CreateEventForm = ({ onClose, onSuccess }) => {
       expDate: formData.expDate ? format(formData.expDate, "yyyy/MM/dd") : "",
     };
     try {
-      await dispatch(
+      const result = await dispatch(
         createEvent({
           name: formData.eventName,
           discountPercent: formData.discountPercent,
@@ -34,12 +34,14 @@ const CreateEventForm = ({ onClose, onSuccess }) => {
           jwt: localStorage.getItem("jwt"),
         })
       );
-      onSuccess();
-      notification.success({ message: "Thêm mới thành công!" });
-      onClose();
+      if (result) {
+        onSuccess();
+        notification.success({ message: "Thêm mới thành công!" });
+        onClose();
+      }
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Thêm mới thất bại";
-      notification.error({ errorMessage });
+      notification.error({ message: errorMessage });
     }
   };
 

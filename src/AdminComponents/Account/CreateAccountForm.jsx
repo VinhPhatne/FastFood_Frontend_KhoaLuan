@@ -31,6 +31,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
       fullname: formData.fullname,
       phonenumber: formData.phonenumber,
       password: formData.password,
+      email: formData.email,
     };
     try {
       await dispatch(
@@ -43,7 +44,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
       onClose();
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Thêm mới thất bại";
-      notification.error({ errorMessage });
+      notification.error({ message: errorMessage });
     }
   };
 

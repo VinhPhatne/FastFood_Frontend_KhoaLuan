@@ -42,6 +42,11 @@ const BillDetailTable = () => {
     }, 0);
   }
 
+  const totalSubtotal =
+    billData?.lineItem?.reduce((total, item) => {
+      return total + (item.subtotal || 0);
+    }, 0) || 0;
+
   return (
     <Box sx={{ width: "95%", margin: "0px auto", marginTop: "100px" }}>
       <h1 style={{ color: "#ff7d01" }} className="text-3xl font-bold mb-6">
@@ -158,8 +163,7 @@ const BillDetailTable = () => {
                   </h2>
                   <span className="text-sm">Số lượng: {item?.quantity}</span>
                   <p className="text-sm">
-                    Thành tiền:{" "}
-                    {(item?.product?.price * item?.quantity).toLocaleString()} đ
+                    Thành tiền: {item.subtotal.toLocaleString()} đ
                   </p>
                 </div>
               </div>
@@ -169,7 +173,7 @@ const BillDetailTable = () => {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Tổng đơn hàng</span>
-                  <span>{totalPrice} đ</span>
+                  <span>{totalSubtotal.toLocaleString()} đ</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Phí giao hàng</span>
@@ -179,6 +183,12 @@ const BillDetailTable = () => {
                   <div className="flex justify-between">
                     <span>Giảm giá Voucher</span>
                     <span>-{voucherDiscount.toLocaleString()} đ</span>
+                  </div>
+                )}
+                {billData?.pointDiscount > 0 && (
+                  <div className="flex justify-between">
+                    <span>Giảm giá Điểm</span>
+                    <span>-{billData.pointDiscount.toLocaleString()} đ</span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold text-xl">

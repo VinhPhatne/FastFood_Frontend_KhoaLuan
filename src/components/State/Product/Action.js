@@ -76,6 +76,7 @@ export const createProduct = (productData) => async (dispatch) => {
       type: CREATE_PRODUCT_FAILURE,
       payload: error.response.data.message,
     });
+    throw error;
   }
 };
 
@@ -96,6 +97,7 @@ export const updateProduct =
       dispatch({
         type: UPDATE_PRODUCT_FAILURE,
       });
+      throw error;
     }
   };
 

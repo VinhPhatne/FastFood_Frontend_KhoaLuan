@@ -56,8 +56,6 @@ const EventTable = () => {
     (state) => state.categoryReducer.categories
   );
 
-  console.log("categories", categories);
-
   const jwt = localStorage.getItem("jwt");
 
   const [openProductModal, setOpenProductModal] = useState(false);
@@ -72,10 +70,6 @@ const EventTable = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-
-  // useEffect(() => {
-  //   dispatch(getEvents({ jwt }));
-  // }, [dispatch, jwt]);
 
   const fetchEvents = () => {
     dispatch(getEvents({ jwt }));
@@ -126,19 +120,28 @@ const EventTable = () => {
 
   const fetchProductsAndCategories = async () => {
     const response = await dispatch(getCategories({ jwt }));
-    console.log("response", response);
     setProducts(response || []);
   };
 
+  // const handleOpenProductModal = async (eventId) => {
+  //   setCurrentEventId(eventId);
+  //   await fetchProductsAndCategories();
+  //   setOpenProductModal(true);
+  // };
+
   const handleOpenProductModal = async (eventId) => {
     setCurrentEventId(eventId);
+    const eventResponse = await dispatch(getEventById({ id: eventId, jwt }));
+    console.log("eventResponse", eventResponse);
+    if (eventResponse) setSelectedEvent(eventResponse);
+
     await fetchProductsAndCategories();
     setOpenProductModal(true);
   };
 
   const handleCloseProductModal = () => {
     setOpenProductModal(false);
-    setSelectedProducts(new Set()); // Reset lựa chọn
+    setSelectedProducts(new Set());
   };
 
   // Xử lý khi chọn checkbox
@@ -160,14 +163,17 @@ const EventTable = () => {
         eventId: eventId,
         products: selectedProductArray,
       };
-      const response = await fetch(`http://localhost:8080/v1/event/${eventId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`, 
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `http://localhost:8080/v1/event/${eventId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${jwt}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to update products");
@@ -183,22 +189,29 @@ const EventTable = () => {
 
   const handleSaveProducts = async () => {
     const selectedProductArray = Array.from(selectedProducts);
-
-    //Gọi API update Event với danh sách sản phẩm
-    const result = await updateEventProducts(currentEventId, selectedProductArray);
+    const result = await updateEventProducts(
+      currentEventId,
+      selectedProductArray
+    );
 
     if (result) {
-      console.log("Event products updated successfully:", result);
-      // Đóng modal sau khi thành công
       handleCloseProductModal();
-      // Cập nhật danh sách sự kiện
       fetchEvents();
-    } else {
-      console.error("Failed to update event products");
     }
+  };
 
-    console.log("selected product", selectedProductArray);
-    console.log("currentEventId", currentEventId);
+  const filterProductsForEvent = (category) => {
+    // Lọc chỉ các sản phẩm không thuộc sự kiện nào hoặc thuộc sự kiện hiện tại
+    return category.products.filter(
+      (product) => !product.event || product.event === currentEventId
+    );
+  };
+  
+  const isProductChecked = (productId) => {
+    const isChecked = selectedEvent?.data?.products?.some((p) => p === productId);
+    console.log(`Sản phẩm với ID ${productId} đã có trong sự kiện:`, isChecked);
+  
+    return isChecked;
   };
 
   return (
@@ -325,7 +338,7 @@ const EventTable = () => {
           </Typography>
           <Box
             sx={{
-              maxHeight: 500, 
+              maxHeight: 500,
               overflowY: "auto",
               paddingRight: 2,
             }}
@@ -340,11 +353,11 @@ const EventTable = () => {
                   <Box
                     sx={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(4, 1fr)", // Cập nhật để hiển thị 4 sản phẩm mỗi hàng
+                      gridTemplateColumns: "repeat(4, 1fr)",
                       gap: 2,
                     }}
                   >
-                    {category.products.map((product) => (
+                    {filterProductsForEvent(category).map((product) => (
                       <Box
                         key={product._id}
                         sx={{
@@ -372,7 +385,10 @@ const EventTable = () => {
                           Giá: {product.currentPrice.toLocaleString()} VND
                         </Typography>
                         <Checkbox
-                          checked={selectedProducts.has(product._id)}
+                          checked={
+                            selectedProducts.has(product._id) ||
+                            isProductChecked(product._id)
+                          }
                           onChange={() => handleToggleProduct(product._id)}
                         />
                       </Box>
