@@ -124,7 +124,7 @@ export const deleteCategory =
     dispatch({ type: DELETE_CATEGORY_REQUEST });
     try {
       const { data } = await api.put(
-        `${API_URL}/v1/category/delete/${id}`,
+        `${API_URL}/v1/category/${id}`,
         { isActive: false },
         {
           headers: {
