@@ -39,7 +39,6 @@ const LoginForm = ({
       if (resultAction.type === LOGIN_SUCCESS) {
         handleCancel();
       }
-
     } catch (error) {
       const message =
         error.response?.data?.message || error.message || "Đăng nhập thất bại";
@@ -110,6 +109,10 @@ const LoginForm = ({
               {
                 required: true,
                 message: "Vui lòng nhập Số điện thoại / Email!",
+              },
+              {
+                pattern: /^0\d{9}$/,
+                message: "Số điện thoại phải gồm 10 số và bắt đầu bằng số 0!",
               },
             ]}
             className={styles["form-item"]}
@@ -183,7 +186,13 @@ const LoginForm = ({
           <Form.Item
             name="email"
             label="Email"
-            rules={[{ required: true, message: "Vui lòng nhập Email!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập Email!" },
+              {
+                pattern: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                message: "Email không đúng định dạng!",
+              },
+            ]}
             className={styles["form-item"]}
           >
             <Input placeholder="Nhập email" style={{ height: "50px" }} />
@@ -194,6 +203,10 @@ const LoginForm = ({
             label="Số điện thoại"
             rules={[
               { required: true, message: "Vui lòng nhập số điện thoại!" },
+              {
+                pattern: /^0\d{9}$/,
+                message: "Số điện thoại phải gồm 10 số và bắt đầu bằng số 0!",
+              },
             ]}
             className={styles["form-item"]}
           >

@@ -24,16 +24,9 @@ const Card = () => {
   const { products } = useSelector((state) => state.productReducer);
   const jwt = useMemo(() => localStorage.getItem("jwt"), []);
   useEffect(() => {
-    if (jwt) {
-      dispatch(getCategories({ jwt }));
-      dispatch(getProducts({ jwt }));
-    }
+    dispatch(getCategories({ jwt }));
+    dispatch(getProducts({ jwt }));
   }, [dispatch, jwt]);
-
-  const [showPrevArrow, setShowPrevArrow] = useState(false);
-  const [showNextArrow, setShowNextArrow] = useState(true);
-
-  const [categoryProducts, setCategoryProducts] = useState({});
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -56,8 +49,6 @@ const Card = () => {
   const handleRedirect = () => {
     navigate("/category/7089338599931904");
   };
-
-  //const [active, setActive] = useState(1);
 
   const [active, setActive] = useState(null);
   const [startIndex, setStartIndex] = useState(0);
@@ -175,7 +166,15 @@ const Card = () => {
       <div>
         {Array.isArray(categories) && categories.length > 0 ? (
           categories
-            .filter((category) => category.isActive)
+            .filter((category) => {
+              const productsInCategory = products.filter(
+                (item) =>
+                  item.category &&
+                  item.category._id === category._id &&
+                  item.isSelling
+              );
+              return category.isActive && productsInCategory.length > 0;
+            })
             .map((category) => (
               <div key={category._id} className={styles.card}>
                 <div className={styles.content}>
@@ -197,15 +196,20 @@ const Card = () => {
                   {Array.isArray(products) &&
                   products.filter(
                     (item) =>
-                      item.category._id === category._id && item.isSelling
+                      item.category &&
+                      item.category._id === category._id &&
+                      item.isSelling
                   ).length > 0 ? (
                     products
                       .filter(
                         (item) =>
-                          item.category._id === category._id && item.isSelling
+                          item.category &&
+                          item.category._id === category._id &&
+                          item.isSelling
                       )
                       .map((item) => (
                         <div
+                          key={item._id}
                           className={styles.item}
                           onClick={() => showModal(item)}
                         >

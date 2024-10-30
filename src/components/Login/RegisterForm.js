@@ -123,6 +123,10 @@ const RegisterForm = ({ isModalVisible, handleCancel, switchToLogin }) => {
                 label="Địa chỉ email"
                 rules={[
                   { required: true, message: "Vui lòng nhập địa chỉ email!" },
+                  {
+                    pattern: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                    message: "Email không đúng định dạng!",
+                  },
                 ]}
                 className={styles["form-item"]}
               >
@@ -154,6 +158,14 @@ const RegisterForm = ({ isModalVisible, handleCancel, switchToLogin }) => {
                 label="Nhập lại mật khẩu"
                 rules={[
                   { required: true, message: "Vui lòng nhập lại mật khẩu!" },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue("password") === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(new Error("Mật khẩu không khớp!"));
+                    },
+                  }),
                 ]}
                 className={styles["form-item"]}
               >
@@ -172,6 +184,11 @@ const RegisterForm = ({ isModalVisible, handleCancel, switchToLogin }) => {
                 label="Số điện thoại"
                 rules={[
                   { required: true, message: "Vui lòng nhập số điện thoại!" },
+                  {
+                    pattern: /^0\d{9}$/,
+                    message:
+                      "Số điện thoại phải gồm 10 số và bắt đầu bằng số 0!",
+                  },
                 ]}
                 className={styles["form-item"]}
               >

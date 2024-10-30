@@ -31,7 +31,7 @@ const Cart = () => {
   }, [dispatch, jwt]);
 
   const userProfile = useSelector((state) => state.auth.user);
-  const userPoints = userProfile.point;
+  const userPoints = userProfile ? userProfile.point : "";
 
   console.log("userPoints", userPoints);
 
