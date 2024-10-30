@@ -21,13 +21,18 @@ import ClearIcon from "@mui/icons-material/Clear";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  blockCategory,
   deleteCategory,
   getCategories,
   getCategoryById,
+  unblockCategory,
 } from "../../components/State/Category/Action";
 import { Delete } from "@mui/icons-material";
 import CreateFoodCategoryForm from "./CreateFoodCategoryForm";
 import UpdateFoodCategoryForm from "./UpdateFoodCategoryForm";
+import LockIcon from "@mui/icons-material/Lock";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
+import { notification } from "antd";
 
 const style = {
   position: "absolute",
@@ -103,6 +108,25 @@ const FoodCategoryTable = () => {
     await dispatch(deleteCategory({ id: deleteId, jwt }));
     setOpenDeleteModal(false);
     fetchCategories();
+  };
+
+  const handleBlockUnblock = async (item) => {
+    try {
+      if (item.isActive) {
+        const response = await dispatch(blockCategory({ id: item._id, jwt }));
+        notification.success({ message: "Sản phẩm đã bị khóa thành công!" });
+      } else {
+        const response = await dispatch(unblockCategory({ id: item._id, jwt }));
+        notification.success({
+          message: "Sản phẩm đã được mở khóa thành công!",
+        });
+      }
+      fetchCategories();
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Đã có lỗi xảy ra!";
+      console.error(error);
+      notification.error({ message: errorMessage });
+    }
   };
   return (
     <Box
@@ -193,6 +217,13 @@ const FoodCategoryTable = () => {
                       {item.isActive ? "Active" : "Inactive"}
                     </TableCell>
                     <TableCell align="right">
+                      <IconButton onClick={() => handleBlockUnblock(item)}>
+                        {item.isActive ? (
+                          <LockIcon style={{ color: "#D32F2F" }} />
+                        ) : (
+                          <LockOpenIcon style={{ color: "#43A047" }} />
+                        )}
+                      </IconButton>
                       <IconButton
                         color="error"
                         onClick={() => {

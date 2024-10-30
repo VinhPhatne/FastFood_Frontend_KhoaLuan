@@ -36,9 +36,10 @@ const LoginForm = ({
           navigate,
         })
       );
-      if (resultAction) {
+      if (resultAction.type === LOGIN_SUCCESS) {
         handleCancel();
       }
+
     } catch (error) {
       const message =
         error.response?.data?.message || error.message || "Đăng nhập thất bại";

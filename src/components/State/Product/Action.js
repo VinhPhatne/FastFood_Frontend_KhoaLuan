@@ -16,6 +16,9 @@ import {
   UNBLOCK_PRODUCT_SUCCESS,
   UNBLOCK_PRODUCT_REQUEST,
   UNBLOCK_PRODUCT_FAILURE,
+  BLOCK_PRODUCT_REQUEST,
+  BLOCK_PRODUCT_SUCCESS,
+  BLOCK_PRODUCT_FAILURE,
 } from "./ActionType";
 import { API_URL, api } from "../../config/api";
 
@@ -34,7 +37,8 @@ export const getProducts = () => async (dispatch) => {
   }
 };
 
-export const getProductsListPage = ({ jwt, page = 1, search, cateId, isSelling }) =>
+export const getProductsListPage =
+  ({ jwt, page = 1, search, cateId, isSelling }) =>
   async (dispatch) => {
     try {
       const response = await axios.get(`${API_URL}/v1/product/listpage`, {
@@ -140,16 +144,29 @@ export const getProductById =
   };
 
 // Xóa mềm sự kiện (đặt isSelling  thành false)
-export const deleteProduct =
+export const blockProduct =
   ({ id, jwt }) =>
   async (dispatch) => {
-    dispatch({ type: DELETE_PRODUCT_REQUEST });
+    dispatch({ type: BLOCK_PRODUCT_REQUEST });
     try {
       await api.put(
         `${API_URL}/v1/product/delete/${id}`,
         { isSelling: false },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
+      dispatch({ type: BLOCK_PRODUCT_SUCCESS, payload: id });
+    } catch (error) {
+      console.error("Error blocking product:", error);
+      dispatch({ type: BLOCK_PRODUCT_FAILURE });
+    }
+  };
+
+export const deleteProduct =
+  ({ id }) =>
+  async (dispatch) => {
+    dispatch({ type: DELETE_PRODUCT_REQUEST });
+    try {
+      await api.delete(`${API_URL}/v1/product/harddelete/${id}`);
       dispatch({ type: DELETE_PRODUCT_SUCCESS, payload: id });
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -164,13 +181,13 @@ export const unBlockProduct =
     dispatch({ type: UNBLOCK_PRODUCT_REQUEST });
     try {
       await api.put(
-        `${API_URL}/v1/event/delete/${id}`,
-        { isActive: false },
+        `${API_URL}/v1/product/unblock/${id}`,
+        { isSelling: true },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
       dispatch({ type: UNBLOCK_PRODUCT_SUCCESS, payload: id });
     } catch (error) {
-      console.error("Error deleting event:", error);
+      console.error("Error unblock product:", error);
       dispatch({ type: UNBLOCK_PRODUCT_FAILURE });
     }
   };

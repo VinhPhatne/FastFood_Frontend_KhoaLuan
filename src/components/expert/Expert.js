@@ -1,7 +1,7 @@
-import { Button } from "@mantine/core";
 import React from "react";
 import styles from "./Expert.module.scss";
 import image from "../../assets/images/expert.png";
+import { Button } from "antd";
 
 const Expert = () => {
   return (

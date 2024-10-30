@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "@mantine/core";
 import { FaCartShopping } from "react-icons/fa6";
+import { Button } from "@mantine/core";
 import { AiOutlineSearch } from "react-icons/ai";
 import styles from "./Header.module.scss";
 import logo from "../../assets/images/logo1.png";
@@ -32,7 +32,7 @@ const Header = () => {
   useEffect(() => {
     const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
     setCart(savedCart);
-  }, [jwt, cart]);
+  }, [jwt]);
 
   useEffect(() => {
     if (jwt) {
@@ -41,8 +41,7 @@ const Header = () => {
   }, [dispatch, jwt]);
 
   useEffect(() => {
-    const token = localStorage.getItem("jwt");
-    if (token) {
+    if (jwt) {
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);

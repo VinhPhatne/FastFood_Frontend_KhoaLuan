@@ -13,6 +13,9 @@ import {
   DELETE_EVENT_REQUEST,
   DELETE_EVENT_SUCCESS,
   DELETE_EVENT_FAILURE,
+  BLOCK_EVENT_REQUEST,
+  BLOCK_EVENT_SUCCESS,
+  BLOCK_EVENT_FAILURE,
 } from "./ActionType";
 import { API_URL, api } from "../../config/api";
 
@@ -91,19 +94,49 @@ export const getEventById =
   };
 
 // Xóa mềm sự kiện (đặt isActive thành false)
-export const deleteEvent =
+export const blockEvent =
   ({ id, jwt }) =>
   async (dispatch) => {
-    dispatch({ type: DELETE_EVENT_REQUEST });
+    dispatch({ type: BLOCK_EVENT_REQUEST });
     try {
       await api.put(
         `${API_URL}/v1/event/${id}`,
         { isActive: false },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
-      dispatch({ type: DELETE_EVENT_SUCCESS, payload: id });
+      dispatch({ type: BLOCK_EVENT_SUCCESS, payload: id });
     } catch (error) {
       console.error("Error deleting event:", error);
+      dispatch({ type: BLOCK_EVENT_FAILURE });
+    }
+  };
+
+  export const unblockEvent =
+  ({ id, jwt }) =>
+  async (dispatch) => {
+    dispatch({ type: BLOCK_EVENT_REQUEST });
+    try {
+      await api.put(
+        `${API_URL}/v1/event/${id}`,
+        { isActive: true },
+        { headers: { Authorization: `Bearer ${jwt}` } }
+      );
+      dispatch({ type: BLOCK_EVENT_SUCCESS, payload: id });
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      dispatch({ type: BLOCK_EVENT_FAILURE });
+    }
+  };
+
+export const deleteEvent =
+  ({ id }) =>
+  async (dispatch) => {
+    dispatch({ type: DELETE_EVENT_REQUEST });
+    try {
+      await api.delete(`${API_URL}/v1/event/harddelete/${id}`);
+      dispatch({ type: DELETE_EVENT_SUCCESS, payload: id });
+    } catch (error) {
+      console.error("Error deleting product:", error);
       dispatch({ type: DELETE_EVENT_FAILURE });
     }
   };

@@ -89,6 +89,7 @@ export const loginUser = (reqData) => async (dispatch) => {
     notification.success({
       message: "Đăng nhập thành công",
     });
+    return { type: LOGIN_SUCCESS, payload: data };
   } catch (error) {
     console.log("ER",error);
     const message = error.response?.data?.message || "Đăng nhập thất bại";
@@ -96,6 +97,7 @@ export const loginUser = (reqData) => async (dispatch) => {
     notification.error({
       message,
     });
+    return { type: LOGIN_FAILURE, payload: message };
   }
 };
 
