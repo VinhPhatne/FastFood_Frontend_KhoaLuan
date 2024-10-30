@@ -32,7 +32,7 @@ const Header = () => {
   useEffect(() => {
     const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
     setCart(savedCart);
-  }, [jwt]);
+  }, [jwt, cart]);
 
   useEffect(() => {
     if (jwt) {
