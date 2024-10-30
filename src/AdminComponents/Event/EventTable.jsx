@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Card,
-  CardHeader,
   IconButton,
   Modal,
   Paper,
@@ -15,11 +14,7 @@ import {
   TextField,
   Typography,
   InputAdornment,
-  List,
-  ListItem,
-  FormControlLabel,
   Checkbox,
-  Grid,
 } from "@mui/material";
 import CreateIcon from "@mui/icons-material/Create";
 import SearchIcon from "@mui/icons-material/Search";
@@ -30,12 +25,17 @@ import {
   deleteEvent,
   getEvents,
   getEventById,
+  blockEvent,
+  unblockEvent,
 } from "../../components/State/Event/Action";
 import { Delete } from "@mui/icons-material";
 import CreateEventForm from "./CreateEventForm";
 import UpdateEventForm from "./UpdateEventForm";
 import { getProductsByCategory } from "../../components/State/Product/Action";
 import { getCategories } from "../../components/State/Category/Action";
+import LockIcon from "@mui/icons-material/Lock";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
+import { notification } from "antd";
 
 const style = {
   position: "absolute",
@@ -71,8 +71,8 @@ const EventTable = () => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  const fetchEvents = () => {
-    dispatch(getEvents({ jwt }));
+  const fetchEvents = async () => {
+    await dispatch(getEvents({ jwt }));
   };
 
   useEffect(() => {
@@ -123,18 +123,14 @@ const EventTable = () => {
     setProducts(response || []);
   };
 
-  // const handleOpenProductModal = async (eventId) => {
-  //   setCurrentEventId(eventId);
-  //   await fetchProductsAndCategories();
-  //   setOpenProductModal(true);
-  // };
-
   const handleOpenProductModal = async (eventId) => {
     setCurrentEventId(eventId);
     const eventResponse = await dispatch(getEventById({ id: eventId, jwt }));
-    console.log("eventResponse", eventResponse);
     if (eventResponse) setSelectedEvent(eventResponse);
 
+    if (eventResponse?.data?.products) {
+      setSelectedProducts(new Set(eventResponse.data.products));
+    }
     await fetchProductsAndCategories();
     setOpenProductModal(true);
   };
@@ -144,7 +140,6 @@ const EventTable = () => {
     setSelectedProducts(new Set());
   };
 
-  // Xử lý khi chọn checkbox
   const handleToggleProduct = (productId) => {
     setSelectedProducts((prev) => {
       const newSelected = new Set(prev);
@@ -195,23 +190,34 @@ const EventTable = () => {
     );
 
     if (result) {
+      await fetchEvents();
       handleCloseProductModal();
-      fetchEvents();
     }
   };
 
   const filterProductsForEvent = (category) => {
-    // Lọc chỉ các sản phẩm không thuộc sự kiện nào hoặc thuộc sự kiện hiện tại
     return category.products.filter(
       (product) => !product.event || product.event === currentEventId
     );
   };
-  
-  const isProductChecked = (productId) => {
-    const isChecked = selectedEvent?.data?.products?.some((p) => p === productId);
-    console.log(`Sản phẩm với ID ${productId} đã có trong sự kiện:`, isChecked);
-  
-    return isChecked;
+
+  const handleBlockUnblock = async (item) => {
+    try {
+      if (item.isActive) {
+        const response = await dispatch(blockEvent({ id: item._id, jwt }));
+        notification.success({ message: "Sản phẩm đã bị khóa thành công!" });
+      } else {
+        const response = await dispatch(unblockEvent({ id: item._id, jwt }));
+        notification.success({
+          message: "Sản phẩm đã được mở khóa thành công!",
+        });
+      }
+      fetchEvents();
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Đã có lỗi xảy ra!";
+      console.error(error);
+      notification.error({ message: errorMessage });
+    }
   };
 
   return (
@@ -291,6 +297,13 @@ const EventTable = () => {
                       {item.isActive ? "Active" : "Inactive"}
                     </TableCell>
                     <TableCell align="right">
+                      <IconButton onClick={() => handleBlockUnblock(item)}>
+                        {item.isActive ? (
+                          <LockIcon style={{ color: "#D32F2F" }} />
+                        ) : (
+                          <LockOpenIcon style={{ color: "#43A047" }} />
+                        )}
+                      </IconButton>
                       <IconButton
                         color="error"
                         onClick={() => {
@@ -385,11 +398,12 @@ const EventTable = () => {
                           Giá: {product.currentPrice.toLocaleString()} VND
                         </Typography>
                         <Checkbox
-                          checked={
-                            selectedProducts.has(product._id) ||
-                            isProductChecked(product._id)
-                          }
-                          onChange={() => handleToggleProduct(product._id)}
+                          checked={selectedProducts.has(product._id)}
+                          onChange={() => {
+                            console.log("selectedProducts 1", selectedProducts);
+                            handleToggleProduct(product._id);
+                            console.log("selectedProducts 2", selectedProducts);
+                          }}
                         />
                       </Box>
                     ))}

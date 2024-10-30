@@ -24,18 +24,23 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useEffect, useState } from "react";
 import CreateIcon from "@mui/icons-material/Create";
+import LockIcon from "@mui/icons-material/Lock";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { useFormik } from "formik";
 import ClearIcon from "@mui/icons-material/Clear";
 import { Delete, Edit } from "@mui/icons-material";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  blockProduct,
   deleteProduct,
   getProductById,
   getProducts,
   getProductsListPage,
+  unBlockProduct,
 } from "../../components/State/Product/Action";
 import { getCategories } from "../../components/State/Category/Action";
+import { message, notification } from "antd";
 
 const style = {
   position: "absolute",
@@ -157,6 +162,32 @@ const ProductTable = () => {
   const handleDelete = async () => {
     await dispatch(deleteProduct({ id: deleteId, jwt }));
     setOpenDeleteModal(false);
+    const pageFromParams = searchParams.get("page");
+    const page = pageFromParams ? parseInt(pageFromParams, 10) : currentPage;
+    setCurrentPage(page);
+    dispatch(getProductsListPage({ jwt, page }));
+  };
+
+  const handleBlockUnblockProduct = async (item) => {
+    try {
+      if (item.isSelling) {
+        const response = await dispatch(blockProduct({ id: item._id, jwt }));
+        notification.success({ message: "Sản phẩm đã bị khóa thành công!" });
+      } else {
+        const response = await dispatch(unBlockProduct({ id: item._id, jwt }));
+        notification.success({
+          message: "Sản phẩm đã được mở khóa thành công!",
+        });
+      }
+      const pageFromParams = searchParams.get("page");
+      const page = pageFromParams ? parseInt(pageFromParams, 10) : currentPage;
+      setCurrentPage(page);
+      dispatch(getProductsListPage({ jwt, page }));
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Đã có lỗi xảy ra!";
+      console.error(error);
+      notification.error({ message: errorMessage });
+    }
   };
 
   return (
@@ -189,18 +220,6 @@ const ProductTable = () => {
               height: "50px",
             },
           }}
-          // InputProps={{
-          //   endAdornment: (
-          //     <InputAdornment position="end">
-          //       <IconButton onClick={handleSearch}>
-          //         <SearchIcon />
-          //       </IconButton>
-          //       <IconButton onClick={() => handleClearSearch()} edge="end">
-          //         <ClearIcon />
-          //       </IconButton>
-          //     </InputAdornment>
-          //   ),
-          // }}
         />
 
         <FormControl sx={{ minWidth: 150, marginLeft: 2 }}>
@@ -229,7 +248,6 @@ const ProductTable = () => {
           >
             <MenuItem value={true}>Đang bán</MenuItem>
             <MenuItem value={false}>Ngừng bán</MenuItem>{" "}
-            {/* False: Ngừng bán */}
           </Select>
         </FormControl>
 
@@ -241,8 +259,6 @@ const ProductTable = () => {
             <ClearIcon />
           </IconButton>
         </InputAdornment>
-        {/* ),
-          }} */}
 
         <Button
           variant="contained"
@@ -265,13 +281,10 @@ const ProductTable = () => {
                 backgroundColor: "#fdba74",
               }}
             >
-              {" "}
-              {/* Đổi màu nền TableHead thành cam Popeyes */}
               <TableRow>
                 <TableCell align="left" sx={{ color: "#000" }}>
                   Image
                 </TableCell>{" "}
-                {/* Đổi màu chữ thành trắng */}
                 <TableCell align="left" sx={{ color: "#000" }}>
                   Name
                 </TableCell>
@@ -319,7 +332,9 @@ const ProductTable = () => {
                     <TableCell align="left">{item.name}</TableCell>
                     <TableCell align="right">{item.price} VND</TableCell>
                     <TableCell align="right">{item.currentPrice} VND</TableCell>
-                    <TableCell align="right">{item.category.name} </TableCell>
+                    <TableCell align="right">
+                      {item.category ? item.category.name : "N/A"}{" "}
+                    </TableCell>
                     <TableCell align="right">
                       {item.isSelling ? (
                         <span style={{ color: "#43A047" }}>Selling</span>
@@ -328,17 +343,24 @@ const ProductTable = () => {
                       )}
                     </TableCell>
                     <TableCell align="right">
+                      {/* Nút khóa */}
+                      <IconButton
+                        onClick={() => handleBlockUnblockProduct(item)}
+                      >
+                        {item.isSelling ? (
+                          <LockIcon style={{ color: "#D32F2F" }} />
+                        ) : (
+                          <LockOpenIcon style={{ color: "#43A047" }} />
+                        )}
+                      </IconButton>
+                      {/* Nút chỉnh sửa */}
                       <IconButton
                         color="error"
-                        // onClick={() => {
-                        //   console.log("IDDDD", item._id);
-                        //   //handleUpdate(item._id);
-                        // }}
-
                         onClick={() => navigate(`${item._id}`)}
                       >
                         <CreateIcon />
                       </IconButton>
+                      {/* Nút xóa */}
                       <IconButton
                         color="error"
                         onClick={() => {

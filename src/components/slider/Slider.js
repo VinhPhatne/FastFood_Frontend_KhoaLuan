@@ -1,4 +1,3 @@
-import { Button } from "@mantine/core";
 import React from "react";
 import styles from "./Slider.module.scss";
 import "slick-carousel/slick/slick.css";

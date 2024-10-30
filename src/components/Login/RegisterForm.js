@@ -49,7 +49,6 @@ const RegisterForm = ({ isModalVisible, handleCancel, switchToLogin }) => {
       const message = error.response?.data?.message || "Gửi OTP thất bại!";
       console.error(error);
       notification.error({ message });
-      throw error;
     }
   };
 

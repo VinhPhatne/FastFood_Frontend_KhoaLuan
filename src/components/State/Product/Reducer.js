@@ -15,7 +15,6 @@ const initialState = {
   productsByCategory: {},
   error: null,
   selectedProduct: null,
-
 };
 
 const productReducer = (state = initialState, action) => {
@@ -45,9 +44,11 @@ const productReducer = (state = initialState, action) => {
     case UPDATE_PRODUCT_SUCCESS:
       return {
         ...state,
-        products: state.products.map((product) =>
-          product._id === action.payload._id ? action.payload : product
-        ),
+        products: Array.isArray(state.products)
+          ? state.products.map((product) =>
+              product._id === action.payload._id ? action.payload : product
+            )
+          : [],
         error: null,
       };
     case UPDATE_PRODUCT_FAILURE:

@@ -12,6 +12,9 @@ import {
   DELETE_CATEGORY_REQUEST,
   DELETE_CATEGORY_SUCCESS,
   DELETE_CATEGORY_FAILURE,
+  BLOCK_CATEGORY_REQUEST,
+  BLOCK_CATEGORY_SUCCESS,
+  BLOCK_CATEGORY_FAILURE,
 } from "./ActionType";
 import { API_URL, api } from "../../config/api";
 import axios from "axios";
@@ -111,19 +114,19 @@ export const getCategoryById =
         },
       });
       dispatch({ type: "GET_CATEGORY_BY_ID_SUCCESS", payload: response.data });
-      return response.data; 
+      return response.data;
     } catch (error) {
       console.error("Error fetching category by ID:", error);
       dispatch({ type: "GET_CATEGORY_BY_ID_FAILURE", payload: error });
-      return null; 
+      return null;
     }
   };
 
 // Xóa mềm category (đặt isActive thành false)
-export const deleteCategory =
+export const blockCategory =
   ({ id, jwt }) =>
   async (dispatch) => {
-    dispatch({ type: DELETE_CATEGORY_REQUEST });
+    dispatch({ type: BLOCK_CATEGORY_REQUEST });
     try {
       const { data } = await api.put(
         `${API_URL}/v1/category/${id}`,
@@ -135,9 +138,44 @@ export const deleteCategory =
         }
       );
       console.log("deleteCategory", data);
-      dispatch({ type: DELETE_CATEGORY_SUCCESS, payload: id });
+      dispatch({ type: BLOCK_CATEGORY_SUCCESS, payload: id });
     } catch (error) {
       console.log("error", error);
+      dispatch({ type: BLOCK_CATEGORY_FAILURE });
+    }
+  };
+
+  export const unblockCategory =
+  ({ id, jwt }) =>
+  async (dispatch) => {
+    dispatch({ type: BLOCK_CATEGORY_REQUEST });
+    try {
+      const { data } = await api.put(
+        `${API_URL}/v1/category/unblock/${id}`,
+        { isActive: true },
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        }
+      );
+      console.log("deleteCategory", data);
+      dispatch({ type: BLOCK_CATEGORY_SUCCESS, payload: id });
+    } catch (error) {
+      console.log("error", error);
+      dispatch({ type: BLOCK_CATEGORY_FAILURE });
+    }
+  };
+
+export const deleteCategory =
+  ({ id }) =>
+  async (dispatch) => {
+    dispatch({ type: DELETE_CATEGORY_REQUEST });
+    try {
+      await api.delete(`${API_URL}/v1/category/harddelete/${id}`);
+      dispatch({ type: DELETE_CATEGORY_SUCCESS, payload: id });
+    } catch (error) {
+      console.error("Error deleting product:", error);
       dispatch({ type: DELETE_CATEGORY_FAILURE });
     }
   };
