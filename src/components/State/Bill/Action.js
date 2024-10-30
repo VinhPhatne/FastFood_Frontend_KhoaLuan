@@ -58,22 +58,23 @@ export const createBill = (billData) => async (dispatch) => {
   }
 };
 
-export const updateBill =
-  ({ id, billData }) =>
-  async (dispatch) => {
-    try {
-      const response = await axios.put(`${API_URL}/v1/bill/${id}`, billData);
-      dispatch({
-        type: UPDATE_BILL_SUCCESS,
-        payload: response.data.updatedBill,
-      });
-    } catch (error) {
-      dispatch({
-        type: UPDATE_BILL_FAILURE,
-        payload: error.response?.data?.message || "Failed to update bill",
-      });
-    }
-  };
+
+export const updateBillStatus = (id, newStatus) => async (dispatch) => {
+  const billData = { state: newStatus }; 
+
+  try {
+    const response = await axios.put(`${API_URL}/v1/bill/${id}`, billData);
+    dispatch({
+      type: UPDATE_BILL_SUCCESS,
+      payload: response.data.updatedBill, 
+    });
+  } catch (error) {
+    dispatch({
+      type: UPDATE_BILL_FAILURE,
+      payload: error.response?.data?.message || 'Failed to update bill',
+    });
+  }
+};
 
 export const getBillsByAccount = (accountId) => async (dispatch) => {
   try {

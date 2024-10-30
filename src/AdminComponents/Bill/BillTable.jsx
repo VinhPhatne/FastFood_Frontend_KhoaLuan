@@ -16,6 +16,8 @@ import {
   TextField,
   Typography,
   InputAdornment,
+  MenuItem,
+  Select,
 } from "@mui/material";
 import CreateIcon from "@mui/icons-material/Create";
 import SearchIcon from "@mui/icons-material/Search";
@@ -28,7 +30,7 @@ import {
   getEventById,
 } from "../../components/State/Event/Action";
 import { Delete } from "@mui/icons-material";
-import { getBills } from "../../components/State/Bill/Action";
+import { getBills, updateBillStatus } from "../../components/State/Bill/Action";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 const style = {
@@ -62,13 +64,11 @@ const BillTable = () => {
       params.set("accountId", accountId);
     }
     setCurrentPage(value);
-    console.log("page", value)
+    console.log("page", value);
     dispatch(
       getBills({
-
         page: value,
         accountId,
-
       })
     );
   };
@@ -78,13 +78,12 @@ const BillTable = () => {
 
     const params = new URLSearchParams(location.search);
     const accountId = params.get("accountId");
-    console.log("check param", accountId)
+    console.log("check param", accountId);
     if (searchTerm) {
       params.set("phone", searchTerm);
     }
 
-
-    dispatch(getBills( {page: 1, accountId, searchTerm } ));
+    dispatch(getBills({ page: 1, accountId, searchTerm }));
   };
 
   const [searchParams] = useSearchParams();
@@ -102,6 +101,15 @@ const BillTable = () => {
     console.log("check param", accountId);
     dispatch(getBills({ page: 1, accountId }));
   }, [dispatch]);
+  const handleStatusChange = (id, newStatus) => {
+
+    dispatch(updateBillStatus(id, newStatus)); 
+    const params = new URLSearchParams(location.search);
+    const accountId = params.get("accountId");
+  
+    dispatch(getBills({ page: currentPage, accountId }));
+
+  };
 
   const handleClearSearch = () => setSearchTerm("");
 
@@ -129,7 +137,7 @@ const BillTable = () => {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton  onClick={handleSearch}>
+                <IconButton onClick={handleSearch}>
                   <SearchIcon />
                 </IconButton>
                 <IconButton onClick={handleClearSearch}>
@@ -139,7 +147,6 @@ const BillTable = () => {
             ),
           }}
         />
-    
       </Box>
 
       {/* Table Section */}
@@ -154,7 +161,7 @@ const BillTable = () => {
                 <TableCell align="center">Giá trị đơn hàng</TableCell>
                 <TableCell align="right">Ngày tạo</TableCell>
                 <TableCell align="center">Trạng thái thanh toán</TableCell>
-                <TableCell align="right">Action</TableCell>
+                <TableCell align="center">Trạng thái đơn hàng</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -169,7 +176,7 @@ const BillTable = () => {
                       {index + 1}
                     </TableCell>
                     <TableCell align="left">{item.fullName}</TableCell>
-                    
+
                     <TableCell align="left">{item.phone_shipment}</TableCell>
                     <TableCell align="center">{item.total_price} đ</TableCell>
                     <TableCell align="right">
@@ -178,19 +185,21 @@ const BillTable = () => {
                     <TableCell align="center">
                       {item.isPaid ? "Đã thanh toán" : "Chưa thanh toán"}
                     </TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        color="error"
-                        
+                    <TableCell align="center">
+                      <TextField
+                        select
+                        value={item.state} 
+                        onChange={(e) => handleStatusChange(item._id, e.target.value)}
+                        variant="outlined"
+                        size="small"
+                        onClick={(e) => e.stopPropagation()}
+                        InputProps={{ readOnly: false }} 
                       >
-                        <CreateIcon />
-                      </IconButton>
-                      <IconButton
-                        color="error"
-                        
-                      >
-                        <Delete />
-                      </IconButton>
+                        <MenuItem value={1}>Đang xử lí</MenuItem>
+                        <MenuItem value={2}>Đang thực hiện món</MenuItem>
+                        <MenuItem value={3}>Đang giao hàng</MenuItem>
+                        <MenuItem value={4}>Hoàn tất</MenuItem>
+                      </TextField>
                     </TableCell>
                   </TableRow>
                 ))
