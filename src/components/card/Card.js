@@ -14,7 +14,9 @@ import { getProducts, getProductsByCategory } from "../State/Product/Action";
 import Cookies from "js-cookie";
 import { notification } from "antd";
 import { Modal, InputNumber, Button } from "antd";
-import "./productModal.css"; // Import your CSS for styling
+import "./productModal.css";
+import { CartContext } from "../CardContext"; 
+import useCart from "./useCart";
 const Card = () => {
   const dispatch = useDispatch();
   const { categories } = useSelector(
@@ -23,6 +25,7 @@ const Card = () => {
   const { productsByCategory } = useSelector((state) => state.productReducer);
   const { products } = useSelector((state) => state.productReducer);
   const jwt = useMemo(() => localStorage.getItem("jwt"), []);
+  const { cart, addToCart } = useCart();
   useEffect(() => {
     dispatch(getCategories({ jwt }));
     dispatch(getProducts({ jwt }));
@@ -66,45 +69,48 @@ const Card = () => {
     }
   };
   const handleAddToCartModal = (product) => {
-    handleAddToCart(product);
+    addToCart(product, quantity);
     setQuantity(1);
   };
 
   const handleAddToCart = (product) => {
-    if (!jwt) {
-      alert("Bạn cần đăng nhập để thêm vào giỏ hàng.");
-      return;
-    }
 
-    const cart = JSON.parse(Cookies.get(jwt) || "[]");
 
-    const existingProduct = cart.find((item) => item.id === product._id);
+    addToCart(product, quantity)
+    // if (!jwt) {
+    //   alert("Bạn cần đăng nhập để thêm vào giỏ hàng.");
+    //   return;
+    // }
 
-    let updatedCart;
-    if (existingProduct) {
-      updatedCart = cart.map((item) =>
-        item.id === product._id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
-    } else {
-      updatedCart = [
-        ...cart,
-        {
-          id: product._id,
-          name: product.name,
-          price: product.price,
-          picture: product.picture,
-          quantity: quantity,
-        },
-      ];
-    }
+    // const cart = JSON.parse(Cookies.get(jwt) || "[]");
 
-    Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
+    // const existingProduct = cart.find((item) => item.id === product._id);
 
-    notification.success({
-      message: "Sản phẩm đã được thêm vào giỏ hàng!",
-    });
+    // let updatedCart;
+    // if (existingProduct) {
+    //   updatedCart = cart.map((item) =>
+    //     item.id === product._id
+    //       ? { ...item, quantity: item.quantity + 1 }
+    //       : item
+    //   );
+    // } else {
+    //   updatedCart = [
+    //     ...cart,
+    //     {
+    //       id: product._id,
+    //       name: product.name,
+    //       price: product.price,
+    //       picture: product.picture,
+    //       quantity: quantity,
+    //     },
+    //   ];
+    // }
+
+    // Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
+
+    // notification.success({
+    //   message: "Sản phẩm đã được thêm vào giỏ hàng!",
+    // });
   };
 
   return (

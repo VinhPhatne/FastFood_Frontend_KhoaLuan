@@ -5,10 +5,10 @@ import { getUserProfile } from "../State/Authentication/Action";
 import { createBill } from "../State/Bill/Action";
 import { Button, TextField } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
+import useCart from "../card/useCart";
 
 const Checkout = () => {
   const jwt = localStorage.getItem("jwt");
-  const [cart, setCart] = useState([]);
   const [formData, setFormData] = useState({
     fullName: "",
     address: "",
@@ -17,25 +17,15 @@ const Checkout = () => {
   });
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const { state } = useLocation();
   const { discount, voucherId, finalTotal, pointsUsed } = state || {};
-
-  console.log("discount", discount);
-  console.log("voucher", voucherId);
-  console.log("finalTotal", finalTotal);
-  console.log("pointsUsed", pointsUsed);
-
+  const { cart, totalQuantity, totalPrice, handleIncrease, handleDecrease, handleRemove } = useCart(jwt);
   const userProfile = useSelector((state) => state.auth.user);
+  const shippingFee = totalPrice > 0 ? 10000 : 0;
 
   useEffect(() => {
     dispatch(getUserProfile());
   }, [dispatch]);
-
-  useEffect(() => {
-    const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
-    setCart(savedCart);
-  }, [jwt]);
 
   useEffect(() => {
     if (userProfile) {
@@ -47,39 +37,6 @@ const Checkout = () => {
       });
     }
   }, [userProfile]);
-
-  const handleIncrease = (id) => {
-    const updatedCart = cart.map((item) =>
-      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-    );
-    setCart(updatedCart);
-    Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
-  };
-
-  const handleDecrease = (id) => {
-    const updatedCart = cart
-      .map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity - 1 } : item
-      )
-      .filter((item) => item.quantity > 0);
-    setCart(updatedCart);
-    Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
-  };
-
-  const handleRemove = (id) => {
-    const updatedCart = cart.filter((item) => item.id !== id);
-    setCart(updatedCart);
-    Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
-  };
-
-  const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
-  const totalPrice = cart.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
-
-  const shippingFee = totalPrice > 0 ? 10000 : 0;
-  //const finalTotal = totalPrice + shippingFee;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -110,10 +67,7 @@ const Checkout = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
   return (
@@ -123,7 +77,6 @@ const Checkout = () => {
       </h1>
 
       <div className="flex justify-between">
-        {/* Form thông tin người dùng */}
         <div className="w-1/2 border rounded-lg p-6 mr-6">
           <h2 className="text-xl font-bold mb-4">Thông tin giao hàng</h2>
           <form onSubmit={handleSubmit}>
@@ -178,7 +131,6 @@ const Checkout = () => {
           </form>
         </div>
 
-        {/* Hiển thị giỏ hàng */}
         <div className="w-1/2">
           <div className="border rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">{totalQuantity} MÓN</h2>
@@ -189,40 +141,15 @@ const Checkout = () => {
                   key={item.id}
                   className="flex items-center justify-between border rounded-lg p-4 gap-4 mb-4"
                 >
-                  <img
-                    src={item.picture}
-                    alt={item.name}
-                    className="w-16 h-16 rounded-md"
-                  />
+                  <img src={item.picture} alt={item.name} className="w-16 h-16 rounded-md" />
                   <div className="flex-grow">
                     <h2 className="text-lg font-semibold">{item.name}</h2>
-                    <button
-                      onClick={() => handleRemove(item.id)}
-                      className="text-sm text-blue-500 hover:underline"
-                    >
-                      Xóa
-                    </button>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleDecrease(item.id)}
-                      className="w-6 h-6 border rounded-full flex justify-center items-center"
-                    >
-                      -
-                    </button>
-                    <span className="text-lg font-semibold">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => handleIncrease(item.id)}
-                      className="w-6 h-6 border rounded-full flex justify-center items-center"
-                    >
-                      +
-                    </button>
+
+                    <span className="text-lg font-semibold mx-10">x {item.quantity}</span>
                   </div>
-                  <span className="text-lg font-semibold">
-                    {item.price * item.quantity} đ
-                  </span>
+                  <span className="text-lg font-semibold">{(item.price * item.quantity).toLocaleString()} đ</span>
                 </div>
               ))
             ) : (

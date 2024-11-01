@@ -1,3 +1,4 @@
+// src/components/header/Header.js
 import React, { useEffect, useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
 import { Button } from "@mantine/core";
@@ -9,46 +10,37 @@ import RegisterForm from "../Login/RegisterForm";
 import { Dropdown, Menu, notification, Avatar } from "antd";
 import { useNavigate } from "react-router-dom";
 import { UserOutlined } from "@ant-design/icons";
-import Cookies from "js-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserProfile, logout } from "../State/Authentication/Action";
 import { GiTwoCoins } from "react-icons/gi";
+import useCart from "../card/useCart";
+
 
 const Header = () => {
   const [activeTab, setActiveTab] = useState("Trang chủ");
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isRegisterMode, setIsRegisterMode] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeForm, setActiveForm] = useState("login");
-  const [cart, setCart] = useState([]);
+  const [totalQuantity, setTotalQuantity] = useState(0);
 
   const jwt = localStorage.getItem("jwt");
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const userProfile = useSelector((state) => state.auth.user);
+  const { cart } = useCart(); 
+
   useEffect(() => {
-    const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
-    setCart(savedCart);
-  }, [jwt, cart]);
+    const quantity = cart.reduce((acc, item) => acc + item.quantity, 0);
+    setTotalQuantity(quantity);
+  }, [cart]);
 
   useEffect(() => {
     if (jwt) {
       dispatch(getUserProfile());
     }
   }, [dispatch, jwt]);
-
-  useEffect(() => {
-    if (jwt) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
-  }, [jwt]);
-
-  const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   const handleFocus = () => {
     setIsSearchActive(true);
@@ -64,7 +56,7 @@ const Header = () => {
   };
 
   const handleCartClick = () => {
-    if (isLoggedIn) {
+    if (jwt) {
       navigate("/cart");
     } else {
       setIsModalVisible(true);
@@ -78,7 +70,6 @@ const Header = () => {
   const handleLogout = () => {
     navigate("/");
     dispatch(logout());
-    setIsLoggedIn(false);
     notification.success({
       message: "Đăng xuất thành công",
     });
@@ -99,7 +90,7 @@ const Header = () => {
         Profile
       </Menu.Item>
       <Menu.Item
-        key="profile"
+        key="change-password"
         onClick={() => navigate("/profile/change-password")}
       >
         Đổi mật khẩu
@@ -149,20 +140,20 @@ const Header = () => {
           <span className={styles.cartBadge}>{totalQuantity}</span>
         </div>
 
-        {isLoggedIn && userProfile && (
+        {userProfile && (
           <div className={styles.points}>
             <span className={styles.pointsText}>{userProfile.point || 0}</span>
             <GiTwoCoins className={styles.coinIcon} />
           </div>
         )}
 
-        {isLoggedIn ? (
+        {jwt ? (
           <div className={styles.userProfile}>
             <Dropdown overlay={userMenu}>
               <a onClick={(e) => e.preventDefault()}>
                 <Avatar
                   src={"https://example.com/avatar.jpg"}
-                  icon={isLoggedIn && <UserOutlined />}
+                  icon={<UserOutlined />}
                   className={styles.avatar}
                   shape="circle"
                   size="large"
