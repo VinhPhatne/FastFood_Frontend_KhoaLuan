@@ -22,6 +22,7 @@ const menu = [
   { title: "Events", icon: <EventIcon />, path: "/event" },
   { title: "Voucher", icon: <DiscountIcon />, path: "/voucher" },
   { title: "Import", icon: <DiscountIcon />, path: "/import" },
+  { title: "Tuỳ chọn món ăn kèm", icon: <DiscountIcon />, path: "/optional" },
   { title: "Logout", icon: <LogoutIcon />, path: "/" },
 ];
 

@@ -14,7 +14,10 @@ import { getProducts, getProductsByCategory } from "../State/Product/Action";
 import Cookies from "js-cookie";
 import { notification } from "antd";
 import { Modal, InputNumber, Button } from "antd";
-import "./productModal.css"; // Import your CSS for styling
+import "./productModal.css"; 
+import useCart from "../../hook/useCart";
+
+
 const Card = () => {
   const dispatch = useDispatch();
   const { categories } = useSelector(
@@ -23,6 +26,7 @@ const Card = () => {
   const { productsByCategory } = useSelector((state) => state.productReducer);
   const { products } = useSelector((state) => state.productReducer);
   const jwt = useMemo(() => localStorage.getItem("jwt"), []);
+  const { cart, addToCart } = useCart();
   useEffect(() => {
     dispatch(getCategories({ jwt }));
     dispatch(getProducts({ jwt }));
@@ -66,7 +70,8 @@ const Card = () => {
     }
   };
   const handleAddToCartModal = (product) => {
-    handleAddToCart(product);
+    //handleAddToCart(product);
+    addToCart(product, quantity);
     setQuantity(1);
   };
 
@@ -76,32 +81,32 @@ const Card = () => {
       return;
     }
 
-    const cart = JSON.parse(Cookies.get(jwt) || "[]");
+    // const cart = JSON.parse(Cookies.get(jwt) || "[]");
 
-    const existingProduct = cart.find((item) => item.id === product._id);
+    // const existingProduct = cart.find((item) => item.id === product._id);
 
-    let updatedCart;
-    if (existingProduct) {
-      updatedCart = cart.map((item) =>
-        item.id === product._id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
-    } else {
-      updatedCart = [
-        ...cart,
-        {
-          id: product._id,
-          name: product.name,
-          price: product.price,
-          picture: product.picture,
-          quantity: quantity,
-        },
-      ];
-    }
+    // let updatedCart;
+    // if (existingProduct) {
+    //   updatedCart = cart.map((item) =>
+    //     item.id === product._id
+    //       ? { ...item, quantity: item.quantity + 1 }
+    //       : item
+    //   );
+    // } else {
+    //   updatedCart = [
+    //     ...cart,
+    //     {
+    //       id: product._id,
+    //       name: product.name,
+    //       price: product.price,
+    //       picture: product.picture,
+    //       quantity: quantity,
+    //     },
+    //   ];
+    // }
 
-    Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
-
+    // Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
+    addToCart(product, quantity)
     notification.success({
       message: "Sản phẩm đã được thêm vào giỏ hàng!",
     });
