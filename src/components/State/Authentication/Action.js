@@ -143,6 +143,7 @@ export const getUserProfile = () => async (dispatch) => {
 export const logout = () => async (dispatch) => {
   try {
     localStorage.removeItem("jwt");
+    localStorage.removeItem("role");
     console.log("logout");
     dispatch({ type: LOGOUT });
   } catch (error) {

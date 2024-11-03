@@ -6,16 +6,18 @@ export const CartProvider = ({ children }) => {
     return savedCart ? JSON.parse(savedCart) : [];
   });
   console.log("check contexxt", cart);
-  
+
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
+
+  const clearCart = () => setCart([]);
   return (
-    <CartContext.Provider value={{ cart, setCart }}>
+    <CartContext.Provider value={{ cart, setCart, clearCart }}>
       {children}
     </CartContext.Provider>
   );
 };
-export const useCart = () => {
-    return useContext(CartContext);
-  };
+export const useCartContext = () => {
+  return useContext(CartContext);
+};

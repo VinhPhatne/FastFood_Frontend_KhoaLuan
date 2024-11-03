@@ -123,7 +123,7 @@ const Cart = () => {
       <div className="flex items-start justify-between">
         <div
           className="flex flex-col justify-start gap-6 md:grid-cols-2"
-          style={{ width: "760px" }}
+          style={{ width: "760px", minHeight: '250px' }}
         >
           {cart.length > 0 ? (
             cart.map((item) => (

@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUserProfile, logout } from "../State/Authentication/Action";
 import { GiTwoCoins } from "react-icons/gi";
 import useCart from "../../hook/useCart";
+import { useCartContext } from "../cart/CartContext";
 
 const Header = () => {
   const [activeTab, setActiveTab] = useState("Trang chủ");
@@ -24,6 +25,7 @@ const Header = () => {
   const [activeForm, setActiveForm] = useState("login");
   //const [cart, setCart] = useState([]);
   const { cart } = useCart();
+  const { clearCart } = useCartContext();
   const [totalQuantity, setTotalQuantity] = useState(0);
 
   const jwt = localStorage.getItem("jwt");
@@ -79,6 +81,7 @@ const Header = () => {
   };
 
   const handleLogout = () => {
+    clearCart();
     navigate("/");
     dispatch(logout());
     setIsLoggedIn(false);
