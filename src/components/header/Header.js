@@ -13,6 +13,7 @@ import Cookies from "js-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserProfile, logout } from "../State/Authentication/Action";
 import { GiTwoCoins } from "react-icons/gi";
+import useCart from "../../hook/useCart";
 
 const Header = () => {
   const [activeTab, setActiveTab] = useState("Trang chủ");
@@ -21,7 +22,9 @@ const Header = () => {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeForm, setActiveForm] = useState("login");
-  const [cart, setCart] = useState([]);
+  //const [cart, setCart] = useState([]);
+  const { cart } = useCart();
+  const [totalQuantity, setTotalQuantity] = useState(0);
 
   const jwt = localStorage.getItem("jwt");
 
@@ -30,9 +33,9 @@ const Header = () => {
 
   const userProfile = useSelector((state) => state.auth.user);
   useEffect(() => {
-    const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
-    setCart(savedCart);
-  }, [jwt, cart]);
+    const quantity = cart.reduce((acc, item) => acc + item.quantity, 0);
+    setTotalQuantity(quantity);
+  }, [cart]);
 
   useEffect(() => {
     if (jwt) {
@@ -48,7 +51,7 @@ const Header = () => {
     }
   }, [jwt]);
 
-  const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
+
 
   const handleFocus = () => {
     setIsSearchActive(true);

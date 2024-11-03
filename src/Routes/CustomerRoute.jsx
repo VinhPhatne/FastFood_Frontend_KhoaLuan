@@ -14,6 +14,7 @@ import AboutUs from "../components/AboutMe/AboutUs";
 import OTP from "../components/otp/OTP";
 import { useSelector } from "react-redux";
 import BillDetail from "../components/profile/BillDetail";
+import { CartProvider } from "../components/cart/CartContext";
 
 const CustomerRoute = () => {
   // const { role } = useSelector((state) => state.auth);
@@ -21,19 +22,21 @@ const CustomerRoute = () => {
   //   return <Navigate to="/admin" replace />;
   // }
   return (
-    <div>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/profile/*" element={<Profile />} />
-        <Route path="/cart/*" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/success" element={<PaymentSuccess />} />
-        <Route path="/about" element={<AboutUs />} />
-        <Route path="/otp" element={<OTP />} />
-      </Routes>
-      <Footer />
-    </div>
+    <CartProvider>
+      <div>
+        <Header />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/profile/*" element={<Profile />} />
+          <Route path="/cart/*" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/success" element={<PaymentSuccess />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/otp" element={<OTP />} />
+        </Routes>
+        <Footer />
+      </div>
+    </CartProvider>
   );
 };
 

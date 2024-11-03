@@ -4,13 +4,22 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserProfile } from "../State/Authentication/Action";
+import useCart from "../../hook/useCart";
 
 const Cart = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const jwt = localStorage.getItem("jwt");
-  const [cart, setCart] = useState([]);
+  //const [cart, setCart] = useState([]);
+
+  const {
+    cart,
+    addToCart,
+    increaseQuantity,
+    decreaseQuantity,
+    removeFromCart,
+  } = useCart();
 
   const [voucher, setVoucher] = useState(""); // State cho mã voucher
   const [discount, setDiscount] = useState(0); // State cho tiền giảm giá
@@ -19,10 +28,10 @@ const Cart = () => {
   const [pointsUsed, setPointsUsed] = useState(0); // State để nhập điểm
   const [pointsError, setPointsError] = useState(""); // State để thông báo lỗi
 
-  useEffect(() => {
-    const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
-    setCart(savedCart);
-  }, [jwt]);
+  // useEffect(() => {
+  //   const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
+  //   setCart(savedCart);
+  // }, [jwt]);
 
   useEffect(() => {
     if (jwt) {
@@ -36,27 +45,18 @@ const Cart = () => {
   console.log("userPoints", userPoints);
 
   const handleIncrease = (id) => {
-    const updatedCart = cart.map((item) =>
-      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-    );
-    setCart(updatedCart);
-    Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
+    increaseQuantity(id);
+    Cookies.set(jwt, JSON.stringify(cart), { expires: 2 });
   };
 
   const handleDecrease = (id) => {
-    const updatedCart = cart
-      .map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity - 1 } : item
-      )
-      .filter((item) => item.quantity > 0);
-    setCart(updatedCart);
-    Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
+    decreaseQuantity(id);
+    Cookies.set(jwt, JSON.stringify(cart), { expires: 2 });
   };
 
   const handleRemove = (id) => {
-    const updatedCart = cart.filter((item) => item.id !== id);
-    setCart(updatedCart);
-    Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
+    removeFromCart(id);
+    Cookies.set(jwt, JSON.stringify(cart), { expires: 2 });
   };
 
   const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -123,7 +123,7 @@ const Cart = () => {
       <div className="flex items-start justify-between">
         <div
           className="flex flex-col justify-start gap-6 md:grid-cols-2"
-          style={{ width: "760px", height: "200px" }}
+          style={{ width: "760px" }}
         >
           {cart.length > 0 ? (
             cart.map((item) => (

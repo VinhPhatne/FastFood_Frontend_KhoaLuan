@@ -5,10 +5,12 @@ import { getUserProfile } from "../State/Authentication/Action";
 import { createBill } from "../State/Bill/Action";
 import { Button, TextField } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
+import useCart from "../../hook/useCart";
 
 const Checkout = () => {
   const jwt = localStorage.getItem("jwt");
-  const [cart, setCart] = useState([]);
+  //const [cart, setCart] = useState([]);
+  const { cart, totalQuantity, totalPrice, handleIncrease, handleDecrease, handleRemove } = useCart(jwt);
   const [formData, setFormData] = useState({
     fullName: "",
     address: "",
@@ -32,10 +34,10 @@ const Checkout = () => {
     dispatch(getUserProfile());
   }, [dispatch]);
 
-  useEffect(() => {
-    const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
-    setCart(savedCart);
-  }, [jwt]);
+  // useEffect(() => {
+  //   const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
+  //   setCart(savedCart);
+  // }, [jwt]);
 
   useEffect(() => {
     if (userProfile) {
@@ -48,35 +50,35 @@ const Checkout = () => {
     }
   }, [userProfile]);
 
-  const handleIncrease = (id) => {
-    const updatedCart = cart.map((item) =>
-      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-    );
-    setCart(updatedCart);
-    Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
-  };
+  // const handleIncrease = (id) => {
+  //   const updatedCart = cart.map((item) =>
+  //     item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+  //   );
+  //   setCart(updatedCart);
+  //   Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
+  // };
 
-  const handleDecrease = (id) => {
-    const updatedCart = cart
-      .map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity - 1 } : item
-      )
-      .filter((item) => item.quantity > 0);
-    setCart(updatedCart);
-    Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
-  };
+  // const handleDecrease = (id) => {
+  //   const updatedCart = cart
+  //     .map((item) =>
+  //       item.id === id ? { ...item, quantity: item.quantity - 1 } : item
+  //     )
+  //     .filter((item) => item.quantity > 0);
+  //   setCart(updatedCart);
+  //   Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
+  // };
 
-  const handleRemove = (id) => {
-    const updatedCart = cart.filter((item) => item.id !== id);
-    setCart(updatedCart);
-    Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
-  };
+  // const handleRemove = (id) => {
+  //   const updatedCart = cart.filter((item) => item.id !== id);
+  //   setCart(updatedCart);
+  //   Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
+  // };
 
-  const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
-  const totalPrice = cart.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
+  // const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
+  // const totalPrice = cart.reduce(
+  //   (acc, item) => acc + item.price * item.quantity,
+  //   0
+  // );
 
   const shippingFee = totalPrice > 0 ? 10000 : 0;
   //const finalTotal = totalPrice + shippingFee;
@@ -200,25 +202,13 @@ const Checkout = () => {
                       onClick={() => handleRemove(item.id)}
                       className="text-sm text-blue-500 hover:underline"
                     >
-                      Xóa
+                      x {item.quantity}
                     </button>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleDecrease(item.id)}
-                      className="w-6 h-6 border rounded-full flex justify-center items-center"
-                    >
-                      -
-                    </button>
                     <span className="text-lg font-semibold">
-                      {item.quantity}
+                      SL : {item.quantity}
                     </span>
-                    <button
-                      onClick={() => handleIncrease(item.id)}
-                      className="w-6 h-6 border rounded-full flex justify-center items-center"
-                    >
-                      +
-                    </button>
                   </div>
                   <span className="text-lg font-semibold">
                     {item.price * item.quantity} đ

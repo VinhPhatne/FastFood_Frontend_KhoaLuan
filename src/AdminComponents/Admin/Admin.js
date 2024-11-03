@@ -16,6 +16,8 @@ import BillDetailTable from "../Bill/BillDetailTable";
 import Voucher from "../Voucher/Voucher";
 import StockIn from "../StockIn/StockIn";
 import Dashboard from "../DashBoard/Dashboard";
+import Optional from "../Optional/Optional";
+import ChoiceTable from "../Choice/ChoiceTable";
 
 const Admin = () => {
   const dispatch = useDispatch();
@@ -56,8 +58,10 @@ const Admin = () => {
             <Route path="/account" element={<Account />} />
             <Route path="/voucher" element={<Voucher />} />
             <Route path="/import" element={<StockIn />} />
+            <Route path="/optional" element={<Optional />} />
             <Route path="/bill" element={<Bill />} />
             <Route path="/bill/:id" element={<BillDetailTable />} />
+            <Route path="/optional/choice-table/:optionalId" element={<ChoiceTable />} />
           </Routes>
         </div>
       </div>

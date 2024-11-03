@@ -5,18 +5,11 @@ import { categoryReducer } from "./Category/Reducer";
 import productReducer from "./Product/Reducer";
 import { eventReducer } from "./Event/Reducer";
 import { userReducer } from "./User/Reducer";
-
 import { voucherReducer } from "./voucher/Reducer";
-
 import { billReducer } from "./Bill/Reducer";
 import { ingredientReducer } from "./Import/Reducer";
-
-// import { restaurantReducer } from "./Restaurant/Reducer";
-// import { menuItemReducer } from "./Menu/Reducer";
-// import { cartReducer } from "./Cart/Reducer";
-// import { orderReducer } from "./Order/Reducer";
-// import { ingredientReducer } from "./Ingredients/Reducer";
-// import { restaurantsOrderReducer } from "./RestaurantOrder/Reducer";
+import { optionalReducer } from "./Optional/Reducer";
+import { choiceReducer } from "./Choice/Reducer";
 
 const rooteReducer = combineReducers({
   auth: authReducer,
@@ -27,14 +20,8 @@ const rooteReducer = combineReducers({
   voucherReducer : voucherReducer,
   billReducer: billReducer,
   ingredientReducer: ingredientReducer,
-
-
-  // restaurant: restaurantReducer,
-  // menu: menuItemReducer,
-  // cart: cartReducer,
-  // order: orderReducer,
-  // restaurantOrder: restaurantsOrderReducer,
-  // ingredients: ingredientReducer,
+  optionalReducer : optionalReducer,
+  choiceReducer : choiceReducer,
 });
 
 export const store = legacy_createStore(rooteReducer, applyMiddleware(thunk));
