@@ -17,11 +17,11 @@ import {
 } from "./ActionType";
 import { API_URL } from "../../config/api";
 
-export const getBills = ({page = 1, accountId, phone}) =>
-
+export const getBills =
+  ({ page = 1, accountId, phone }) =>
   async (dispatch) => {
     try {
-      console.log("checkk accId",accountId )
+      console.log("checkk accId", accountId);
       const response = await axios.get(`${API_URL}/v1/bill/list`, {
         params: {
           page: page,
@@ -58,20 +58,19 @@ export const createBill = (billData) => async (dispatch) => {
   }
 };
 
-
 export const updateBillStatus = (id, newStatus) => async (dispatch) => {
-  const billData = { state: newStatus }; 
+  const billData = { state: newStatus };
 
   try {
     const response = await axios.put(`${API_URL}/v1/bill/${id}`, billData);
     dispatch({
       type: UPDATE_BILL_SUCCESS,
-      payload: response.data.updatedBill, 
+      payload: response.data.updatedBill,
     });
   } catch (error) {
     dispatch({
       type: UPDATE_BILL_FAILURE,
-      payload: error.response?.data?.message || 'Failed to update bill',
+      payload: error.response?.data?.message || "Failed to update bill",
     });
   }
 };

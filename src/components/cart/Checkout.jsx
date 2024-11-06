@@ -6,11 +6,18 @@ import { createBill } from "../State/Bill/Action";
 import { Button, TextField } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import useCart from "../../hook/useCart";
+import { useCartContext } from "./CartContext";
 
 const Checkout = () => {
   const jwt = localStorage.getItem("jwt");
-  //const [cart, setCart] = useState([]);
-  const { cart, totalQuantity, totalPrice, handleIncrease, handleDecrease, handleRemove } = useCart(jwt);
+  const {
+    cart,
+    totalQuantity,
+    totalPrice,
+    handleIncrease,
+    handleDecrease,
+    handleRemove,
+  } = useCart(jwt);
   const [formData, setFormData] = useState({
     fullName: "",
     address: "",
@@ -19,6 +26,7 @@ const Checkout = () => {
   });
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { clearCart } = useCartContext();
 
   const { state } = useLocation();
   const { discount, voucherId, finalTotal, pointsUsed } = state || {};
@@ -34,11 +42,6 @@ const Checkout = () => {
     dispatch(getUserProfile());
   }, [dispatch]);
 
-  // useEffect(() => {
-  //   const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
-  //   setCart(savedCart);
-  // }, [jwt]);
-
   useEffect(() => {
     if (userProfile) {
       setFormData({
@@ -50,38 +53,7 @@ const Checkout = () => {
     }
   }, [userProfile]);
 
-  // const handleIncrease = (id) => {
-  //   const updatedCart = cart.map((item) =>
-  //     item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-  //   );
-  //   setCart(updatedCart);
-  //   Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
-  // };
-
-  // const handleDecrease = (id) => {
-  //   const updatedCart = cart
-  //     .map((item) =>
-  //       item.id === id ? { ...item, quantity: item.quantity - 1 } : item
-  //     )
-  //     .filter((item) => item.quantity > 0);
-  //   setCart(updatedCart);
-  //   Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
-  // };
-
-  // const handleRemove = (id) => {
-  //   const updatedCart = cart.filter((item) => item.id !== id);
-  //   setCart(updatedCart);
-  //   Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
-  // };
-
-  // const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
-  // const totalPrice = cart.reduce(
-  //   (acc, item) => acc + item.price * item.quantity,
-  //   0
-  // );
-
   const shippingFee = totalPrice > 0 ? 10000 : 0;
-  //const finalTotal = totalPrice + shippingFee;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -98,13 +70,20 @@ const Checkout = () => {
         product: item.id,
         quantity: item.quantity,
         subtotal: item.price * item.quantity,
+        options: item.options.map((option) => ({
+          optionId: option.optionId,
+          choiceId: option.choiceId,
+        })),
       })),
       note: formData.note || "",
       account: userProfile._id,
     };
 
+    console.log("billData", billData);
+
     dispatch(createBill(billData)).then(() => {
       Cookies.remove(jwt);
+      clearCart();
       dispatch(getUserProfile());
       navigate("/success");
     });

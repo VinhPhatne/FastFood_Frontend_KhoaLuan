@@ -20,6 +20,12 @@ import {
   InputLabel,
   Modal,
   Typography,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  Checkbox,
+  ListItemText,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useEffect, useState } from "react";
@@ -31,6 +37,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import { Delete, Edit } from "@mui/icons-material";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import AddBoxIcon from "@mui/icons-material/AddBox";
 import {
   blockProduct,
   deleteProduct,
@@ -38,9 +45,11 @@ import {
   getProducts,
   getProductsListPage,
   unBlockProduct,
+  updateOptionalProduct,
 } from "../../components/State/Product/Action";
 import { getCategories } from "../../components/State/Category/Action";
 import { message, notification } from "antd";
+import { getOptionals } from "../../components/State/Optional/Action";
 
 const style = {
   position: "absolute",
@@ -63,6 +72,7 @@ const ProductTable = () => {
     (state) => state.categoryReducer.categories
   );
   const { products } = useSelector((state) => state.productReducer);
+  const { optionals } = useSelector((state) => state.optionalReducer.optionals);
   const jwt = localStorage.getItem("jwt");
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -72,6 +82,12 @@ const ProductTable = () => {
   const [isSell, setIsSell] = useState("");
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+
+  const [openOptionalModal, setOpenOptionalModal] = useState(false);
+  //const [optionals, setOptionals] = useState([]);
+  const [selectedOptionals, setSelectedOptionals] = useState(new Set()); // Các optionalId được chọn
+  const [currentProductId, setCurrentProductId] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const handleSearch = () => {
     setCurrentPage(1);
@@ -146,6 +162,14 @@ const ProductTable = () => {
     setSelectedCategory(event.target.value);
   };
 
+  const fetchEvents = async () => {
+    await dispatch(getOptionals({ jwt }));
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, [dispatch, jwt]);
+
   useEffect(() => {
     const pageFromParams = searchParams.get("page");
     const page = pageFromParams ? parseInt(pageFromParams, 10) : currentPage;
@@ -189,6 +213,139 @@ const ProductTable = () => {
       notification.error({ message: errorMessage });
     }
   };
+
+  // Modal optional
+
+  // const handleOpenOptionalModal = async (product) => {
+  //   setOpenOptionalModal(true);
+  //   const productId = product._id; // Giả sử sản phẩm có trường _id
+  //   setCurrentProductId(productId);
+
+  //   try {
+  //     // Gọi API GetProductById để lấy dữ liệu sản phẩm
+  //     const productData = await getProductById(productId); // Giả sử bạn có hàm này để gọi API
+
+  //     if (productData) {
+  //       const { optionals } = productData; // Giả sử rằng productData có trường optionals
+  //       const selectedOptionals = optionals
+  //         .filter(
+  //           (optional) => optionalIds.includes(optional._id) // optionalIds là danh sách ID đã chọn
+  //         )
+  //         .map((optional) => optional._id); // Lấy ra danh sách ID của optionals
+
+  //       setSelectedOptionals(selectedOptionals); // Cập nhật selectedOptionals
+  //     } else {
+  //       console.error("No product data found");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching product data:", error);
+  //   }
+  // };
+
+  const handleOpenOptionalModal = async (productId) => {
+    setCurrentProductId(productId);
+    const eventResponse = await dispatch(
+      getProductById({ id: productId, jwt })
+    );
+    if (eventResponse) setSelectedProduct(eventResponse);
+
+    console.log("eventResponse", eventResponse);
+    if (eventResponse && eventResponse.data) {
+      // Đảm bảo rằng options chỉ chứa _id
+      const optionIds = eventResponse.data.options.map((option) => option._id);
+      setSelectedOptionals(new Set(optionIds));
+    }
+    await fetchEvents();
+
+    setOpenOptionalModal(true);
+  };
+
+  //   const handleOpenOptionalModal = async (productId) => {
+  //     setCurrentProductId(productId);
+  //     const eventResponse = await dispatch(
+  //         getProductById({ id: productId, jwt })
+  //     );
+
+  //     // Đảm bảo rằng eventResponse là hợp lệ và có dữ liệu
+  //     if (eventResponse && eventResponse.data) {
+  //         const product = eventResponse.data.products;
+
+  //         // Kiểm tra nếu product tồn tại và có trường optionals
+  //         if (product && Array.isArray(product.optionals)) {
+  //             // Lấy ra các optionals từ sản phẩm
+  //             const optionals = product.optionals; // Không cần gán lại vì đã là mảng
+
+  //             // Chuyển đổi mảng optionals thành một Set để lưu trữ các optionalId đã chọn
+  //             const selectedSet = new Set(optionals.map(optional => optional._id));
+  //             setSelectedOptionals(selectedSet);
+  //         } else {
+  //             console.warn("Không có optionals trong sản phẩm hoặc sản phẩm không hợp lệ");
+  //             setSelectedOptionals(new Set()); // Reset nếu không có optionals
+  //         }
+  //     } else {
+  //         console.error("Không tìm thấy sản phẩm hoặc dữ liệu không hợp lệ");
+  //     }
+
+  //     await fetchEvents();
+  //     setOpenOptionalModal(true);
+  // };
+
+  const handleCloseOptionalModal = () => {
+    setOpenOptionalModal(false);
+    setSelectedOptionals(new Set());
+  };
+
+  const handleOptionalChange = (optionalId) => {
+    setSelectedOptionals((prevSelected) =>
+      prevSelected.includes(optionalId)
+        ? prevSelected.filter((id) => id !== optionalId)
+        : [...prevSelected, optionalId]
+    );
+  };
+
+  const handleToggleProduct = (productId) => {
+    setSelectedOptionals((prev) => {
+      const newSelected = new Set(prev);
+      if (newSelected.has(productId)) {
+        newSelected.delete(productId);
+      } else {
+        newSelected.add(productId);
+      }
+      return newSelected;
+    });
+  };
+
+  // const handleUpdateOptional = async () => {
+  //   const selectedProductArray = Array.from(selectedOptionals);
+  //   await dispatch(
+  //     updateOptionalProduct({
+  //       jwt,
+  //       id: currentProductId, // Sử dụng id của sản phẩm cần cập nhật
+  //       optionalData: selectedOptionals, // Truyền selectedOptionals làm optionalData
+  //     })
+  //   );
+  //   notification.success({
+  //     message: "Sản phẩm đã được cập nhật Optional thành công!",
+  //   });
+  //   handleCloseOptionalModal();
+  // };
+
+  const handleUpdateOptional = async () => {
+    const selectedProductArray = Array.from(selectedOptionals);
+    const result = await await dispatch(
+      updateOptionalProduct({
+        jwt,
+        id: currentProductId, // Sử dụng id của sản phẩm cần cập nhật
+        optionalData: selectedProductArray, // Truyền selectedOptionals làm optionalData
+      })
+    );
+
+    if (result) {
+      //await fetchEvents();
+      handleCloseOptionalModal();
+    }
+  };
+  console.log("selectedOptionals", selectedOptionals);
 
   return (
     <Box
@@ -370,6 +527,11 @@ const ProductTable = () => {
                       >
                         <Delete />
                       </IconButton>
+                      <IconButton
+                        onClick={() => handleOpenOptionalModal(item._id)}
+                      >
+                        <AddBoxIcon />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))
@@ -405,6 +567,67 @@ const ProductTable = () => {
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
             <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
             <Button onClick={handleDelete}>Xóa</Button>
+          </Box>
+        </Box>
+      </Modal>
+
+      {/* Modal quản lý optional */}
+      <Modal open={openOptionalModal} onClose={handleCloseOptionalModal}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh",
+          }}
+        >
+          <Box
+            sx={{
+              padding: 4,
+              backgroundColor: "white",
+              maxWidth: 500,
+              width: "100%",
+              borderRadius: 2,
+              boxShadow: 24,
+            }}
+          >
+            <Typography variant="h6">Chọn Optional cho sản phẩm</Typography>
+            <List>
+              {optionals?.map((optional) => (
+                <ListItem key={optional._id} disablePadding>
+                  <ListItemButton
+                    role={undefined}
+                    //onClick={() => handleOptionalChange(optional._id)}
+                    dense
+                  >
+                    <ListItemIcon>
+                      <Checkbox
+                        edge="start"
+                        tabIndex={-1}
+                        disableRipple
+                        checked={selectedOptionals.has(optional._id)}
+                        onChange={() => {
+                          console.log("selectedProducts 1", selectedOptionals);
+                          handleToggleProduct(optional._id);
+                          console.log("selectedProducts 2", selectedOptionals);
+                        }}
+                      />
+                    </ListItemIcon>
+                    <ListItemText primary={optional.name} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <Button onClick={handleCloseOptionalModal}>Hủy</Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleUpdateOptional}
+              >
+                Cập nhật
+              </Button>
+            </div>
           </Box>
         </Box>
       </Modal>

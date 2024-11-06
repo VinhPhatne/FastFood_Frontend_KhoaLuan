@@ -191,3 +191,29 @@ export const unBlockProduct =
       dispatch({ type: UNBLOCK_PRODUCT_FAILURE });
     }
   };
+
+export const updateOptionalProduct =
+  ({ id, optionalData, jwt }) =>
+  async (dispatch) => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/v1/product/${id}`,
+        { options: optionalData },
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        }
+      );
+      dispatch({
+        type: UPDATE_PRODUCT_SUCCESS,
+        payload: response.data.updatedProduct,
+      });
+    } catch (error) {
+      dispatch({
+        type: UPDATE_PRODUCT_FAILURE,
+        payload:
+          error.response?.data?.message || "Failed to update optional fields",
+      });
+    }
+  };

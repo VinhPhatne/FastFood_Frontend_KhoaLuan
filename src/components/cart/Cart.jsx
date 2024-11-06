@@ -28,11 +28,6 @@ const Cart = () => {
   const [pointsUsed, setPointsUsed] = useState(0); // State để nhập điểm
   const [pointsError, setPointsError] = useState(""); // State để thông báo lỗi
 
-  // useEffect(() => {
-  //   const savedCart = JSON.parse(Cookies.get(jwt) || "[]");
-  //   setCart(savedCart);
-  // }, [jwt]);
-
   useEffect(() => {
     if (jwt) {
       dispatch(getUserProfile());

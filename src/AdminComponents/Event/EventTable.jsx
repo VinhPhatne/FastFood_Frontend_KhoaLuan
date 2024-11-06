@@ -220,6 +220,9 @@ const EventTable = () => {
     }
   };
 
+  console.log("selectedProducts", selectedProducts);
+
+
   return (
     <Box sx={{ width: "95%", margin: "0px auto", marginTop: "100px" }}>
       {/* Search and Create Button Section */}
