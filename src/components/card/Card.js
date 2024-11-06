@@ -124,19 +124,6 @@ const Card = () => {
     });
   };
 
-  const fetchChoicesByOptionalId = async (optionalId) => {
-    // Giả sử bạn có action `getListChoiceByOptionalId` đã được định nghĩa
-    const response = await dispatch(
-      getChoicesByOptionalId({ optionalId, jwt })
-    );
-    if (response && response.choices) {
-      setOptionalChoices((prev) => ({
-        ...prev,
-        [optionalId]: response.choices,
-      }));
-    }
-  };
-
   const toggleOption = (optionId) => {
     setExpandedOptions((prev) => ({
       ...prev,

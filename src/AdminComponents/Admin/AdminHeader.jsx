@@ -13,11 +13,17 @@ import { notification } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "../../components/State/Authentication/Action";
+import { useCartContext } from "../../components/cart/CartContext";
 
 const AdminHeader = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = useState(null);
+  const cartContext = useCartContext();
+  if (!cartContext) {
+    console.error("CartContext is not available.");
+  }
+  const { clearCart } = cartContext || {};
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -28,6 +34,7 @@ const AdminHeader = () => {
   };
 
   const handleLogout = () => {
+    clearCart();
     navigate("/");
     dispatch(logout());
     notification.success({

@@ -5,6 +5,8 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserProfile } from "../State/Authentication/Action";
 import useCart from "../../hook/useCart";
+import { getOptionals } from "../State/Optional/Action";
+import { getChoicesByOptionalId } from "../State/Choice/Action";
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -27,10 +29,16 @@ const Cart = () => {
   const [voucherId, setVoucherId] = useState(null);
   const [pointsUsed, setPointsUsed] = useState(0); // State để nhập điểm
   const [pointsError, setPointsError] = useState(""); // State để thông báo lỗi
+  const [optionNames, setOptionNames] = useState({});
+
+  //const [choices, setChoices] = useState({});
+  const { optionals } = useSelector((state) => state.optionalReducer.optionals);
+  const [choices, setChoices] = useState({});
 
   useEffect(() => {
     if (jwt) {
       dispatch(getUserProfile());
+      dispatch(getOptionals({ jwt }));
     }
   }, [dispatch, jwt]);
 
@@ -109,6 +117,69 @@ const Cart = () => {
     });
   };
 
+  console.log("cart", cart);
+  console.log("optionals", optionals);
+
+  const getOptionName = async (optionalId) => {
+    if (!optionals || optionals.length === 0) {
+      return "Không tìm thấy tên tùy chọn";
+    }
+    const option = optionals.find((opt) => opt._id === optionalId);
+
+    // Gọi dispatch mà không chờ kết quả trả về để tránh trả về Promise
+    dispatch(getChoicesByOptionalId({ optionalId, jwt }))
+      .then((response) => {
+        console.log("response", response);
+        setChoices((prevChoices) => ({
+          ...prevChoices,
+          [optionalId]: response, 
+        }));
+      })
+      .catch((error) => {
+        console.error("Error setting choices:", error);
+      });
+
+    console.log("Choices123", choices);
+
+    return option ? option.name : "Không có tên tùy chọn";
+  };
+
+  //Hàm lấy tên của choice dựa vào choiceId
+  // const getChoiceName = (choiceId) => {
+  //   if (!choices || choices.length === 0) {
+  //     return "Không tìm thấy tên tùy chọn";
+  //   }
+  //   const choice = choices.find((ch) => ch.id === choiceId);
+  //   console.log("Choices", choices);
+
+  //   return choice ? choice.name : "Không có tên lựa chọn";
+  // };
+
+  const getChoiceName = (optionalId, choiceId) => {
+    const choiceList = choices[optionalId];
+    if (!choiceList || choiceList.length === 0) {
+      return "Không tìm thấy tên lựa chọn";
+    }
+    const choice = choiceList.find((ch) => ch._id === choiceId);
+    return choice ? choice.name : "Không có tên lựa chọn";
+  };
+
+  useEffect(() => {
+    const fetchOptionNames = async () => {
+      const names = {};
+      for (const item of cart) {
+        for (const opt of item.options) {
+          names[opt.optionId] = await getOptionName(opt.optionId);
+        }
+      }
+      setOptionNames(names);
+    };
+
+    if (cart.length > 0) {
+      fetchOptionNames();
+    }
+  }, [cart, optionals]);
+
   return (
     <div class="container mx-auto p-8 mt-24 mb-12">
       <h1 style={{ color: "#ff7d01" }} class="text-3xl font-bold mb-6">
@@ -118,7 +189,7 @@ const Cart = () => {
       <div className="flex items-start justify-between">
         <div
           className="flex flex-col justify-start gap-6 md:grid-cols-2"
-          style={{ width: "760px", minHeight: '250px' }}
+          style={{ width: "760px", minHeight: "250px" }}
         >
           {cart.length > 0 ? (
             cart.map((item) => (
@@ -133,6 +204,11 @@ const Cart = () => {
                 />
                 <div className="flex-grow">
                   <h2 className="text-xl font-semibold">{item.name}</h2>
+                  {item.options.map((opt, index) => (
+                    <p key={index} className="text-sm text-gray-600">
+                    {getChoiceName(opt.optionId, opt.choiceId) || "Đang tải..."}
+                    </p>
+                  ))}
                   <button
                     onClick={() => handleRemove(item.id)}
                     className="text-sm text-blue-500 hover:underline"

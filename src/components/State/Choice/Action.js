@@ -26,6 +26,7 @@ export const getChoicesByOptionalId =
       });
       console.log("getChoicesByOptionalId", data);
       dispatch({ type: GET_CHOICES_BY_OPTIONAL_ID, payload: data });
+      return data.choices;
     } catch (error) {
       console.error("Error fetching choices by optionalId:", error);
     }

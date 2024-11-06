@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import Manager from "../ManageComponents/Manager/Manager";
+import { CartProvider } from "../components/cart/CartContext";
 
 const ManagerRoute = () => {
   // const { role } = useSelector((state) => state.auth);
@@ -11,11 +12,13 @@ const ManagerRoute = () => {
   // }
 
   return (
-    <div>
-      <Routes>
-        <Route path="/*" element={<Manager />} />
-      </Routes>
-    </div>
+    <CartProvider>
+      <div>
+        <Routes>
+          <Route path="/*" element={<Manager />} />
+        </Routes>
+      </div>
+    </CartProvider>
   );
 };
 
