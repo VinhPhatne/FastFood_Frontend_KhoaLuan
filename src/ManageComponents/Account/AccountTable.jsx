@@ -242,18 +242,8 @@ const AccountTable = () => {
           </IconButton>
         </InputAdornment>
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => handleOpen()}
-          sx={{
-            ml: "auto",
-            height: "40px",
-            borderRadius: "20px",
-          }}
-        >
-          Thêm mới
-        </Button>
+    
+     
       </Box>
       <Card sx={{ boxShadow: "0 3px 5px rgba(0,0,0,0.1)" }}>
         <TableContainer component={Paper}>
@@ -271,7 +261,7 @@ const AccountTable = () => {
                   Họ và tên
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
-                Số điện thoại
+                  Số điện thoại
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
                   Địa chỉ
@@ -281,9 +271,6 @@ const AccountTable = () => {
                 </TableCell>
                 <TableCell align="center" sx={{ color: "#000" }}>
                   Trạng thái
-                </TableCell>
-                <TableCell align="right" sx={{ color: "#000" }}>
-                  Action
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -300,7 +287,7 @@ const AccountTable = () => {
                   <TableRow
                     key={user._id}
                     onClick={() =>
-                      navigate(`/admin/bill?accountId=${user._id}`)
+                      navigate(`/manager/bill?accountId=${user._id}`)
                     }
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
@@ -326,26 +313,7 @@ const AccountTable = () => {
                         {user.state === true ? "Hoạt động" : "Khóa"}
                       </Typography>
                     </TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        color="primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenFormModal(user._id);
-                        }}
-                      >
-                        <Edit />
-                      </IconButton>
-                      <IconButton
-                        color="error"
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent row click
-                          handleOpenDeleteModal(user._id);
-                        }}
-                      >
-                        <Delete />
-                      </IconButton>
-                    </TableCell>
+                    
                   </TableRow>
                 ))
               ) : (
