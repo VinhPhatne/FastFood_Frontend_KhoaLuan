@@ -120,7 +120,7 @@ const BillTable = () => {
   const search = params.get("search");
 
   const handleRowClick = (id) => {
-    navigate(`/admin/bill/${id}`);
+    navigate(`/manager/bill/${id}`);
   };
 
   useEffect(() => {

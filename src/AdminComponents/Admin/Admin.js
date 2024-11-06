@@ -22,23 +22,9 @@ import ChoiceTable from "../Choice/ChoiceTable";
 const Admin = () => {
   const dispatch = useDispatch();
   const jwt = localStorage.getItem("jwt");
-  //const { restaurant } = useSelector((store) => store);
   const handleClose = () => {};
 
-  // useEffect(() => {
-  //   dispatch(
-  //     getRestaurantsCategory({
-  //       jwt,
-  //       restaurantId: restaurant.usersRestaurant?.id,
-  //     })
-  //   );
-  //   dispatch(
-  //     fetchRestaurantsOrder({
-  //       jwt,
-  //       restaurantId: restaurant.usersRestaurant?.id,
-  //     })
-  //   );
-  // },[]);
+
 
   return (
     <div>
