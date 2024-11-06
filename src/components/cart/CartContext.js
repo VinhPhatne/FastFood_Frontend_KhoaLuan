@@ -5,7 +5,6 @@ export const CartProvider = ({ children }) => {
     const savedCart = localStorage.getItem("cart");
     return savedCart ? JSON.parse(savedCart) : [];
   });
-  console.log("check contexxt", cart);
 
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));

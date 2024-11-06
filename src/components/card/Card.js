@@ -12,11 +12,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "../State/Category/Action";
 import { getProducts, getProductsByCategory } from "../State/Product/Action";
 import Cookies from "js-cookie";
-import { notification } from "antd";
+import { notification, Radio } from "antd";
 import { Modal, InputNumber, Button } from "antd";
-import "./productModal.css"; 
+import "./productModal.css";
 import useCart from "../../hook/useCart";
-
+import { getOptionals } from "../State/Optional/Action";
+import { getChoicesByOptionalId } from "../State/Choice/Action";
+import { PlusOutlined } from "@ant-design/icons";
 
 const Card = () => {
   const dispatch = useDispatch();
@@ -25,19 +27,38 @@ const Card = () => {
   );
   const { productsByCategory } = useSelector((state) => state.productReducer);
   const { products } = useSelector((state) => state.productReducer);
+  const { optionals } = useSelector((state) => state.optionalReducer.optionals);
+
+  const [choices, setChoices] = useState({});
+  const [optionalChoices, setOptionalChoices] = useState({});
+
+  // const filteredOptionals = optionals.filter((optional) =>
+  //   products.options.includes(optional._id)
+  // );
+
   const jwt = useMemo(() => localStorage.getItem("jwt"), []);
   const { cart, addToCart } = useCart();
   useEffect(() => {
     dispatch(getCategories({ jwt }));
     dispatch(getProducts({ jwt }));
+    dispatch(getOptionals({ jwt }));
   }, [dispatch, jwt]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
+
+  const [expandedOptions, setExpandedOptions] = useState({});
+  const [selectedChoices, setSelectedChoices] = useState({});
+
+  const [nonSpicyChickenQty, setNonSpicyChickenQty] = useState(4);
+  const [spicyChickenQty, setSpicyChickenQty] = useState(0);
+
   const showModal = (product) => {
     setSelectedProduct(product);
     setIsModalVisible(true);
+    setNonSpicyChickenQty(4); // Reset default values
+    setSpicyChickenQty(0);
   };
 
   const handleCancel = () => {
@@ -70,9 +91,26 @@ const Card = () => {
     }
   };
   const handleAddToCartModal = (product) => {
-    //handleAddToCart(product);
-    addToCart(product, quantity);
+    // //handleAddToCart(product);
+    // addToCart(product, quantity);
+    // setQuantity(1);
+
+    const selectedOptions = Object.entries(selectedChoices).map(
+      ([optionId, choiceId]) => ({
+        optionId,
+        choiceId,
+      })
+    );
+
+    addToCart(
+      {
+        ...product,
+        options: selectedOptions, // Thêm các lựa chọn vào product
+      },
+      quantity
+    );
     setQuantity(1);
+    setSelectedChoices({});
   };
 
   const handleAddToCart = (product) => {
@@ -80,37 +118,41 @@ const Card = () => {
       alert("Bạn cần đăng nhập để thêm vào giỏ hàng.");
       return;
     }
-
-    // const cart = JSON.parse(Cookies.get(jwt) || "[]");
-
-    // const existingProduct = cart.find((item) => item.id === product._id);
-
-    // let updatedCart;
-    // if (existingProduct) {
-    //   updatedCart = cart.map((item) =>
-    //     item.id === product._id
-    //       ? { ...item, quantity: item.quantity + 1 }
-    //       : item
-    //   );
-    // } else {
-    //   updatedCart = [
-    //     ...cart,
-    //     {
-    //       id: product._id,
-    //       name: product.name,
-    //       price: product.price,
-    //       picture: product.picture,
-    //       quantity: quantity,
-    //     },
-    //   ];
-    // }
-
-    // Cookies.set(jwt, JSON.stringify(updatedCart), { expires: 2 });
-    addToCart(product, quantity)
+    addToCart(product, quantity);
     notification.success({
       message: "Sản phẩm đã được thêm vào giỏ hàng!",
     });
   };
+
+  const fetchChoicesByOptionalId = async (optionalId) => {
+    // Giả sử bạn có action `getListChoiceByOptionalId` đã được định nghĩa
+    const response = await dispatch(
+      getChoicesByOptionalId({ optionalId, jwt })
+    );
+    if (response && response.choices) {
+      setOptionalChoices((prev) => ({
+        ...prev,
+        [optionalId]: response.choices,
+      }));
+    }
+  };
+
+  const toggleOption = (optionId) => {
+    setExpandedOptions((prev) => ({
+      ...prev,
+      [optionId]: !prev[optionId],
+    }));
+  };
+
+  const handleChoiceSelect = (optionId, choiceId) => {
+    setSelectedChoices((prevChoices) => ({
+      ...prevChoices,
+      [optionId]: choiceId,
+    }));
+  };
+
+  console.log("optionals", optionals);
+  console.log("selectedProduct", selectedProduct);
 
   return (
     <div>
@@ -172,12 +214,14 @@ const Card = () => {
         {Array.isArray(categories) && categories.length > 0 ? (
           categories
             .filter((category) => {
-              const productsInCategory = products.filter(
-                (item) =>
-                  item.category &&
-                  item.category._id === category._id &&
-                  item.isSelling
-              );
+              const productsInCategory = Array.isArray(products)
+                ? products.filter(
+                    (item) =>
+                      item.category &&
+                      item.category._id === category._id &&
+                      item.isSelling
+                  )
+                : [];
               return category.isActive && productsInCategory.length > 0;
             })
             .map((category) => (
@@ -269,22 +313,11 @@ const Card = () => {
         open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
-        width={1200}
+        width={1000}
       >
-        {/* <div
-          style={{
-            textAlign: "center",
-            marginBottom: "15px",
-            fontSize: "24px",
-            fontWeight: "bold",
-            // color: "#ff7d01",
-
-          }}
-        >
-          Chi tiết sản phẩm
-        </div> */}
         {selectedProduct && (
           <div className="modal-content">
+            {/* Left Side - Product Image */}
             <div className="modal-left">
               <img
                 src={selectedProduct.picture}
@@ -292,6 +325,8 @@ const Card = () => {
                 className="product-image"
               />
             </div>
+
+            {/* Right Side - Product Details */}
             <div className="modal-right">
               <h2 className="product-title">{selectedProduct.name}</h2>
               <p className="product-description">
@@ -300,6 +335,50 @@ const Card = () => {
               <div className="product-price">
                 <strong>{selectedProduct.price} đ</strong>
               </div>
+
+              <hr></hr>
+
+              {/* Options Selection */}
+              {selectedProduct.options &&
+                selectedProduct.options.map((option) => (
+                  <div key={option._id} className="option-group">
+                    <h4>
+                      {option.name}
+                      <PlusOutlined
+                        onClick={() => toggleOption(option._id)}
+                        style={{ marginLeft: 8, cursor: "pointer" }}
+                      />
+                    </h4>
+                    {expandedOptions[option._id] && (
+                      <Radio.Group
+                        style={{ width: "100%" }}
+                        onChange={(e) =>
+                          handleChoiceSelect(option._id, e.target.value)
+                        }
+                        value={selectedChoices[option._id]}
+                      >
+                        {option.choices.map((choice) => (
+                          <div className="option-choice" key={choice._id}>
+                            {/* <Radio key={choice._id} value={choice._id}>
+                              {choice.name} (+{choice.extraPrice} đ)
+                            </Radio> */}
+                            <span className="choice-name">
+                              {choice.name} (+{choice.extraPrice} đ)
+                            </span>
+                            <Radio
+                              value={choice._id}
+                              className="choice-radio"
+                            />
+                          </div>
+                        ))}
+                      </Radio.Group>
+                    )}
+
+                    <hr></hr>
+                  </div>
+                ))}
+
+              {/* Quantity Selector */}
               <div className="quantity-selector">
                 <span>Số lượng:</span>
                 <InputNumber
@@ -309,12 +388,17 @@ const Card = () => {
                   onChange={(value) => setQuantity(value)}
                 />
               </div>
+
+              {/* Add to Cart Button */}
               <Button
                 type="primary"
                 className="add-to-cart-button"
                 onClick={() => {
                   if (selectedProduct) {
-                    handleAddToCartModal({ ...selectedProduct, quantity });
+                    handleAddToCartModal({
+                      ...selectedProduct,
+                      quantity,
+                    });
                     setIsModalVisible(false);
                   }
                 }}

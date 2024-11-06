@@ -21,10 +21,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  blockEvent,
-  unblockEvent,
-} from "../../components/State/Event/Action";
+import { blockEvent, unblockEvent } from "../../components/State/Event/Action";
 import { Delete } from "@mui/icons-material";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
@@ -129,7 +126,7 @@ const OptionalTable = () => {
     }
   };
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const handleRowClick = (optionalId) => {
     navigate(`/admin/optional/choice-table/${optionalId}`);
   };
@@ -198,12 +195,16 @@ const OptionalTable = () => {
                   <TableRow
                     key={item._id}
                     sx={{ "&:hover": { backgroundColor: "#FFF3E0" } }}
-                    onClick={() => handleRowClick(item._id)}
                   >
                     <TableCell component="th" scope="row">
                       {index + 1}
                     </TableCell>
-                    <TableCell align="left">{item.name}</TableCell>
+                    <TableCell
+                      align="left"
+                      onClick={() => handleRowClick(item._id)}
+                    >
+                      {item.name}
+                    </TableCell>
                     <TableCell align="center">
                       {item.discountPercent} %
                     </TableCell>
@@ -221,7 +222,8 @@ const OptionalTable = () => {
                       </IconButton>
                       <IconButton
                         color="error"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.preventDefault();
                           console.log("IDDDD", item._id);
                           handleOpenFormModal(item._id);
                         }}
@@ -230,7 +232,8 @@ const OptionalTable = () => {
                       </IconButton>
                       <IconButton
                         color="error"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.preventDefault();
                           console.log("IDDDD", item._id);
                           handleOpenDeleteModal(item._id);
                         }}
