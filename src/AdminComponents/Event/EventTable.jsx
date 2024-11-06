@@ -36,6 +36,7 @@ import { getCategories } from "../../components/State/Category/Action";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { notification } from "antd";
+import AddBoxIcon from "@mui/icons-material/AddBox";
 
 const style = {
   position: "absolute",
@@ -325,12 +326,11 @@ const EventTable = () => {
                       >
                         <Delete />
                       </IconButton>
-                      <Button
-                        variant="outlined"
+                      <IconButton
                         onClick={() => handleOpenProductModal(item._id)}
                       >
-                        Quản lý sản phẩm
-                      </Button>
+                        <AddBoxIcon />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))

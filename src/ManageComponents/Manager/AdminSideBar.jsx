@@ -5,6 +5,7 @@ import { Divider, Drawer, useMediaQuery } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "../../components/State/Authentication/Action";
+import { useCartContext } from "../../components/cart/CartContext";
 
 const menu = [
   { title: "Dashboard", icon: <Dashboard />, path: "/" },
@@ -17,11 +18,13 @@ const AdminSideBar = ({ handleClose }) => {
   const [activeItem, setActiveItem] = useState(menu[0].title);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { clearCart } = useCartContext();
 
   const handleNavigate = (item) => {
     setActiveItem(item.title);
     navigate(`/manager${item.path}`);
     if (item.title === "Logout") {
+      clearCart();
       navigate("/");
       dispatch(logout());
       handleClose();
@@ -37,7 +40,7 @@ const AdminSideBar = ({ handleClose }) => {
         anchor="left"
         sx={{ backgroundColor: "#FAF3E0", marginTop: "20px" }}
       >
-        <div className="w-[70vw] lg:w-[14vw] h-screen flex flex-col justify-center text-l space-y-[0.8rem]">
+        <div className="w-[70vw] lg:w-[14vw] h-screen flex flex-col text-l space-y-[0.8rem]">
           {menu.map((item, i) => (
             <React.Fragment key={item.title}>
               <div

@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "../../components/State/Authentication/Action";
 import DiscountIcon from "@mui/icons-material/Discount";
+import { useCartContext } from "../../components/cart/CartContext";
 // import { logout } from "../../component/State/Authentication/Action";
 
 const menu = [
@@ -31,11 +32,13 @@ const AdminSideBar = ({ handleClose }) => {
   const [activeItem, setActiveItem] = useState(menu[0].title);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { clearCart } = useCartContext();
 
   const handleNavigate = (item) => {
     setActiveItem(item.title);
     navigate(`/admin${item.path}`);
     if (item.title === "Logout") {
+      clearCart();
       navigate("/");
       dispatch(logout());
       handleClose();

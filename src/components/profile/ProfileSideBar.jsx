@@ -6,13 +6,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUserProfile, logout } from "../State/Authentication/Action";
 import { notification, Avatar } from "antd";
 import { UserOutlined } from "@ant-design/icons";
+import { useCartContext } from "../cart/CartContext";
 
 //navigate(`/admin/bill?accountId=${user._id}`)
 
 const ProfileSideBar = () => {
   const [activeItem, setActiveItem] = useState("");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch();  
+  const { clearCart } = useCartContext();
 
   const handleNavigate = (item) => {
     setActiveItem(item.title);
@@ -20,6 +22,7 @@ const ProfileSideBar = () => {
   };
 
   const handleLogout = () => {
+    clearCart();
     navigate("/");
     dispatch(logout());
     notification.success({
