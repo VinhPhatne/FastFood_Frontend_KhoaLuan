@@ -17,30 +17,29 @@ import {
 } from "./ActionType";
 import { API_URL } from "../../config/api";
 
-export const getBills = ({page = 1, accountId, phone}) =>
+export const getBills = ({ page = 1, accountId, phone, state }) => async (dispatch) => {
+  try {
+    const response = await axios.get(`${API_URL}/v1/bill/list`, {
+      params: {
+        page: page,
+        accountId: accountId,
+        phone: phone,
+        state: state, 
+      },
+    });
+    console.log("getBills", response.data.data);
+    dispatch({
+      type: GET_BILLS_SUCCESS,
+      payload: response.data.data,
 
-  async (dispatch) => {
-    try {
-      console.log("checkk accId",accountId )
-      const response = await axios.get(`${API_URL}/v1/bill/list`, {
-        params: {
-          page: page,
-          accountId: accountId,
-          phone: phone,
-        },
-      });
-      console.log("getBills", response.data.data);
-      dispatch({
-        type: GET_BILLS_SUCCESS,
-        payload: response.data.data,
-        // paganition: response.data.data
-      });
-    } catch (error) {
-      dispatch({
-        type: GET_BILLS_FAILURE,
-      });
-    }
-  };
+      // pagination: response.data.pagination,
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_BILLS_FAILURE,
+    });
+  }
+};
 
 //
 export const createBill = (billData) => async (dispatch) => {
