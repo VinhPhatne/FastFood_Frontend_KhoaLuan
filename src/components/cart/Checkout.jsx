@@ -7,6 +7,8 @@ import { Button, TextField } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import useCart from "../../hook/useCart";
 import { useCartContext } from "./CartContext";
+import { getOptionals } from "../State/Optional/Action";
+import { getChoicesByOptionalId } from "../State/Choice/Action";
 
 const Checkout = () => {
   const jwt = localStorage.getItem("jwt");
@@ -37,9 +39,12 @@ const Checkout = () => {
   console.log("pointsUsed", pointsUsed);
 
   const userProfile = useSelector((state) => state.auth.user);
+  const { optionals } = useSelector((state) => state.optionalReducer.optionals);
+  const [choices, setChoices] = useState({});
 
   useEffect(() => {
     dispatch(getUserProfile());
+    dispatch(getOptionals({ jwt }));
   }, [dispatch]);
 
   useEffect(() => {
@@ -54,6 +59,13 @@ const Checkout = () => {
   }, [userProfile]);
 
   const shippingFee = totalPrice > 0 ? 10000 : 0;
+  const totalPrice1 = cart.reduce((acc, item) => {
+    const totalAddPrice = item.options.reduce(
+      (optionAcc, opt) => optionAcc + (opt.addPrice || 0),
+      0
+    );
+    return acc + (item.price + totalAddPrice) * item.quantity;
+  }, 0);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -73,6 +85,7 @@ const Checkout = () => {
         options: item.options.map((option) => ({
           optionId: option.optionId,
           choiceId: option.choiceId,
+          addPrice: option.addPrice,
         })),
       })),
       note: formData.note || "",
@@ -96,6 +109,54 @@ const Checkout = () => {
       [name]: value,
     });
   };
+
+  const getOptionName = async (optionalId) => {
+    if (!optionals || optionals.length === 0) {
+      return "Không tìm thấy tên tùy chọn";
+    }
+    const option = optionals.find((opt) => opt._id === optionalId);
+
+    // Gọi dispatch mà không chờ kết quả trả về để tránh trả về Promise
+    dispatch(getChoicesByOptionalId({ optionalId, jwt }))
+      .then((response) => {
+        console.log("response", response);
+        setChoices((prevChoices) => ({
+          ...prevChoices,
+          [optionalId]: response,
+        }));
+      })
+      .catch((error) => {
+        console.error("Error setting choices:", error);
+      });
+
+    console.log("Choices123", choices);
+
+    return option ? option.name : "";
+  };
+
+  const getChoiceName = (optionalId, choiceId) => {
+    const choiceList = choices[optionalId];
+    if (!choiceList || choiceList.length === 0) {
+      return "";
+    }
+    const choice = choiceList.find((ch) => ch._id === choiceId);
+    return choice ? choice.name : "Không có tên lựa chọn";
+  };
+
+  useEffect(() => {
+    const fetchOptionNames = async () => {
+      const names = {};
+      for (const item of cart) {
+        for (const opt of item.options) {
+          names[opt.optionId] = await getOptionName(opt.optionId);
+        }
+      }
+    };
+
+    if (cart.length > 0) {
+      fetchOptionNames();
+    }
+  }, [cart, optionals]);
 
   return (
     <div className="container mx-auto p-8 mt-24 mb-12">
@@ -183,14 +244,37 @@ const Checkout = () => {
                     >
                       x {item.quantity}
                     </button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-semibold">
-                      SL : {item.quantity}
-                    </span>
+                    {/* Hiển thị options */}
+                    {item.options && item.options.length > 0 && (
+                      <div className="text-sm text-gray-500">
+                        {item.options.map((option) => (
+                          <div
+                            key={option.optionId}
+                            className="flex justify-between"
+                          >
+                            {getChoiceName(option.optionId, option.choiceId) ||
+                              ""}
+                            {option.addPrice
+                              ? ` (+${option.addPrice.toLocaleString()} đ)`
+                              : ""}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <span className="text-lg font-semibold">
-                    {item.price * item.quantity} đ
+                    {(
+                      item.price * item.quantity +
+                      item.options.reduce(
+                        (acc, option) =>
+                          acc +
+                          (option.addPrice
+                            ? option.addPrice * item.quantity
+                            : 0),
+                        0
+                      )
+                    ).toLocaleString()}{" "}
+                    đ
                   </span>
                 </div>
               ))
@@ -202,7 +286,7 @@ const Checkout = () => {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Tổng đơn hàng</span>
-                  <span>{totalPrice.toLocaleString()} đ</span>
+                  <span>{totalPrice1.toLocaleString()} đ</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Phí giao hàng</span>

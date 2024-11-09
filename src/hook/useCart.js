@@ -60,29 +60,57 @@ const useCart = () => {
   };
   
 
-  const increaseQuantity = (productId) => {
+  // const increaseQuantity = (productId) => {
+  //   const updatedCart = cart.map((item) =>
+  //     item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+  //   );
+  //   setCart(updatedCart);
+  // };
+  // const decreaseQuantity = (productId) => {
+  //   const updatedCart = cart
+  //     .map((item) =>
+  //       item.id === productId ? { ...item, quantity: item.quantity - 1 } : item
+  //     )
+  //     .filter((item) => item.quantity > 0);
+  //   setCart(updatedCart);
+  // };
+
+  const increaseQuantity = (productId, options) => {
     const updatedCart = cart.map((item) =>
-      item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+      item.id === productId && JSON.stringify(item.options) === JSON.stringify(options)
+        ? { ...item, quantity: item.quantity + 1 }
+        : item
     );
     setCart(updatedCart);
   };
-  const decreaseQuantity = (productId) => {
+
+  const decreaseQuantity = (productId, options) => {
     const updatedCart = cart
       .map((item) =>
-        item.id === productId ? { ...item, quantity: item.quantity - 1 } : item
+        item.id === productId && JSON.stringify(item.options) === JSON.stringify(options)
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
       )
       .filter((item) => item.quantity > 0);
     setCart(updatedCart);
   };
+
+  const removeFromCart = (productId, options) => {
+    const updatedCart = cart.filter(
+      (item) => !(item.id === productId && JSON.stringify(item.options) === JSON.stringify(options))
+    );
+    setCart(updatedCart);
+  };
+
   const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
   const totalPrice = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
   );
-  const removeFromCart = (productId) => {
-    const updatedCart = cart.filter((item) => item.id !== productId);
-    setCart(updatedCart);
-  };
+  // const removeFromCart = (productId) => {
+  //   const updatedCart = cart.filter((item) => item.id !== productId);
+  //   setCart(updatedCart);
+  // };
   return {
     cart,
     addToCart,

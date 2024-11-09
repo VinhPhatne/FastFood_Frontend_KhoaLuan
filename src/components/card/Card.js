@@ -25,16 +25,8 @@ const Card = () => {
   const { categories } = useSelector(
     (state) => state.categoryReducer.categories
   );
-  const { productsByCategory } = useSelector((state) => state.productReducer);
   const { products } = useSelector((state) => state.productReducer);
   const { optionals } = useSelector((state) => state.optionalReducer.optionals);
-
-  const [choices, setChoices] = useState({});
-  const [optionalChoices, setOptionalChoices] = useState({});
-
-  // const filteredOptionals = optionals.filter((optional) =>
-  //   products.options.includes(optional._id)
-  // );
 
   const jwt = useMemo(() => localStorage.getItem("jwt"), []);
   const { cart, addToCart } = useCart();
@@ -48,17 +40,11 @@ const Card = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
 
-  const [expandedOptions, setExpandedOptions] = useState({});
   const [selectedChoices, setSelectedChoices] = useState({});
-
-  const [nonSpicyChickenQty, setNonSpicyChickenQty] = useState(4);
-  const [spicyChickenQty, setSpicyChickenQty] = useState(0);
 
   const showModal = (product) => {
     setSelectedProduct(product);
     setIsModalVisible(true);
-    setNonSpicyChickenQty(4); // Reset default values
-    setSpicyChickenQty(0);
   };
 
   const handleCancel = () => {
@@ -91,15 +77,32 @@ const Card = () => {
     }
   };
   const handleAddToCartModal = (product) => {
+    if (!jwt) {
+      notification.error("Bạn cần đăng nhập để thêm vào giỏ hàng!!!");
+      return;
+    }
     // //handleAddToCart(product);
     // addToCart(product, quantity);
     // setQuantity(1);
 
+    // const selectedOptions = Object.entries(selectedChoices).map(
+    //   ([optionId, choiceId]) => ({
+    //     optionId,
+    //     choiceId,
+    //   })
+    // );
+
     const selectedOptions = Object.entries(selectedChoices).map(
-      ([optionId, choiceId]) => ({
-        optionId,
-        choiceId,
-      })
+      ([optionId, choiceId]) => {
+        const option = product.options.find(opt => opt._id === optionId);
+        const choice = option?.choices.find(cho => cho._id === choiceId);
+  
+        return {
+          optionId,
+          choiceId,
+          addPrice: choice ? choice.additionalPrice : 0, // Lấy giá của choice
+        };
+      }
     );
 
     addToCart(
@@ -115,20 +118,13 @@ const Card = () => {
 
   const handleAddToCart = (product) => {
     if (!jwt) {
-      alert("Bạn cần đăng nhập để thêm vào giỏ hàng.");
+      notification.error("Bạn cần đăng nhập để thêm vào giỏ hàng!!!");
       return;
     }
     addToCart(product, quantity);
     notification.success({
       message: "Sản phẩm đã được thêm vào giỏ hàng!",
     });
-  };
-
-  const toggleOption = (optionId) => {
-    setExpandedOptions((prev) => ({
-      ...prev,
-      [optionId]: !prev[optionId],
-    }));
   };
 
   const handleChoiceSelect = (optionId, choiceId) => {
@@ -140,6 +136,7 @@ const Card = () => {
 
   console.log("optionals", optionals);
   console.log("selectedProduct", selectedProduct);
+  console.log("selectedChoices", selectedChoices);
 
   return (
     <div>
@@ -332,35 +329,28 @@ const Card = () => {
                     <h4>
                       {option.name}
                       <PlusOutlined
-                        onClick={() => toggleOption(option._id)}
                         style={{ marginLeft: 8, cursor: "pointer" }}
                       />
                     </h4>
-                    {expandedOptions[option._id] && (
-                      <Radio.Group
-                        style={{ width: "100%" }}
-                        onChange={(e) =>
-                          handleChoiceSelect(option._id, e.target.value)
-                        }
-                        value={selectedChoices[option._id]}
-                      >
-                        {option.choices.map((choice) => (
-                          <div className="option-choice" key={choice._id}>
-                            {/* <Radio key={choice._id} value={choice._id}>
+                    <Radio.Group
+                      style={{ width: "100%" }}
+                      onChange={(e) =>
+                        handleChoiceSelect(option._id, e.target.value)
+                      }
+                      value={selectedChoices[option._id]}
+                    >
+                      {option.choices.map((choice) => (
+                        <div className="option-choice" key={choice._id}>
+                          {/* <Radio key={choice._id} value={choice._id}>
                               {choice.name} (+{choice.extraPrice} đ)
                             </Radio> */}
-                            <span className="choice-name">
-                              {choice.name} (+{choice.extraPrice} đ)
-                            </span>
-                            <Radio
-                              value={choice._id}
-                              className="choice-radio"
-                            />
-                          </div>
-                        ))}
-                      </Radio.Group>
-                    )}
-
+                          <span className="choice-name">
+                            {choice.name} (+{choice.additionalPrice} đ)
+                          </span>
+                          <Radio value={choice._id} className="choice-radio" />
+                        </div>
+                      ))}
+                    </Radio.Group>
                     <hr></hr>
                   </div>
                 ))}

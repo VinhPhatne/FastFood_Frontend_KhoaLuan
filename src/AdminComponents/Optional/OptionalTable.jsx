@@ -181,11 +181,8 @@ const OptionalTable = () => {
           <Table sx={{ minWidth: 650 }} aria-label="Event Table">
             <TableHead sx={{ backgroundColor: "#fdba74" }}>
               <TableRow>
-                <TableCell align="left">Id</TableCell>
+                <TableCell align="left">#</TableCell>
                 <TableCell align="left">Name</TableCell>
-                <TableCell align="center">Giảm giá</TableCell>
-                <TableCell align="right">Ngày hết hạn</TableCell>
-                <TableCell align="center">Active</TableCell>
                 <TableCell align="right">Action</TableCell>
               </TableRow>
             </TableHead>
@@ -205,13 +202,7 @@ const OptionalTable = () => {
                     >
                       {item.name}
                     </TableCell>
-                    <TableCell align="center">
-                      {item.discountPercent} %
-                    </TableCell>
-                    <TableCell align="right">{item.expDate}</TableCell>
-                    <TableCell align="center">
-                      {item.isActive ? "Active" : "Inactive"}
-                    </TableCell>
+                   
                     <TableCell align="right">
                       <IconButton onClick={() => handleBlockUnblock(item)}>
                         {item.isActive ? (

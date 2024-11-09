@@ -47,26 +47,29 @@ const Cart = () => {
 
   console.log("userPoints", userPoints);
 
-  const handleIncrease = (id) => {
-    increaseQuantity(id);
+  const handleIncrease = (id, options) => {
+    increaseQuantity(id, options);
     Cookies.set(jwt, JSON.stringify(cart), { expires: 2 });
   };
 
-  const handleDecrease = (id) => {
-    decreaseQuantity(id);
+  const handleDecrease = (id, options) => {
+    decreaseQuantity(id, options);
     Cookies.set(jwt, JSON.stringify(cart), { expires: 2 });
   };
 
-  const handleRemove = (id) => {
-    removeFromCart(id);
+  const handleRemove = (id, options) => {
+    removeFromCart(id, options);
     Cookies.set(jwt, JSON.stringify(cart), { expires: 2 });
   };
 
   const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
-  const totalPrice = cart.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
+  const totalPrice = cart.reduce((acc, item) => {
+    const totalAddPrice = item.options.reduce(
+      (optionAcc, opt) => optionAcc + (opt.addPrice || 0),
+      0
+    );
+    return acc + (item.price + totalAddPrice) * item.quantity;
+  }, 0);
 
   const shippingFee = totalPrice > 0 ? 10000 : 0;
   const finalTotal = Math.max(
@@ -132,7 +135,7 @@ const Cart = () => {
         console.log("response", response);
         setChoices((prevChoices) => ({
           ...prevChoices,
-          [optionalId]: response, 
+          [optionalId]: response,
         }));
       })
       .catch((error) => {
@@ -141,24 +144,13 @@ const Cart = () => {
 
     console.log("Choices123", choices);
 
-    return option ? option.name : "Không có tên tùy chọn";
+    return option ? option.name : "";
   };
-
-  //Hàm lấy tên của choice dựa vào choiceId
-  // const getChoiceName = (choiceId) => {
-  //   if (!choices || choices.length === 0) {
-  //     return "Không tìm thấy tên tùy chọn";
-  //   }
-  //   const choice = choices.find((ch) => ch.id === choiceId);
-  //   console.log("Choices", choices);
-
-  //   return choice ? choice.name : "Không có tên lựa chọn";
-  // };
 
   const getChoiceName = (optionalId, choiceId) => {
     const choiceList = choices[optionalId];
     if (!choiceList || choiceList.length === 0) {
-      return "Không tìm thấy tên lựa chọn";
+      return "";
     }
     const choice = choiceList.find((ch) => ch._id === choiceId);
     return choice ? choice.name : "Không có tên lựa chọn";
@@ -192,50 +184,63 @@ const Cart = () => {
           style={{ width: "760px", minHeight: "250px" }}
         >
           {cart.length > 0 ? (
-            cart.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center border rounded-lg p-4 gap-4"
-              >
-                <img
-                  src={item.picture}
-                  alt={item.name}
-                  className="w-24 h-24 rounded-md"
-                />
-                <div className="flex-grow">
-                  <h2 className="text-xl font-semibold">{item.name}</h2>
-                  {item.options.map((opt, index) => (
-                    <p key={index} className="text-sm text-gray-600">
-                    {getChoiceName(opt.optionId, opt.choiceId) || "Đang tải..."}
-                    </p>
-                  ))}
-                  <button
-                    onClick={() => handleRemove(item.id)}
-                    className="text-sm text-blue-500 hover:underline"
-                  >
-                    Xóa
-                  </button>
+            cart.map((item) => {
+              // Tính tổng `addPrice` cho từng `item`
+              const itemOptionsTotal = item.options.reduce(
+                (sum, opt) => sum + (opt.addPrice || 0),
+                0
+              );
+
+              return (
+                <div
+                  key={item.id}
+                  className="flex items-center border rounded-lg p-4 gap-4"
+                >
+                  <img
+                    src={item.picture}
+                    alt={item.name}
+                    className="w-24 h-24 rounded-md"
+                  />
+                  <div className="flex-grow">
+                    <h2 className="text-xl font-semibold">{item.name}</h2>
+                    {item.options.map((opt, index) => (
+                      <p key={index} className="text-sm text-gray-600">
+                        {getChoiceName(opt.optionId, opt.choiceId) || ""}
+                        {opt.addPrice
+                          ? ` (+${opt.addPrice.toLocaleString()} đ)`
+                          : ""}
+                      </p>
+                    ))}
+                    <button
+                      onClick={() => handleRemove(item.id, item.options)}
+                      className="text-sm text-blue-500 hover:underline"
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => handleDecrease(item.id, item.options)}
+                      className="w-8 h-8 border rounded-full flex justify-center items-center"
+                    >
+                      -
+                    </button>
+                    <span className="text-lg font-semibold">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => handleIncrease(item.id, item.options)}
+                      className="w-8 h-8 border rounded-full flex justify-center items-center"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <span className="text-lg font-semibold">
+                  {((item.price + itemOptionsTotal) * item.quantity).toLocaleString()} đ
+                  </span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => handleDecrease(item.id)}
-                    className="w-8 h-8 border rounded-full flex justify-center items-center"
-                  >
-                    -
-                  </button>
-                  <span className="text-lg font-semibold">{item.quantity}</span>
-                  <button
-                    onClick={() => handleIncrease(item.id)}
-                    className="w-8 h-8 border rounded-full flex justify-center items-center"
-                  >
-                    +
-                  </button>
-                </div>
-                <span className="text-lg font-semibold">
-                  {item.price * item.quantity} đ
-                </span>
-              </div>
-            ))
+              );
+            })
           ) : (
             <p>Giỏ hàng trống</p>
           )}
