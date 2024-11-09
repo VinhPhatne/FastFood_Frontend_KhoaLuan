@@ -181,7 +181,6 @@ const ChoiceTable = () => {
                 <TableCell align="left">Id</TableCell>
                 <TableCell align="left">Name</TableCell>
                 <TableCell align="center">Giá bổ sung</TableCell>
-                <TableCell align="right">Ngày hết hạn</TableCell>
                 <TableCell align="center">Active</TableCell>
                 <TableCell align="right">Action</TableCell>
               </TableRow>
@@ -200,7 +199,6 @@ const ChoiceTable = () => {
                     <TableCell align="center">
                       {(item.additionalPrice).toLocaleString()} đ
                     </TableCell>
-                    <TableCell align="right">{item.additionalPrice}</TableCell>
                     <TableCell align="center">
                       {item.isActive ? "Active" : "Inactive"}
                     </TableCell>
