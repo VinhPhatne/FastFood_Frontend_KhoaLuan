@@ -16,6 +16,7 @@ import {
   GET_PRODUCT_SALE_FAILURE,
 } from "./ActionType";
 import { API_URL } from "../../config/api";
+import socket from "../../config/socket";
 
 export const getBills = ({ page = 1, accountId, phone, state }) => async (dispatch) => {
   try {
@@ -50,6 +51,8 @@ export const createBill = (billData) => async (dispatch) => {
       type: CREATE_BILL_SUCCESS,
       payload: response.data.createNew,
     });
+
+    socket.emit("billCreated", { billData, status: "success" });
   } catch (error) {
     dispatch({
       type: CREATE_BILL_FAILURE,

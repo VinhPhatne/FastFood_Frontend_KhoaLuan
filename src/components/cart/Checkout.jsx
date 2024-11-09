@@ -9,7 +9,7 @@ import useCart from "../../hook/useCart";
 import { useCartContext } from "./CartContext";
 import { getOptionals } from "../State/Optional/Action";
 import { getChoicesByOptionalId } from "../State/Choice/Action";
-
+import socket from "../config/socket";
 const Checkout = () => {
   const jwt = localStorage.getItem("jwt");
   const {
@@ -37,6 +37,7 @@ const Checkout = () => {
   console.log("voucher", voucherId);
   console.log("finalTotal", finalTotal);
   console.log("pointsUsed", pointsUsed);
+  const [serverResponse, setServerResponse] = useState(null);
 
   const userProfile = useSelector((state) => state.auth.user);
   const { optionals } = useSelector((state) => state.optionalReducer.optionals);
@@ -48,25 +49,27 @@ const Checkout = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (userProfile) {
-      setFormData({
-        fullName: userProfile.fullname || "",
-        address: userProfile.address || "",
-        phone: userProfile.phonenumber || "",
-        note: "",
-      });
-    }
-  }, [userProfile]);
-
-  const shippingFee = totalPrice > 0 ? 10000 : 0;
-  const totalPrice1 = cart.reduce((acc, item) => {
-    const totalAddPrice = item.options.reduce(
-      (optionAcc, opt) => optionAcc + (opt.addPrice || 0),
-      0
-    );
-    return acc + (item.price + totalAddPrice) * item.quantity;
-  }, 0);
-
+    socket.on("connect", () => {
+      console.log("Connected to server via WebSocket");
+    });
+  
+    socket.on("billCreated", (response) => {
+      console.log("Server response:", response);
+      setServerResponse(response);
+      if (response.status === "success") {
+        clearCart();
+        navigate("/success");
+      } else {
+        alert("Error creating bill");
+      }
+    });
+  
+    return () => {
+      socket.off("connect");
+      socket.off("billCreated");
+    };
+  }, []);
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     const billData = {
@@ -91,16 +94,67 @@ const Checkout = () => {
       note: formData.note || "",
       account: userProfile._id,
     };
-
-    console.log("billData", billData);
-
-    dispatch(createBill(billData)).then(() => {
-      Cookies.remove(jwt);
-      clearCart();
-      dispatch(getUserProfile());
-      navigate("/success");
-    });
+  
+    socket.emit("createBill", billData);
   };
+
+  useEffect(() => {
+    if (userProfile) {
+      setFormData({
+        fullName: userProfile.fullname || "",
+        address: userProfile.address || "",
+        phone: userProfile.phonenumber || "",
+        note: "",
+      });
+    }
+  }, [userProfile]);
+
+  const shippingFee = totalPrice > 0 ? 10000 : 0;
+  const totalPrice1 = cart.reduce((acc, item) => {
+    const totalAddPrice = item.options.reduce(
+      (optionAcc, opt) => optionAcc + (opt.addPrice || 0),
+      0
+    );
+    return acc + (item.price + totalAddPrice) * item.quantity;
+  }, 0);
+
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   const billData = {
+  //     fullName: formData.fullName,
+  //     address_shipment: formData.address,
+  //     phone_shipment: formData.phone,
+  //     ship: shippingFee,
+  //     total_price: finalTotal,
+  //     pointDiscount: pointsUsed,
+  //     isPaid: false,
+  //     voucher: voucherId,
+  //     lineItems: cart.map((item) => ({
+  //       product: item.id,
+  //       quantity: item.quantity,
+  //       subtotal: item.price * item.quantity,
+  //       options: item.options.map((option) => ({
+  //         optionId: option.optionId,
+  //         choiceId: option.choiceId,
+  //         addPrice: option.addPrice,
+  //       })),
+  //     })),
+  //     note: formData.note || "",
+  //     account: userProfile._id,
+  //   };
+
+  //   console.log("billData", billData);
+
+  //   dispatch(createBill(billData)).then(() => {
+  //     // Gọi Socket để thông báo cho server về việc hóa đơn đã được tạo
+  //     socket.emit("billCreated", { billData, status: "success" });
+  
+  //     Cookies.remove(jwt);
+  //     clearCart();
+  //     dispatch(getUserProfile());
+  //     navigate("/success");
+  //   });
+  // };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
