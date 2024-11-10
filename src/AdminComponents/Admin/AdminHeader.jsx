@@ -66,14 +66,14 @@ const AdminHeader = () => {
         <IconButton
           color="inherit"
           sx={{ fontSize: "30px" }}
-          onClick={handleMenuClick} // Open the menu on click
+          onClick={handleMenuClick} 
         >
           <AccountCircle sx={{ fontSize: "inherit" }} />
         </IconButton>
         <Menu
-          anchorEl={anchorEl} // Where the menu is anchored
-          open={Boolean(anchorEl)} // Menu open state
-          onClose={handleClose} // Close menu when clicking outside
+          anchorEl={anchorEl} 
+          open={Boolean(anchorEl)}
+          onClose={handleClose} 
         >
           <MenuItem onClick={handleLogout}>Log Out</MenuItem>
         </Menu>

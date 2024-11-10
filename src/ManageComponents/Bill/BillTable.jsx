@@ -34,6 +34,8 @@ import {
 import { Delete } from "@mui/icons-material";
 import { getBills, updateBillStatus } from "../../components/State/Bill/Action";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import socket from "../../components/config/socket"; 
+import { notification } from "antd";
 
 const style = {
   position: "absolute",
@@ -85,6 +87,27 @@ const BillTable = () => {
       })
     );
   };
+
+
+
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("Connected to server via WebSocket in BillTable");
+    });
+  
+    socket.on("billCreated", (response) => {
+      console.log("Server response in BillTable:", response);
+      handleSearch();
+      notification.success({ message: "Có đơn hàng mới !!!" });
+    });
+  
+    return () => {
+      socket.off("connect");
+      socket.off("billCreated");
+    };
+  }, []);
+  
 
   const handleSearch = () => {
     setCurrentPage(1);

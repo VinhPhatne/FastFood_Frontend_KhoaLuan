@@ -43,14 +43,18 @@ const BillDetailTable = () => {
     }, 0);
   }
 
-  const totalSubtotal =
-    billData?.lineItem?.reduce((total, item) => {
-      return total + (item.subtotal || 0);
-    }, 0) || 0;
+  const totalSubtotal = 
+  billData?.lineItem?.reduce((total, item) => {
+    const itemTotal = item.subtotal + 
+      (item.options ? item.options.reduce((sum, option) => sum + (option.addPrice || 0), 0) : 0);
+    return total + itemTotal;
+  }, 0) || 0;
+
+  console.log("billData", billData);
 
   return (
     <Box sx={{ width: "95%", margin: "0px auto", marginTop: "100px" }}>
-     <Button
+      <Button
         variant="contained"
         className="float-left"
         style={{ color: "#fff", backgroundColor: "#ff7d01" }}
@@ -174,8 +178,26 @@ const BillDetailTable = () => {
                     {item?.product?.name}
                   </h2>
                   <span className="text-sm">Số lượng: {item?.quantity}</span>
+                  {item.options && item.options.length > 0 && (
+                      <div className="text-sm text-gray-500">
+                        {item.options.map((option) => (
+                          <div
+                            key={option.optionId}
+                            className="flex justify-between"
+                          >
+                            {option.choices.name || ""}
+                            {option.addPrice
+                              ? ` (+${option.addPrice.toLocaleString()} đ)`
+                              : ""}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   <p className="text-sm">
-                    Thành tiền: {item.subtotal.toLocaleString()} đ
+                    Thành tiền : {(
+                      item.subtotal +
+                      (item.options ? item.options.reduce((sum, option) => sum + (option.addPrice || 0), 0) : 0)
+                    ).toLocaleString()} đ
                   </p>
                 </div>
               </div>
