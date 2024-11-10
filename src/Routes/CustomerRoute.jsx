@@ -15,6 +15,8 @@ import OTP from "../components/otp/OTP";
 import { useSelector } from "react-redux";
 import BillDetail from "../components/profile/BillDetail";
 import { CartProvider } from "../components/cart/CartContext";
+import OrderDetails6 from "../components/cart/OrderDetail";
+import Promotion from "../components/card/Promotion";
 
 const CustomerRoute = () => {
   // const { role } = useSelector((state) => state.auth);
@@ -31,7 +33,9 @@ const CustomerRoute = () => {
           <Route path="/cart/*" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/success" element={<PaymentSuccess />} />
+          <Route path="/order-detail" element={<OrderDetails6 />} />
           <Route path="/about" element={<AboutUs />} />
+          <Route path="/promotion" element={<Promotion />} />
           <Route path="/otp" element={<OTP />} />
         </Routes>
         <Footer />

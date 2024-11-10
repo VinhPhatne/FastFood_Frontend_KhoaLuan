@@ -54,7 +54,7 @@ const AdminSideBar = ({ handleClose }) => {
         anchor="left"
         sx={{ backgroundColor: "#FAF3E0", marginTop: "20px" }}
       >
-        <div className="w-[70vw] lg:w-[14vw] h-screen flex flex-col justify-center text-l space-y-[0.8rem] mt-11">
+        <div className="w-[70vw] lg:w-[14vw] h-screen flex flex-col text-l space-y-[0.8rem]">
           {menu.map((item, i) => (
             <React.Fragment key={item.title}>
               <div

@@ -20,7 +20,7 @@ import { getOptionals } from "../State/Optional/Action";
 import { getChoicesByOptionalId } from "../State/Choice/Action";
 import { PlusOutlined } from "@ant-design/icons";
 
-const Card = () => {
+const Promotion = () => {
   const dispatch = useDispatch();
   const { categories } = useSelector(
     (state) => state.categoryReducer.categories
@@ -28,7 +28,7 @@ const Card = () => {
   const { products } = useSelector((state) => state.productReducer);
   const { optionals } = useSelector((state) => state.optionalReducer.optionals);
 
-  const jwt = localStorage.getItem("jwt");
+  const jwt = useMemo(() => localStorage.getItem("jwt"), []);
   const { cart, addToCart } = useCart();
   useEffect(() => {
     dispatch(getCategories({ jwt }));
@@ -78,11 +78,19 @@ const Card = () => {
   };
   const handleAddToCartModal = (product) => {
     if (!jwt) {
-      notification.error({
-        message: "Bạn cần đăng nhập để thêm vào giỏ hàng!!!",
-      });
+      notification.error("Bạn cần đăng nhập để thêm vào giỏ hàng!!!");
       return;
     }
+    // //handleAddToCart(product);
+    // addToCart(product, quantity);
+    // setQuantity(1);
+
+    // const selectedOptions = Object.entries(selectedChoices).map(
+    //   ([optionId, choiceId]) => ({
+    //     optionId,
+    //     choiceId,
+    //   })
+    // );
 
     const selectedOptions = Object.entries(selectedChoices).map(
       ([optionId, choiceId]) => {
@@ -113,9 +121,7 @@ const Card = () => {
 
   const handleAddToCart = (product) => {
     if (!jwt) {
-      notification.error({
-        message: "Bạn cần đăng nhập để thêm vào giỏ hàng!!!",
-      });
+      notification.error("Bạn cần đăng nhập để thêm vào giỏ hàng!!!");
       return;
     }
     addToCart(product, quantity);
@@ -130,6 +136,10 @@ const Card = () => {
       [optionId]: choiceId,
     }));
   };
+
+  console.log("optionals", optionals);
+  console.log("selectedProduct", selectedProduct);
+  console.log("selectedChoices", selectedChoices);
 
   return (
     <div>
@@ -146,7 +156,11 @@ const Card = () => {
         <ul className="flex justify-between items-center max-w-screen-lg mx-auto px-4 overflow-hidden">
           {Array.isArray(categories) &&
             categories
-              .filter((category) => category.isActive)
+              .filter(
+                (category) =>
+                  category.isActive &&
+                  category.products.some((product) => product.event !== null) 
+              )
               .slice(startIndex, startIndex + visibleCount)
               .map((category) => (
                 <li
@@ -187,7 +201,7 @@ const Card = () => {
           )}
       </div>
 
-      <div>
+      <div className="pt-8">
         {Array.isArray(categories) && categories.length > 0 ? (
           categories
             .filter((category) => {
@@ -196,7 +210,8 @@ const Card = () => {
                     (item) =>
                       item.category &&
                       item.category._id === category._id &&
-                      item.isSelling
+                      item.isSelling &&
+                      item.event
                   )
                 : [];
               return category.isActive && productsInCategory.length > 0;
@@ -224,14 +239,16 @@ const Card = () => {
                     (item) =>
                       item.category &&
                       item.category._id === category._id &&
-                      item.isSelling
+                      item.isSelling &&
+                      item.event
                   ).length > 0 ? (
                     products
                       .filter(
                         (item) =>
                           item.category &&
                           item.category._id === category._id &&
-                          item.isSelling
+                          item.isSelling &&
+                          item.event
                       )
                       .map((item) => (
                         <div
@@ -383,4 +400,4 @@ const Card = () => {
   );
 };
 
-export default Card;
+export default Promotion;

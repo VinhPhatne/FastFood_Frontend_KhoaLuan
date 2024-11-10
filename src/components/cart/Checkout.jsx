@@ -225,6 +225,7 @@ const Checkout = () => {
           <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
+              required
               id="fullName"
               name="fullName"
               label="Họ và tên"
@@ -235,6 +236,7 @@ const Checkout = () => {
             />
             <TextField
               fullWidth
+              required
               id="address"
               name="address"
               label="Địa chỉ"
@@ -245,6 +247,7 @@ const Checkout = () => {
             />
             <TextField
               fullWidth
+              required
               id="phone"
               name="phone"
               label="Số điện thoại"

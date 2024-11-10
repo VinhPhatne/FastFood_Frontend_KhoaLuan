@@ -95,7 +95,7 @@ const Header = () => {
 
   const menuItems = [
     { label: "Menu", path: "/" },
-    { label: "Khuyến Mãi", path: "/" },
+    { label: "Khuyến Mãi", path: "/promotion" },
     { label: "Giới thiệu", path: "/about" },
   ];
 
