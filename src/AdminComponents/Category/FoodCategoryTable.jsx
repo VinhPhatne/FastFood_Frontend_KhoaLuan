@@ -187,16 +187,16 @@ const FoodCategoryTable = () => {
             <TableHead sx={{ backgroundColor: "#fdba74" }}>
               <TableRow>
                 <TableCell align="left" sx={{ color: "#000" }}>
-                  Id
+                  #
                 </TableCell>
                 <TableCell align="left" sx={{ color: "#000" }}>
-                  Name
+                  Tên danh mục
                 </TableCell>
                 <TableCell align="center" sx={{ color: "#000" }}>
-                  Active
+                  Hoạt động
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
-                  Action
+                  Hành động
                 </TableCell>
               </TableRow>
             </TableHead>

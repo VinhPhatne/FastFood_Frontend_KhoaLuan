@@ -274,12 +274,12 @@ const EventTable = () => {
           <Table sx={{ minWidth: 650 }} aria-label="Event Table">
             <TableHead sx={{ backgroundColor: "#fdba74" }}>
               <TableRow>
-                <TableCell align="left">Id</TableCell>
-                <TableCell align="left">Name</TableCell>
+                <TableCell align="left">#</TableCell>
+                <TableCell align="left">Tên sự kiện</TableCell>
                 <TableCell align="center">Giảm giá</TableCell>
                 <TableCell align="right">Ngày hết hạn</TableCell>
-                <TableCell align="center">Active</TableCell>
-                <TableCell align="right">Action</TableCell>
+                <TableCell align="center">Hoạt động</TableCell>
+                <TableCell align="right">Hành động</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

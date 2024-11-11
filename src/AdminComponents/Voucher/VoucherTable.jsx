@@ -158,11 +158,10 @@ const VoucherTable = () => {
           <Table sx={{ minWidth: 650 }} aria-label="Event Table">
             <TableHead sx={{ backgroundColor: "#fdba74" }}>
               <TableRow>
-                <TableCell align="left">Code</TableCell>
-                <TableCell align="left">Name</TableCell>
+                <TableCell align="left">Mã voucher</TableCell>
+                <TableCell align="left">Tên voucher</TableCell>
                 <TableCell align="center">Giảm giá</TableCell>
-                <TableCell align="center">Active</TableCell>
-                <TableCell align="right">Action</TableCell>
+                <TableCell align="right">Hành động</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -178,9 +177,7 @@ const VoucherTable = () => {
                     </TableCell>
                     <TableCell align="left">{item.name}</TableCell>
                     <TableCell align="center">{item.discount} đ</TableCell>
-                    <TableCell align="center">
-                      {item.isActive ? "Active" : "Inactive"}
-                    </TableCell>
+
                     <TableCell align="right">
                       <IconButton
                         color="error"
