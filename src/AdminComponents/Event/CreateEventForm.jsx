@@ -64,7 +64,7 @@ const CreateEventForm = ({ onClose, onSuccess }) => {
             fullWidth
             id="eventName"
             name="eventName"
-            label="Food event"
+            label="Tên sự kiện"
             variant="outlined"
             onChange={handleInputChange}
             value={formData.eventName}

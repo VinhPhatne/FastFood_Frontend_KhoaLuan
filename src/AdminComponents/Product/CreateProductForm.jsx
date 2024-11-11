@@ -166,7 +166,7 @@ const CreateProductForm = () => {
                   htmlFor="description"
                   className="block font-medium mb-1 w-1/4"
                 >
-                  Description:
+                  Mô tả:
                 </label>
                 <TextField
                   fullWidth
@@ -203,7 +203,7 @@ const CreateProductForm = () => {
                   htmlFor="category"
                   className="block font-medium mb-1 w-1/4"
                 >
-                  Category:
+                  Danh mục:
                 </label>
                 <FormControl fullWidth sx={{ maxWidth: "100%" }}>
                   <Select
