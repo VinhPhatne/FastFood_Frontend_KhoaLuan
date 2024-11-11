@@ -30,27 +30,29 @@ const productReducer = (state = initialState, action) => {
         ...state,
         error: action.payload,
       };
-    case CREATE_PRODUCT_SUCCESS:
-      return {
-        ...state,
-        products: [...state.products, action.payload],
-        error: null,
-      };
+      case CREATE_PRODUCT_SUCCESS:
+        return {
+          ...state,
+          products: Array.isArray(state.products)
+            ? [...state.products, action.payload]
+            : [action.payload], 
+          error: null,
+        };
     case CREATE_PRODUCT_FAILURE:
       return {
         ...state,
         error: action.payload,
       };
-    case UPDATE_PRODUCT_SUCCESS:
-      return {
-        ...state,
-        products: Array.isArray(state.products)
-          ? state.products.map((product) =>
-              product._id === action.payload._id ? action.payload : product
-            )
-          : [],
-        error: null,
-      };
+      case UPDATE_PRODUCT_SUCCESS:
+        return {
+          ...state,
+          products: Array.isArray(state.products)
+            ? state.products.map((product) =>
+                product._id === action.payload._id ? action.payload : product
+              )
+            : [], 
+          error: null,
+        };
     case UPDATE_PRODUCT_FAILURE:
       return {
         ...state,

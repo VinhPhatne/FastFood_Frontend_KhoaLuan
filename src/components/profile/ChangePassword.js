@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Form, Input, Button } from "antd";
+import { Form, Input, Button, notification } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserProfile } from "../State/Authentication/Action";
 import { useNavigate } from "react-router-dom";
@@ -16,8 +16,6 @@ const ChangePassword = () => {
   }, [dispatch]);
 
   const onFinish = async (values) => {
-    console.log("values", values);
-    console.log("user", userProfile?._id);
     await dispatch(
       changePassword(userProfile?._id, {
         userData: {
@@ -28,10 +26,14 @@ const ChangePassword = () => {
         },
       })
     );
+    form.resetFields();
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-5 mt-28" style={{ height: "500px" }}>
+    <div
+      className="flex flex-col items-center justify-center p-5 mt-28"
+      style={{ height: "500px" }}
+    >
       <h2 className="text-2xl font-semibold mb-6">Đổi Mật Khẩu</h2>
       <Form
         form={form}

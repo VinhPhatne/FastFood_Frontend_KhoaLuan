@@ -27,6 +27,12 @@ const LoginForm = ({
   const [isForgotModalVisible, setIsForgotModalVisible] = useState(false);
   const [isOtpModalVisible, setIsOtpModalVisible] = useState(false);
   const [resetInfo, setResetInfo] = useState({});
+  const [form] = Form.useForm();
+
+  const closeModal = () => {
+    form.resetFields();
+    handleCancel();
+  };
 
   const onFinish = async (values) => {
     try {
@@ -37,7 +43,7 @@ const LoginForm = ({
         })
       );
       if (resultAction.type === LOGIN_SUCCESS) {
-        handleCancel();
+        closeModal();
       }
     } catch (error) {
       const message =
@@ -48,7 +54,7 @@ const LoginForm = ({
   };
 
   const openForgotPasswordModal = () => {
-    handleCancel();
+    closeModal();
     setIsForgotModalVisible(true);
   };
 
@@ -93,14 +99,18 @@ const LoginForm = ({
       <Modal
         title={<div className={styles["modal-title"]}>Đăng nhập</div>}
         visible={isModalVisible}
-        onCancel={handleCancel}
+        onCancel={closeModal}
         footer={null}
       >
         <Form
-          name="login"
+          form={form}
           onFinish={onFinish}
           layout="vertical"
           autoComplete="off"
+          initialValues={{
+            email: "",
+            password: "",
+          }}
         >
           <Form.Item
             name="email"

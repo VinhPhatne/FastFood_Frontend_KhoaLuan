@@ -22,19 +22,11 @@ import ClearIcon from "@mui/icons-material/Clear";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  deleteEvent,
-  getEvents,
-  getEventById,
-} from "../../components/State/Event/Action";
-
-import {
   deleteVoucher,
   getVoucherById,
   getVouchers,
 } from "../../components/State/voucher/Action";
 import { Delete } from "@mui/icons-material";
-import CreateEventForm from "./CreateVoucherForm";
-import UpdateEventForm from "./UpdateVoucherForm";
 import UpdateVoucherForm from "./UpdateVoucherForm";
 import CreateVoucherForm from "./CreateVoucherForm";
 

@@ -19,6 +19,7 @@ import {
   CREATE_USER_FAILURE,
 } from "./ActionType";
 import { api, API_URL } from "../../config/api";
+import { notification } from "antd";
 
 export const getUsers =
   ({ page = 1, search, state, role }) =>
@@ -232,9 +233,18 @@ export const changePassword = (id, reqData) => async (dispatch) => {
       }
     );
     console.log("Password changed", data);
+    notification.success({
+      message: "Thành công",
+      description: "Mật khẩu đã được thay đổi thành công!",
+    });
     dispatch({ type: CHANGE_PASSWORD_SUCCESS, payload: data });
   } catch (error) {
     console.log(error);
+
+    const errorMessage = error.response?.data?.message || "Có lỗi xảy ra !!!";
+    notification.error({
+      description: errorMessage,
+    });
     dispatch({ type: CHANGE_PASSWORD_FAILURE, payload: error.message });
   }
 };
