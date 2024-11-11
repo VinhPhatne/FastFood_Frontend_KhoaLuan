@@ -63,7 +63,10 @@ const UpdateProductForm = () => {
             description: response.data.description || "",
             price: response.data.price || "",
             picture: response.data.picture || "",
-            category: category || "",
+            category: {
+              _id: response.data.category._id,
+              name: response.data.category.name,
+            },
           });
         } else {
           console.error("Response không hợp lệ:", response);
@@ -108,7 +111,7 @@ const UpdateProductForm = () => {
       } catch (error) {
         const errorMessage =
           error.response?.data?.message || "Cập nhật thất bại";
-          notification.error({ message: errorMessage });
+        notification.error({ message: errorMessage });
       }
     },
   });
@@ -257,7 +260,10 @@ const UpdateProductForm = () => {
                       const selectedCategory = categories.find(
                         (cat) => cat._id === e.target.value
                       );
-                      formik.setFieldValue("category", selectedCategory);
+                      formik.setFieldValue("category", {
+                        _id: selectedCategory._id,
+                        name: selectedCategory.name,
+                      });
                     }}
                     name="category"
                   >
