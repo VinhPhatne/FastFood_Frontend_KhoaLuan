@@ -78,7 +78,7 @@ export const createProduct = (productData) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: CREATE_PRODUCT_FAILURE,
-      payload: error.response.data.message,
+      payload: error.response?.data?.message || "Failed to create product",
     });
     throw error;
   }
@@ -100,6 +100,7 @@ export const updateProduct =
       console.error("Error creating product:", error);
       dispatch({
         type: UPDATE_PRODUCT_FAILURE,
+        payload: error.response?.data?.message || "Failed to update product",
       });
       throw error;
     }

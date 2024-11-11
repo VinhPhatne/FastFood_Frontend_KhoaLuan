@@ -43,33 +43,26 @@ const CreateProductForm = () => {
 
   const formik = useFormik({
     initialValues,
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       const productData = {
-        ...values,
         price: parseFloat(values.price),
-        category: values.category || null,
-        picture: values.picture || "",
+        picture: values.picture,
+        name: values.name,
+        description: values.description,
+        category: values.category ? values.category._id : null,
       };
+  
       try {
-        dispatch(
-          createProduct({
-            price: parseFloat(values.price),
-            picture: values.picture,
-            name: values.name,
-            description: values.description,
-            category: values.category ? values.category._id : null,
-          })
-        );
-        navigate("/admin/product");
+        await dispatch(createProduct(productData));
         notification.success({ message: "Thêm mới thành công!" });
-        console.log("data ----", values);
+        navigate("/admin/product"); 
       } catch (error) {
-        const errorMessage =
-          error.response?.data?.message || "Thêm mới thất bại";
-          notification.error({ message: errorMessage });
+        const errorMessage = error.response?.data?.message || "Tạo mới thất bại";
+        notification.error({ message: errorMessage });
       }
     },
   });
+  
 
   const handleImageChange = async (e) => {
     const file = e.target.files[0];

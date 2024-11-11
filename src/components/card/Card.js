@@ -177,7 +177,7 @@ const Card = () => {
               ))}
         </ul>
         {Array.isArray(categories) &&
-          startIndex + visibleCount < categories.length - 2 && (
+          startIndex + visibleCount < categories.length - 4 && (
             <button
               className="absolute right-[180px] top-1/2 transform -translate-y-1/2 px-2 py-1 mt-2 text-3xl font-bold text-black hover:text-orange-600"
               onClick={handleNext}

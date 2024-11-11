@@ -63,6 +63,7 @@ const RegisterForm = ({ isModalVisible, handleCancel, switchToLogin }) => {
       navigate("/");
       setOtpModalVisible(false);
       form.resetFields();
+      switchToLogin();
       handleCancel();
     } catch (error) {
       const message = error.response?.data?.message || "Xác thực OTP thất bại!";
