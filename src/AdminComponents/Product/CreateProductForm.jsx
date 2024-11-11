@@ -57,7 +57,7 @@ const CreateProductForm = () => {
             picture: values.picture,
             name: values.name,
             description: values.description,
-            category: values.category || null,
+            category: values.category ? values.category._id : null,
           })
         );
         navigate("/admin/product");
@@ -97,7 +97,7 @@ const CreateProductForm = () => {
                   htmlFor="picture"
                   className="block font-medium mb-1 w-1/4"
                 >
-                  Image:
+                  Hình ảnh:
                 </label>
                 <div className="flex items-center w-full">
                   <input
@@ -146,7 +146,7 @@ const CreateProductForm = () => {
             <Grid item xs={12}>
               <div className="flex items-center">
                 <label htmlFor="name" className="block font-medium mb-1 w-1/4">
-                  Name:
+                  Tên sản phẩm:
                 </label>
                 <TextField
                   fullWidth
@@ -183,7 +183,7 @@ const CreateProductForm = () => {
             <Grid item xs={12}>
               <div className="flex items-center">
                 <label htmlFor="price" className="block font-medium mb-1 w-1/4">
-                  Price:
+                  Giá:
                 </label>
                 <TextField
                   fullWidth

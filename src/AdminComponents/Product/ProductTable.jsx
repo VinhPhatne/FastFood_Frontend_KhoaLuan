@@ -352,25 +352,25 @@ const ProductTable = () => {
             >
               <TableRow>
                 <TableCell align="left" sx={{ color: "#000" }}>
-                  Image
+                  Hình ảnh
                 </TableCell>{" "}
                 <TableCell align="left" sx={{ color: "#000" }}>
-                  Name
+                  Tên sản phẩm
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
-                  Price
+                  Giá
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
-                  Current Price
+                  Giá hiện tại
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
-                  Category
+                  Danh mục
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
-                  isSell
+                  Đang bán
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
-                  Action
+                  Hành động
                 </TableCell>
               </TableRow>
             </TableHead>
