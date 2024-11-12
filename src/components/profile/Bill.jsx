@@ -117,7 +117,7 @@ const Bill = () => {
         padding: "20px",
       }}
     >
-      <Box
+      {/* <Box
         sx={{
           marginBottom: "20px",
           display: "flex",
@@ -149,7 +149,7 @@ const Bill = () => {
             ),
           }}
         />
-      </Box>
+      </Box> */}
 
       {/* Table Section */}
       <Card sx={{ boxShadow: "0 3px 5px rgba(0,0,0,0.1)" }}>

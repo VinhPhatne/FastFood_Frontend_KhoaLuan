@@ -1,12 +1,13 @@
-import { Box, TextField } from "@mui/material";
+import { Box, Button, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getBillById } from "../../components/State/Bill/Action";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getVoucherById } from "../../components/State/voucher/Action";
 
 const BillDetail = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { id } = useParams();
   const jwt = localStorage.getItem("jwt");
   const [billData, setBillData] = useState(null);
@@ -56,15 +57,30 @@ const BillDetail = () => {
         paddingLeft: "20px",
       }}
     >
-      <h1
-        style={{ color: "#ff7d01" }}
-        className="text-3xl text-center font-bold mb-6"
-      >
-        CHI TIẾT HÓA ĐƠN
-      </h1>
+      <div className="flex justify-between">
+        <h1
+          style={{ color: "#ff7d01" }}
+          className="text-3xl text-center font-bold mb-6"
+        >
+          CHI TIẾT HÓA ĐƠN
+        </h1>
+        <Button
+          variant="contained"
+          style={{
+            color: "#fff",
+            backgroundColor: "#ff7d01",
+            width: "100px",
+            marginBottom: "20px",
+          }}
+          onClick={() => navigate(-1)}
+        >
+          Quay về
+        </Button>
+      </div>
       <div className="flex justify-between">
         <div className="w-1/2 border rounded-lg p-6 mr-6">
           <h2 className="text-xl font-bold mb-4">Thông tin đơn hàng</h2>
+
           <form>
             <TextField
               fullWidth

@@ -64,7 +64,10 @@ const ChangePassword = () => {
         <Form.Item
           name="newPassword"
           label="Mật khẩu mới"
-          rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới!" }]}
+          rules={[
+            { required: true, message: "Vui lòng nhập mật khẩu mới!" },
+            { min: 6, message: "Mật khẩu phải nhiều hơn 6 ký tự!" },
+          ]}
         >
           <Input.Password placeholder="Nhập mật khẩu mới" className="h-12" />
         </Form.Item>

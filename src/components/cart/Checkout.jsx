@@ -52,7 +52,7 @@ const Checkout = () => {
     socket.on("connect", () => {
       console.log("Connected to server via WebSocket");
     });
-  
+
     socket.on("billCreated", (response) => {
       console.log("Server response:", response);
       setServerResponse(response);
@@ -63,13 +63,13 @@ const Checkout = () => {
         alert("Error creating bill");
       }
     });
-  
+
     return () => {
       socket.off("connect");
       socket.off("billCreated");
     };
   }, []);
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const billData = {
@@ -94,7 +94,7 @@ const Checkout = () => {
       note: formData.note || "",
       account: userProfile._id,
     };
-  
+
     socket.emit("createBill", billData);
   };
 
@@ -148,7 +148,7 @@ const Checkout = () => {
   //   dispatch(createBill(billData)).then(() => {
   //     // Gọi Socket để thông báo cho server về việc hóa đơn đã được tạo
   //     socket.emit("billCreated", { billData, status: "success" });
-  
+
   //     Cookies.remove(jwt);
   //     clearCart();
   //     dispatch(getUserProfile());
@@ -213,10 +213,24 @@ const Checkout = () => {
   }, [cart, optionals]);
 
   return (
-    <div className="container mx-auto p-8 mt-24 mb-12">
-      <h1 style={{ color: "#ff7d01" }} className="text-3xl font-bold mb-6">
-        THANH TOÁN
-      </h1>
+    <div className="container mx-auto p-8 mt-24 mb-12 flex flex-col">
+      <div className="flex justify-between">
+        <h1 style={{ color: "#ff7d01" }} className="text-3xl font-bold mb-6">
+          THANH TOÁN
+        </h1>
+        <Button
+          variant="contained"
+          style={{
+            color: "#fff",
+            backgroundColor: "#ff7d01",
+            width: "100px",
+            marginBottom: "20px",
+          }}
+          onClick={() => navigate(-1)}
+        >
+          Quay về
+        </Button>
+      </div>
 
       <div className="flex justify-between">
         {/* Form thông tin người dùng */}

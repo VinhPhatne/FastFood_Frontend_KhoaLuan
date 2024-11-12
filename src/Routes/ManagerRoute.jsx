@@ -6,10 +6,10 @@ import Manager from "../ManageComponents/Manager/Manager";
 import { CartProvider } from "../components/cart/CartContext";
 
 const ManagerRoute = () => {
-  // const { role } = useSelector((state) => state.auth);
-  // if (role !== 1) {
-  //   return <Navigate to="/" replace />;
-  // }
+  const { role } = useSelector((state) => state.auth);
+  if (role !== 2) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <CartProvider>
