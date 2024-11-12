@@ -132,6 +132,7 @@ export const updateUserProfile = (id, reqData) => async (dispatch) => {
       {
         fullname: reqData.userData.fullname,
         phonenumber: reqData.userData.phonenumber,
+        address: reqData.userData.address,
         //email: reqData.userData.email,
       },
       {
@@ -145,6 +146,7 @@ export const updateUserProfile = (id, reqData) => async (dispatch) => {
   } catch (error) {
     console.log(error);
     dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
+    throw error;
   }
 };
 

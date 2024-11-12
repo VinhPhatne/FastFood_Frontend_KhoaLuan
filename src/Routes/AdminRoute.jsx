@@ -5,10 +5,10 @@ import Admin from "../AdminComponents/Admin/Admin";
 import { CartProvider } from "../components/cart/CartContext";
 
 const AdminRoute = () => {
-  // const { role } = useSelector((state) => state.auth);
-  // if (role !== 1) {
-  //   return <Navigate to="/" replace />;
-  // }
+  const { role } = useSelector((state) => state.auth);
+  if (role !== 1) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <CartProvider>

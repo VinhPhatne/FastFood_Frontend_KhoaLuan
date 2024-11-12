@@ -7,6 +7,7 @@ import { getUserProfile } from "../State/Authentication/Action";
 import useCart from "../../hook/useCart";
 import { getOptionals } from "../State/Optional/Action";
 import { getChoicesByOptionalId } from "../State/Choice/Action";
+import { Button } from "@mui/material";
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -77,6 +78,27 @@ const Cart = () => {
     0
   );
 
+  // const handleApplyVoucher = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `http://localhost:8080/v1/voucher/getcode?code=${voucher}`
+  //     );
+  //     console.log("response", response);
+  //     if (response.data && response.data.data) {
+  //       setDiscount(response.data.data.discount);
+  //       setVoucherId(response.data.data._id);
+  //       setVoucherError("");
+  //     } else {
+  //       setVoucherError("Mã giảm giá không hợp lệ");
+  //       setDiscount(0);
+  //       setVoucherId(null);
+  //     }
+  //   } catch (error) {
+  //     setVoucherError("Có lỗi xảy ra khi áp dụng mã giảm giá");
+  //     console.error(error);
+  //   }
+  // };
+
   const handleApplyVoucher = async () => {
     try {
       const response = await axios.get(
@@ -84,9 +106,16 @@ const Cart = () => {
       );
       console.log("response", response);
       if (response.data && response.data.data) {
-        setDiscount(response.data.data.discount);
-        setVoucherId(response.data.data._id);
-        setVoucherError("");
+        const voucherData = response.data.data;
+        if (voucherData.isActive) { 
+          setDiscount(voucherData.discount);
+          setVoucherId(voucherData._id);
+          setVoucherError("");
+        } else {
+          setVoucherError("Mã giảm giá đã hết hạn sử dụng");
+          setDiscount(0);
+          setVoucherId(null);
+        }
       } else {
         setVoucherError("Mã giảm giá không hợp lệ");
         setDiscount(0);
@@ -174,9 +203,23 @@ const Cart = () => {
 
   return (
     <div class="container mx-auto p-8 mt-24 mb-12">
-      <h1 style={{ color: "#ff7d01" }} class="text-3xl font-bold mb-6">
-        GIỎ HÀNG CỦA TÔI
-      </h1>
+      <div className="flex justify-between">
+        <h1 style={{ color: "#ff7d01" }} class="text-3xl font-bold mb-6">
+          GIỎ HÀNG CỦA TÔI
+        </h1>
+        <Button
+          variant="contained"
+          style={{
+            color: "#fff",
+            backgroundColor: "#ff7d01",
+            width: "200px",
+            marginBottom: "20px",
+          }}
+          onClick={() => navigate("/")}
+        >
+          Quay về trang chủ
+        </Button>
+      </div>
 
       <div className="flex items-start justify-between">
         <div
@@ -236,7 +279,11 @@ const Cart = () => {
                     </button>
                   </div>
                   <span className="text-lg font-semibold">
-                  {((item.price + itemOptionsTotal) * item.quantity).toLocaleString()} đ
+                    {(
+                      (item.price + itemOptionsTotal) *
+                      item.quantity
+                    ).toLocaleString()}{" "}
+                    đ
                   </span>
                 </div>
               );

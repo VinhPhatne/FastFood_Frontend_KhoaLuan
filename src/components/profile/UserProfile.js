@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Form, Input, Button } from "antd";
+import { Form, Input, Button, notification } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserProfile } from "../State/Authentication/Action";
 import { useNavigate } from "react-router-dom";
@@ -16,11 +16,25 @@ const UserProfile = () => {
   }, [dispatch]);
 
   const onFinish = async (values) => {
-    await dispatch(
-      updateUserProfile(userProfile?._id, {
-        userData: { fullname: values.fullname, password: values.password },
-      })
-    );
+    try {
+      await dispatch(
+        updateUserProfile(userProfile?._id, {
+          userData: {
+            fullname: values.fullname,
+            address: values.address,
+          },
+        })
+      );
+      notification.success({
+        message: "Cập nhật thành công",
+        description: "Thông tin người dùng đã được cập nhật thành công.",
+      });
+    } catch (error) {
+      notification.error({
+        message: "Cập nhật thất bại",
+        description: "Có lỗi xảy ra khi cập nhật thông tin.",
+      });
+    }
   };
 
   useEffect(() => {
@@ -29,6 +43,7 @@ const UserProfile = () => {
         fullname: userProfile?.fullname || "",
         phonenumber: userProfile?.phonenumber || "",
         email: userProfile?.email || "",
+        address: userProfile?.address || "",
       });
     }
   }, [userProfile, form]);
@@ -64,16 +79,28 @@ const UserProfile = () => {
           name="phonenumber"
           label="Số điện thoại"
           rules={[{ required: true, message: "Vui lòng nhập Số điện thoại!" }]}
+          disable
         >
-          <Input placeholder="Nhập Số điện thoại" className="h-12" />
+          <Input placeholder="Nhập Số điện thoại" className="h-12" disabled  />
         </Form.Item>
 
-        <Form.Item
+        <Form.Item name="email" label="Địa chỉ email">
+          <Input placeholder="mail@example.com" className="h-12" disabled  />
+        </Form.Item>
+
+        {/* <Form.Item
           name="password"
           label="Mật khẩu"
           rules={[{ message: "Vui lòng nhập mật khẩu!" }]}
         >
           <Input.Password placeholder="Nhập mật khẩu" className="h-12" />
+        </Form.Item> */}
+        <Form.Item
+          name="address"
+          label="Địa chỉ"
+          rules={[{ message: "Vui lòng nhập Địa chỉ!" }]}
+        >
+          <Input placeholder="Nhập địa chỉ" className="h-12" />
         </Form.Item>
 
         <Form.Item className="flex justify-end">

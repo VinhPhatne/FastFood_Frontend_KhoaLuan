@@ -105,19 +105,25 @@ const RegisterForm = ({ isModalVisible, handleCancel, switchToLogin }) => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="fullname"
-                label="Họ và tên"
+                name="phonenumber"
+                label="Số điện thoại"
                 rules={[
-                  { required: true, message: "Vui lòng nhập họ và tên!" },
+                  { required: true, message: "Vui lòng nhập số điện thoại!" },
+                  {
+                    pattern: /^0\d{9}$/,
+                    message:
+                      "Số điện thoại phải gồm 10 số và bắt đầu bằng số 0!",
+                  },
                 ]}
                 className={styles["form-item"]}
               >
                 <Input
-                  placeholder="Nhập họ và tên"
+                  placeholder="Nhập số điện thoại"
                   style={{ height: "50px" }}
                 />
               </Form.Item>
             </Col>
+
             <Col span={12}>
               <Form.Item
                 name="email"
@@ -142,9 +148,27 @@ const RegisterForm = ({ isModalVisible, handleCancel, switchToLogin }) => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
+                name="fullname"
+                label="Họ và tên"
+                rules={[
+                  { required: true, message: "Vui lòng nhập họ và tên!" },
+                ]}
+                className={styles["form-item"]}
+              >
+                <Input
+                  placeholder="Nhập họ và tên"
+                  style={{ height: "50px" }}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
                 name="password"
                 label="Mật khẩu"
-                rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+                rules={[
+                  { required: true, message: "Vui lòng nhập mật khẩu!" },
+                  { min: 6, message: "Mật khẩu phải nhiều hơn 6 ký tự!" },
+                ]}
                 className={styles["form-item"]}
               >
                 <Input.Password
@@ -153,6 +177,9 @@ const RegisterForm = ({ isModalVisible, handleCancel, switchToLogin }) => {
                 />
               </Form.Item>
             </Col>
+          </Row>
+
+          <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 name="confirmPassword"
@@ -176,30 +203,7 @@ const RegisterForm = ({ isModalVisible, handleCancel, switchToLogin }) => {
                 />
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="phonenumber"
-                label="Số điện thoại"
-                rules={[
-                  { required: true, message: "Vui lòng nhập số điện thoại!" },
-                  {
-                    pattern: /^0\d{9}$/,
-                    message:
-                      "Số điện thoại phải gồm 10 số và bắt đầu bằng số 0!",
-                  },
-                ]}
-                className={styles["form-item"]}
-              >
-                <Input
-                  placeholder="Nhập số điện thoại"
-                  style={{ height: "50px" }}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
+            {/* <Col span={12}>
               <Form.Item
                 name="referralCode"
                 label="Mã giới thiệu"
@@ -207,7 +211,7 @@ const RegisterForm = ({ isModalVisible, handleCancel, switchToLogin }) => {
               >
                 <Input placeholder="Mã giới thiệu" style={{ height: "50px" }} />
               </Form.Item>
-            </Col>
+            </Col> */}
           </Row>
 
           <Form.Item>
