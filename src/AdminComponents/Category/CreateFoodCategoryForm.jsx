@@ -54,6 +54,7 @@ const CreateFoodCategoryForm = ({ onClose, onSuccess }) => {
         <form className="space-y-5" onSubmit={handleSubmit}>
           <TextField
             fullWidth
+            required
             id="categoryName"
             name="categoryName"
             label="Tên danh mục"

@@ -8,9 +8,9 @@ import { logout } from "../../components/State/Authentication/Action";
 import { useCartContext } from "../../components/cart/CartContext";
 
 const menu = [
-  { title: "Dashboard", icon: <Dashboard />, path: "/" },
-  { title: "Orders", icon: <ShoppingBag />, path: "/bill" },
-  { title: "Account", icon: <ShoppingBag />, path: "/account" },
+  { title: "Doanh thu", icon: <Dashboard />, path: "/" },
+  { title: "Hóa đơn", icon: <ShoppingBag />, path: "/bill" },
+  { title: "Tài khoản", icon: <ShoppingBag />, path: "/account" },
 ];
 
 const AdminSideBar = ({ handleClose }) => {

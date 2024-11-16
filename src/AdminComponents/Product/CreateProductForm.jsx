@@ -18,13 +18,26 @@ import { getCategories } from "../../components/State/Category/Action";
 import { createProduct } from "../../components/State/Product/Action";
 import { notification } from "antd";
 import { useNavigate } from "react-router-dom";
+import * as Yup from "yup";
 
 const initialValues = {
   name: "",
   description: "",
   price: "",
   picture: "",
+  category: null,
 };
+
+const validationSchema = Yup.object({
+  name: Yup.string().required("Tên sản phẩm là bắt buộc"),
+  description: Yup.string().required("Mô tả là bắt buộc"),
+  price: Yup.number()
+    .required("Giá là bắt buộc")
+    .positive("Giá phải là số dương")
+    .typeError("Giá phải là một số"),
+  picture: Yup.string().required("Hình ảnh là bắt buộc"),
+  category: Yup.object().required("Danh mục là bắt buộc"),
+});
 
 const CreateProductForm = () => {
   const dispatch = useDispatch();
@@ -43,6 +56,7 @@ const CreateProductForm = () => {
 
   const formik = useFormik({
     initialValues,
+    validationSchema,
     onSubmit: async (values) => {
       const productData = {
         price: parseFloat(values.price),
@@ -51,18 +65,18 @@ const CreateProductForm = () => {
         description: values.description,
         category: values.category ? values.category._id : null,
       };
-  
+
       try {
         await dispatch(createProduct(productData));
         notification.success({ message: "Thêm mới thành công!" });
-        navigate("/admin/product"); 
+        navigate("/admin/product");
       } catch (error) {
-        const errorMessage = error.response?.data?.message || "Tạo mới thất bại";
+        const errorMessage =
+          error.response?.data?.message || "Tạo mới thất bại";
         notification.error({ message: errorMessage });
       }
     },
   });
-  
 
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
@@ -86,10 +100,7 @@ const CreateProductForm = () => {
           <Grid container spacing={2} justifyContent="flex-start">
             <Grid item xs={12}>
               <div className="flex items-center">
-                <label
-                  htmlFor="picture"
-                  className="block font-medium mb-1 w-1/4"
-                >
+                <label htmlFor="picture" className="block font-medium mb-1 w-1/4">
                   Hình ảnh:
                 </label>
                 <div className="flex items-center w-full">
@@ -148,17 +159,17 @@ const CreateProductForm = () => {
                   variant="outlined"
                   onChange={formik.handleChange}
                   value={formik.values.name}
+                  error={formik.touched.name && Boolean(formik.errors.name)}
+                  helperText={formik.touched.name && formik.errors.name}
                   sx={{ maxWidth: "100%" }}
                 />
               </div>
             </Grid>
 
+            {/* Row for description field */}
             <Grid item xs={12}>
               <div className="flex items-center">
-                <label
-                  htmlFor="description"
-                  className="block font-medium mb-1 w-1/4"
-                >
+                <label htmlFor="description" className="block font-medium mb-1 w-1/4">
                   Mô tả:
                 </label>
                 <TextField
@@ -168,11 +179,14 @@ const CreateProductForm = () => {
                   variant="outlined"
                   onChange={formik.handleChange}
                   value={formik.values.description}
+                  error={formik.touched.description && Boolean(formik.errors.description)}
+                  helperText={formik.touched.description && formik.errors.description}
                   sx={{ maxWidth: "100%" }}
                 />
               </div>
             </Grid>
 
+            {/* Row for price field */}
             <Grid item xs={12}>
               <div className="flex items-center">
                 <label htmlFor="price" className="block font-medium mb-1 w-1/4">
@@ -185,25 +199,23 @@ const CreateProductForm = () => {
                   variant="outlined"
                   onChange={formik.handleChange}
                   value={formik.values.price}
+                  error={formik.touched.price && Boolean(formik.errors.price)}
+                  helperText={formik.touched.price && formik.errors.price}
                   sx={{ maxWidth: "100%" }}
                 />
               </div>
             </Grid>
 
+            {/* Row for category field */}
             <Grid item xs={12}>
               <div className="flex items-center">
-                <label
-                  htmlFor="category"
-                  className="block font-medium mb-1 w-1/4"
-                >
+                <label htmlFor="category" className="block font-medium mb-1 w-1/4">
                   Danh mục:
                 </label>
                 <FormControl fullWidth sx={{ maxWidth: "100%" }}>
                   <Select
                     id="category"
-                    value={
-                      formik.values.category ? formik.values.category._id : ""
-                    }
+                    value={formik.values.category ? formik.values.category._id : ""}
                     onChange={(e) => {
                       const selectedCategory = categories.find(
                         (cat) => cat._id === e.target.value
@@ -211,6 +223,7 @@ const CreateProductForm = () => {
                       formik.setFieldValue("category", selectedCategory);
                     }}
                     name="category"
+                    error={formik.touched.category && Boolean(formik.errors.category)}
                   >
                     {categories &&
                       categories.map((item) => (

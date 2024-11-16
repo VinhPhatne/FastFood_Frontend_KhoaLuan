@@ -14,6 +14,8 @@ import {
   GET_REVENUE_FAILURE,
   GET_PRODUCT_SALE_SUCCESS,
   GET_PRODUCT_SALE_FAILURE,
+  GET_LIST_BILLS_SUCCESS,
+  GET_LIST_BILLS_FAILURE
 } from "./ActionType";
 import { API_URL } from "../../config/api";
 import socket from "../../config/socket";
@@ -42,7 +44,23 @@ export const getBills = ({ page = 1, accountId, phone, state }) => async (dispat
   }
 };
 
+export const getListBills = () => async (dispatch) => {
+  try {
+    const response = await axios.get(`${API_URL}/v1/bill/list`, {
+    });
+    console.log("getListBills", response.data.data);
+    dispatch({
+      type: GET_LIST_BILLS_SUCCESS,
+      payload: response.data.data,
 
+      // pagination: response.data.pagination,
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_LIST_BILLS_FAILURE,
+    });
+  }
+};
 //
 export const createBill = (billData) => async (dispatch) => {
   try {
@@ -121,7 +139,6 @@ export const getRevenue = (year) => async (dispatch) => {
     const response = await axios.get(`${API_URL}/v1/bill/getrevenue`, {
       params: { year },
     });
-    console.log("CHECK", response.data);
     const transformedData = response.data.data.map((item) => ({
       name: new Date(2024, item.month - 1).toLocaleString("default", {
         month: "short",

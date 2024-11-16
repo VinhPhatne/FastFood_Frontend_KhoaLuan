@@ -12,6 +12,8 @@ import {
   GET_REVENUE_FAILURE,
   GET_PRODUCT_SALE_SUCCESS,
   GET_PRODUCT_SALE_FAILURE,
+  GET_LIST_BILLS_SUCCESS,
+  GET_LIST_BILLS_FAILURE,
 } from "./ActionType";
 
 const initialState = {
@@ -26,12 +28,14 @@ const initialState = {
 export const billReducer = (state = initialState, action) => {
   switch (action.type) {
     case GET_BILLS_SUCCESS:
+    case GET_LIST_BILLS_SUCCESS:
       return {
         ...state,
         bills: action.payload,
         error: null,
       };
     case GET_BILLS_FAILURE:
+    case GET_LIST_BILLS_FAILURE:
       return {
         ...state,
         error: action.payload,

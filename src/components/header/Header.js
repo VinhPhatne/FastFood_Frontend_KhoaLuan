@@ -53,8 +53,6 @@ const Header = () => {
     }
   }, [jwt]);
 
-
-
   const handleFocus = () => {
     setIsSearchActive(true);
   };
@@ -99,19 +97,47 @@ const Header = () => {
     { label: "Giới thiệu", path: "/about" },
   ];
 
+  // const userMenu = (
+  //   <Menu>
+  //     <Menu.Item key="profile" onClick={() => navigate("/profile")}>
+  //       Tài khoản
+  //     </Menu.Item>
+  //     <Menu.Item
+  //       key="profile"
+  //       onClick={() => navigate("/profile/change-password")}
+  //     >
+  //       Đổi mật khẩu
+  //     </Menu.Item>
+  //     <Menu.Item key="logout" onClick={handleLogout}>
+  //       Logout
+  //     </Menu.Item>
+  //   </Menu>
+  // );
+
   const userMenu = (
     <Menu>
+      {userProfile?.role === 1 && ( 
+        <Menu.Item key="admin" onClick={() => navigate("/admin")}>
+          Trang Admin
+        </Menu.Item>
+      )}
+      {userProfile?.role === 2 && ( 
+        <Menu.Item key="manager" onClick={() => navigate("/manager")}>
+          Trang Manager
+        </Menu.Item>
+      )}
       <Menu.Item key="profile" onClick={() => navigate("/profile")}>
         Profile
       </Menu.Item>
       <Menu.Item
-        key="profile"
+        key="change-password"
         onClick={() => navigate("/profile/change-password")}
       >
         Đổi mật khẩu
       </Menu.Item>
+
       <Menu.Item key="logout" onClick={handleLogout}>
-        Logout
+        Đăng xuất
       </Menu.Item>
     </Menu>
   );

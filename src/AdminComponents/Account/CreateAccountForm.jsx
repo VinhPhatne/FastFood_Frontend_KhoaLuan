@@ -65,6 +65,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
         <form className="space-y-5" onSubmit={handleSubmit}>
           <TextField
             fullWidth
+            required
             id="fullname"
             name="fullname"
             label="Họ tên"
@@ -74,6 +75,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
+            required
             id="phonenumber"
             name="phonenumber"
             label="Số điện thoại"
@@ -83,6 +85,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
+            required
             id="password"
             name="password"
             label="Mật khẩu"
@@ -93,6 +96,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
+            required
             id="address"
             name="address"
             label="Địa chỉ"
@@ -102,6 +106,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
+            required
             id="email"
             name="email"
             label="Email"

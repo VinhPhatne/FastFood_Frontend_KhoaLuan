@@ -15,16 +15,16 @@ import { useCartContext } from "../../components/cart/CartContext";
 // import { logout } from "../../component/State/Authentication/Action";
 
 const menu = [
-  { title: "Dashboard", icon: <Dashboard />, path: "/" },
-  { title: "Orders", icon: <ShoppingBag />, path: "/bill" },
-  { title: "Account", icon: <ShoppingBag />, path: "/account" },
-  { title: "Product", icon: <ShopTwoIcon />, path: "/product" },
-  { title: "Food Category", icon: <CategoryIcon />, path: "/category" },
-  { title: "Events", icon: <EventIcon />, path: "/event" },
+  { title: "Doanh thu", icon: <Dashboard />, path: "/" },
+  { title: "Hóa đơn", icon: <ShoppingBag />, path: "/bill" },
+  { title: "Tài khoản", icon: <ShoppingBag />, path: "/account" },
+  { title: "Sản phẩm", icon: <ShopTwoIcon />, path: "/product" },
+  { title: "Danh mục", icon: <CategoryIcon />, path: "/category" },
+  { title: "Sự kiện", icon: <EventIcon />, path: "/event" },
   { title: "Voucher", icon: <DiscountIcon />, path: "/voucher" },
-  { title: "Import", icon: <DiscountIcon />, path: "/import" },
+  { title: "Nhập hàng", icon: <DiscountIcon />, path: "/import" },
   { title: "Tuỳ chọn món ăn kèm", icon: <DiscountIcon />, path: "/optional" },
-  { title: "Logout", icon: <LogoutIcon />, path: "/" },
+  { title: "Đăng xuất", icon: <LogoutIcon />, path: "/" },
 ];
 
 const AdminSideBar = ({ handleClose }) => {

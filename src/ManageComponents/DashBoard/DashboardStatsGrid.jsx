@@ -1,61 +1,77 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { IoBagHandle, IoPieChart, IoPeople, IoCart } from 'react-icons/io5'
+import { getBills, getListBills, getRevenue } from "../../components/State/Bill/Action";
+import { getExpense } from "../../components/State/Import/Action";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function DashboardStatsGrid() {
+  const dispatch = useDispatch();
+	const selectedYear = 2024;
+	const { data: revenueData } = useSelector((state) => state.billReducer);
+  const { dataIngredient: expenseData } = useSelector((state) => state.ingredientReducer);
+  const { bills } = useSelector((state) => state.billReducer.bills);
+
+	useEffect(() => {
+    dispatch(getRevenue(selectedYear));
+    dispatch(getExpense(selectedYear));
+    dispatch(getListBills());
+  }, [dispatch, selectedYear]);
+
+	const totalIncome = revenueData?.reduce((sum, month) => sum + (month.Income || 0), 0) ?? 0;
+  const totalExpense = expenseData?.reduce((sum, month) => sum + (month.Expense || 0), 0) ?? 0;
+  const totalProfit = totalIncome - totalExpense;
+  const totalOrders = bills?.length ?? 0;
+
 	return (
-		<div className="flex gap-4">
-			<BoxWrapper>
-				<div className="rounded-full h-12 w-12 flex items-center justify-center bg-sky-500">
-					<IoBagHandle className="text-2xl text-white" />
-				</div>
-				<div className="pl-4">
-					<span className="text-sm text-gray-500 font-light">Total Sales</span>
-					<div className="flex items-center">
-						<strong className="text-xl text-gray-700 font-semibold">$54232</strong>
-						<span className="text-sm text-green-500 pl-2">+343</span>
-					</div>
-				</div>
-			</BoxWrapper>
-			<BoxWrapper>
-				<div className="rounded-full h-12 w-12 flex items-center justify-center bg-orange-600">
-					<IoPieChart className="text-2xl text-white" />
-				</div>
-				<div className="pl-4">
-					<span className="text-sm text-gray-500 font-light">Total Expenses</span>
-					<div className="flex items-center">
-						<strong className="text-xl text-gray-700 font-semibold">$3423</strong>
-						<span className="text-sm text-green-500 pl-2">-343</span>
-					</div>
-				</div>
-			</BoxWrapper>
-			<BoxWrapper>
-				<div className="rounded-full h-12 w-12 flex items-center justify-center bg-yellow-400">
-					<IoPeople className="text-2xl text-white" />
-				</div>
-				<div className="pl-4">
-					<span className="text-sm text-gray-500 font-light">Total Customers</span>
-					<div className="flex items-center">
-						<strong className="text-xl text-gray-700 font-semibold">12313</strong>
-						<span className="text-sm text-red-500 pl-2">-30</span>
-					</div>
-				</div>
-			</BoxWrapper>
-			<BoxWrapper>
-				<div className="rounded-full h-12 w-12 flex items-center justify-center bg-green-600">
-					<IoCart className="text-2xl text-white" />
-				</div>
-				<div className="pl-4">
-					<span className="text-sm text-gray-500 font-light">Total Orders</span>
-					<div className="flex items-center">
-						<strong className="text-xl text-gray-700 font-semibold">16432</strong>
-						<span className="text-sm text-red-500 pl-2">-43</span>
-					</div>
-				</div>
-			</BoxWrapper>
-		</div>
-	)
+    <div className="flex gap-4">
+      <BoxWrapper>
+        <div className="rounded-full h-12 w-12 flex items-center justify-center bg-sky-500">
+          <IoBagHandle className="text-2xl text-white" />
+        </div>
+        <div className="pl-4">
+          <span className="text-sm text-gray-500 font-light">Doanh thu</span>
+          <div className="flex items-center">
+            <strong className="text-xl text-gray-700 font-semibold">{totalIncome.toLocaleString()} VND</strong>
+          </div>
+        </div>
+      </BoxWrapper>
+      <BoxWrapper>
+        <div className="rounded-full h-12 w-12 flex items-center justify-center bg-orange-600">
+          <IoPieChart className="text-2xl text-white" />
+        </div>
+        <div className="pl-4">
+          <span className="text-sm text-gray-500 font-light">Chi phí</span>
+          <div className="flex items-center">
+            <strong className="text-xl text-gray-700 font-semibold">{totalExpense.toLocaleString()} VND</strong>
+          </div>
+        </div>
+      </BoxWrapper>
+      <BoxWrapper>
+        <div className="rounded-full h-12 w-12 flex items-center justify-center bg-yellow-400">
+          <IoPeople className="text-2xl text-white" />
+        </div>
+        <div className="pl-4">
+          <span className="text-sm text-gray-500 font-light">Lợi nhuận</span>
+          <div className="flex items-center">
+            <strong className="text-xl text-gray-700 font-semibold">{totalProfit.toLocaleString()} VND</strong>
+          </div>
+        </div>
+      </BoxWrapper>
+      <BoxWrapper>
+        <div className="rounded-full h-12 w-12 flex items-center justify-center bg-green-600">
+          <IoCart className="text-2xl text-white" />
+        </div>
+        <div className="pl-4">
+          <span className="text-sm text-gray-500 font-light">Tổng đơn hàng</span>
+          <div className="flex items-center">
+            <strong className="text-xl text-gray-700 font-semibold">{totalOrders}</strong>
+          </div>
+        </div>
+      </BoxWrapper>
+    </div>
+  );
 }
 
 function BoxWrapper({ children }) {
-	return <div className="bg-white rounded-sm p-4 flex-1 border border-gray-200 flex items-center">{children}</div>
+  return <div className="bg-white rounded-sm p-4 flex-1 border border-gray-200 flex items-center">{children}</div>;
 }
