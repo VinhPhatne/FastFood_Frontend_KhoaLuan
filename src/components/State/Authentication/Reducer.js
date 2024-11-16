@@ -29,7 +29,7 @@ const initialState = {
   jwt: null,
   favorites: [],
   success: null,
-  role: 2,
+  role: '',
 };
 
 export const authReducer = (state = initialState, action) => {
@@ -44,6 +44,7 @@ export const authReducer = (state = initialState, action) => {
     case LOGIN_SUCCESS:
     case REGISTER_SUCCESS:
     case VERIFY_OTP_SUCCESS:
+      //localStorage.setItem("role", action.payload.role);
       return {
         ...state,
         isLoading: false,
@@ -62,16 +63,6 @@ export const authReducer = (state = initialState, action) => {
         favorites: action.payload.favorites,
       };
 
-    // case ADD_TO_FAVORITE_SUCCESS:
-    //   return {
-    //     ...state,
-    //     isLoading: false,
-    //     error: null,
-    //     favorites: isPresentInFavorites(state.favorites, action.payload)
-    //       ? state.favorites.filter((item) => item.id !== action.payload.id)
-    //       : [action.payload, ...state.favorites],
-    //   };
-
     // case LOGOUT:
     //   return initialState;
 
@@ -89,6 +80,7 @@ export const authReducer = (state = initialState, action) => {
       };
 
     case SET_ROLE:
+      localStorage.setItem("role", action.payload);
       return { ...state, role: action.payload };
 
     default:

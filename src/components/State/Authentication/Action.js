@@ -82,6 +82,8 @@ export const loginUser = (reqData) => async (dispatch) => {
     if (role === 1) {
       reqData.navigate("/admin");
     } else if (role === 2) {
+      reqData.navigate("/manager");
+    } else {
       reqData.navigate("/");
     }
     //dispatch({ type: LOGIN_SUCCESS, payload: data.jwt });
@@ -91,7 +93,7 @@ export const loginUser = (reqData) => async (dispatch) => {
     });
     return { type: LOGIN_SUCCESS, payload: data };
   } catch (error) {
-    console.log("ER",error);
+    console.log("ER", error);
     const message = error.response?.data?.message || "Đăng nhập thất bại";
     dispatch({ type: LOGIN_FAILURE, payload: message });
     notification.error({
@@ -117,6 +119,7 @@ export const getUserProfile = () => async (dispatch) => {
     console.log("user profile", data);
 
     dispatch({ type: GET_USER_SUCCESS, payload: data });
+    return data;
   } catch (error) {
     console.log(error);
     dispatch({ type: GET_USER_FAILURE, payload: error.message });
@@ -207,4 +210,4 @@ export const verifyOtp = (reqData) => async (dispatch) => {
 export const setUserRole = (role) => ({
   type: SET_ROLE,
   payload: role,
-}); 
+});

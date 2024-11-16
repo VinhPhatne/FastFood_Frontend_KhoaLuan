@@ -114,7 +114,7 @@ const UpdateStockInForm = ({ event, onClose, onSuccess }) => {
             type="submit"
             style={{ color: "#fff", backgroundColor: "#ff7d01" }}
           >
-            Thêm mới
+            Cập nhật
           </Button>
         </form>
       </div>

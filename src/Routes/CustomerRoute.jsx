@@ -1,10 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { Navigate, Route, Routes } from "react-router-dom";
 import Home from "../components/Home";
 import Header from "../components/header/Header";
-import UserProfile from "../components/profile/UserProfile";
-import ChangePassword from "../components/profile/ChangePassword";
 import Profile from "../components/profile/Profile";
 import Cart from "../components/cart/Cart";
 import Checkout from "../components/cart/Checkout";
@@ -12,17 +10,37 @@ import Footer from "../components/footer/Footer";
 import PaymentSuccess from "../components/cart/PaymentSuccess";
 import AboutUs from "../components/AboutMe/AboutUs";
 import OTP from "../components/otp/OTP";
-import { useSelector } from "react-redux";
 import BillDetail from "../components/profile/BillDetail";
 import { CartProvider } from "../components/cart/CartContext";
 import OrderDetails6 from "../components/cart/OrderDetail";
 import Promotion from "../components/card/Promotion";
+import {
+  getUserProfile,
+  setUserRole,
+} from "../components/State/Authentication/Action";
+import { useDispatch, useSelector } from "react-redux";
 
 const CustomerRoute = () => {
-  // const { role } = useSelector((state) => state.auth);
-  // if (role !== 2) {
-  //   return <Navigate to="/admin" replace />;
-  // }
+
+  const dispatch = useDispatch();
+  const jwt = localStorage.getItem("jwt");
+  const storedRole = localStorage.getItem("role") || "2";
+
+  const { role } = useSelector((state) => ({
+    role: state.auth.role,
+    isLoading: state.auth.isLoading,
+  }));
+
+  const userProfile = useSelector((state) => state.auth.user);
+  const check = userProfile?.role || "";
+  useEffect(() => {
+    if (!role) {
+      dispatch(getUserProfile());
+    }
+    dispatch(getUserProfile());
+    dispatch(setUserRole(storedRole));
+  }, [dispatch, jwt, storedRole]);
+
   return (
     <CartProvider>
       <div>

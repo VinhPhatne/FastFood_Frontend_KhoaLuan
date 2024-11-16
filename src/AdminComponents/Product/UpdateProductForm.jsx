@@ -22,13 +22,26 @@ import {
 } from "../../components/State/Product/Action";
 import { useNavigate, useParams } from "react-router-dom";
 import { notification } from "antd";
+import * as Yup from "yup";
 
 const initialValues = {
   name: "",
   description: "",
   price: "",
   picture: "",
+  category: null,
 };
+
+const validationSchema = Yup.object({
+  name: Yup.string().required("Tên sản phẩm là bắt buộc"),
+  description: Yup.string().required("Mô tả là bắt buộc"),
+  price: Yup.number()
+    .required("Giá là bắt buộc")
+    .positive("Giá phải là số dương")
+    .typeError("Giá phải là một số"),
+  picture: Yup.string().required("Hình ảnh là bắt buộc"),
+  category: Yup.object().required("Danh mục là bắt buộc"),
+});
 
 const UpdateProductForm = () => {
   const dispatch = useDispatch();
@@ -89,6 +102,7 @@ const UpdateProductForm = () => {
 
   const formik = useFormik({
     initialValues,
+    validationSchema,
     onSubmit: (values) => {
       const productData = {
         ...values,
@@ -105,7 +119,6 @@ const UpdateProductForm = () => {
             productData,
           })
         );
-        console.log("data ----", values);
         navigate("/admin/product");
         notification.success({ message: "Cập nhật thành công!" });
       } catch (error) {
@@ -138,11 +151,8 @@ const UpdateProductForm = () => {
           <Grid container spacing={2} justifyContent="flex-start">
             <Grid item xs={12}>
               <div className="flex items-center">
-                <label
-                  htmlFor="picture"
-                  className="block font-medium mb-1 w-1/4"
-                >
-                  Image:
+                <label htmlFor="picture" className="block font-medium mb-1 w-1/4">
+                  Hình ảnh:
                 </label>
                 <div className="flex items-center w-full">
                   <input
@@ -191,7 +201,7 @@ const UpdateProductForm = () => {
             <Grid item xs={12}>
               <div className="flex items-center">
                 <label htmlFor="name" className="block font-medium mb-1 w-1/4">
-                  Name:
+                  Tên sản phẩm:
                 </label>
                 <TextField
                   fullWidth
@@ -200,17 +210,17 @@ const UpdateProductForm = () => {
                   variant="outlined"
                   onChange={formik.handleChange}
                   value={formik.values.name}
+                  error={formik.touched.name && Boolean(formik.errors.name)}
+                  helperText={formik.touched.name && formik.errors.name}
                   sx={{ maxWidth: "100%" }}
                 />
               </div>
             </Grid>
 
+            {/* Row for description field */}
             <Grid item xs={12}>
               <div className="flex items-center">
-                <label
-                  htmlFor="description"
-                  className="block font-medium mb-1 w-1/4"
-                >
+                <label htmlFor="description" className="block font-medium mb-1 w-1/4">
                   Mô tả:
                 </label>
                 <TextField
@@ -220,15 +230,18 @@ const UpdateProductForm = () => {
                   variant="outlined"
                   onChange={formik.handleChange}
                   value={formik.values.description}
+                  error={formik.touched.description && Boolean(formik.errors.description)}
+                  helperText={formik.touched.description && formik.errors.description}
                   sx={{ maxWidth: "100%" }}
                 />
               </div>
             </Grid>
 
+            {/* Row for price field */}
             <Grid item xs={12}>
               <div className="flex items-center">
                 <label htmlFor="price" className="block font-medium mb-1 w-1/4">
-                  Price:
+                  Giá:
                 </label>
                 <TextField
                   fullWidth
@@ -237,35 +250,31 @@ const UpdateProductForm = () => {
                   variant="outlined"
                   onChange={formik.handleChange}
                   value={formik.values.price}
+                  error={formik.touched.price && Boolean(formik.errors.price)}
+                  helperText={formik.touched.price && formik.errors.price}
                   sx={{ maxWidth: "100%" }}
                 />
               </div>
             </Grid>
 
+            {/* Row for category field */}
             <Grid item xs={12}>
               <div className="flex items-center">
-                <label
-                  htmlFor="category"
-                  className="block font-medium mb-1 w-1/4"
-                >
+                <label htmlFor="category" className="block font-medium mb-1 w-1/4">
                   Danh mục:
                 </label>
                 <FormControl fullWidth sx={{ maxWidth: "100%" }}>
                   <Select
                     id="category"
-                    value={
-                      formik.values.category ? formik.values.category._id : ""
-                    }
+                    value={formik.values.category ? formik.values.category._id : ""}
                     onChange={(e) => {
                       const selectedCategory = categories.find(
                         (cat) => cat._id === e.target.value
                       );
-                      formik.setFieldValue("category", {
-                        _id: selectedCategory._id,
-                        name: selectedCategory.name,
-                      });
+                      formik.setFieldValue("category", selectedCategory);
                     }}
                     name="category"
+                    error={formik.touched.category && Boolean(formik.errors.category)}
                   >
                     {categories &&
                       categories.map((item) => (
@@ -287,7 +296,7 @@ const UpdateProductForm = () => {
                 type="submit"
                 sx={{ maxWidth: "400px" }}
               >
-                Cập nhật
+                Thêm mới
               </Button>
             </div>
           </Grid>

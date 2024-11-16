@@ -56,6 +56,7 @@ const CreateChoiceForm = ({ onClose, onSuccess }) => {
             id="name"
             name="name"
             label="Tên Lựa chọn"
+            required
             variant="outlined"
             onChange={handleInputChange}
             value={formData.name}
@@ -65,6 +66,7 @@ const CreateChoiceForm = ({ onClose, onSuccess }) => {
             id="additionalPrice"
             name="additionalPrice"
             label="Giá bổ sung"
+            required
             variant="outlined"
             type="number"
             onChange={handleInputChange}

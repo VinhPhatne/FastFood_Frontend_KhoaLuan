@@ -62,6 +62,7 @@ const CreateEventForm = ({ onClose, onSuccess }) => {
         <form className="space-y-5" onSubmit={handleSubmit}>
           <TextField
             fullWidth
+            required
             id="eventName"
             name="eventName"
             label="Tên sự kiện"
@@ -71,6 +72,7 @@ const CreateEventForm = ({ onClose, onSuccess }) => {
           ></TextField>
           <TextField
             fullWidth
+            required
             id="discountPercent"
             name="discountPercent"
             label="Giảm giá"
@@ -89,6 +91,7 @@ const CreateEventForm = ({ onClose, onSuccess }) => {
               format="dd/MM/yyyy"
               inputFormat="dd/MM/yyyy"
               fullWidth
+              required
               renderInput={(params) => (
                 <TextField {...params} className="w-96" variant="outlined" />
               )}

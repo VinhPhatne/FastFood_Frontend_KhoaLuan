@@ -66,6 +66,7 @@ const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
         {/* Tên Voucher */}
         <TextField
           fullWidth
+          required
           id="name"
           name="name"
           label="Tên Voucher"
@@ -77,6 +78,7 @@ const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
         {/* Giảm giá (Chỉ cho nhập số) */}
         <TextField
           fullWidth
+          required
           id="discount"
           name="discount"
           label="Giảm giá"
@@ -90,6 +92,7 @@ const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
         {/* Mã Voucher */}
         <TextField
           fullWidth
+          required
           id="code"
           name="code"
           label="Code"
@@ -97,20 +100,6 @@ const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
           onChange={handleInputChange}
           value={formData.code}
         />
-
-        {/* Ngày hết hạn */}
-        {/* <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <DatePicker
-            label="Ngày hết hạn"
-            value={formData.expDate}
-            onChange={(newValue) =>
-              setFormData({ ...formData, expDate: newValue })
-            }
-            inputFormat="dd/MM/yyyy"
-            renderInput={(params) => <TextField {...params} fullWidth />}
-          />
-        </LocalizationProvider> */}
-
         <Button
           fullWidth
           variant="contained"

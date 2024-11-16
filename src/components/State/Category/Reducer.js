@@ -18,8 +18,6 @@ export const categoryReducer = (state = initialState, action) => {
       return { ...state, categories: action.payload };
 
     case CREATE_CATEGORY_SUCCESS:
-      console.log("State categories before concat:", state.categories);
-      console.log("Action payload:", action.payload);
       return {
         ...state,
         categories: Array.isArray(state.categories)
@@ -38,9 +36,9 @@ export const categoryReducer = (state = initialState, action) => {
     case DELETE_CATEGORY_SUCCESS:
       return {
         ...state,
-        categories: state.categories.filter(
-          (item) => item.id !== action.payload
-        ),
+        categories: Array.isArray(state.categories)
+          ? state.categories.filter((item) => item.id !== action.payload)
+          : [], 
       };
 
     case GET_CATEGORY_BY_ID_SUCCESS:

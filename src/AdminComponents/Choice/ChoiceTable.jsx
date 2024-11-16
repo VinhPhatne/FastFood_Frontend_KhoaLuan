@@ -232,7 +232,7 @@ const ChoiceTable = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={4} align="center">
-                    <Typography>No optionals available</Typography>
+                    <Typography>No choices available</Typography>
                   </TableCell>
                 </TableRow>
               )}

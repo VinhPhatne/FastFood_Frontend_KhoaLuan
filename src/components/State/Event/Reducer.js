@@ -26,15 +26,17 @@ export const eventReducer = (state = initialState, action) => {
     case UPDATE_EVENT_SUCCESS:
       return {
         ...state,
-        events: state.events.map((item) =>
-          item.id === action.payload.id ? action.payload : item
-        ),
+        events: Array.isArray(state.events)
+          ? state.events.concat(action.payload)
+          : [action.payload], 
       };
 
     case DELETE_EVENT_SUCCESS:
       return {
         ...state,
-        events: state.events.filter((item) => item.id !== action.payload),
+        events: Array.isArray(state.events)
+          ? state.events.filter((item) => item.id !== action.payload)
+          : [], 
       };
 
     case GET_EVENT_BY_ID_SUCCESS:

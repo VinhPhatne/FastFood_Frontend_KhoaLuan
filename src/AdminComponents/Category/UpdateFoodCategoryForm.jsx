@@ -72,6 +72,7 @@ const UpdateFoodCategoryForm = ({ category, onClose, onSuccess }) => {
         <form className="space-y-5" onSubmit={handleSubmit}>
           <TextField
             fullWidth
+            required
             id="categoryName"
             name="categoryName"
             label="Food Category"

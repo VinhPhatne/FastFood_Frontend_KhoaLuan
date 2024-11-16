@@ -64,6 +64,7 @@ const UpdateChoiceForm = ({ event, onClose, onSuccess }) => {
         <form className="space-y-5" onSubmit={handleSubmit}>
         <TextField
             fullWidth
+            required
             id="name"
             name="name"
             label="Tên Lựa chọn"
@@ -73,6 +74,7 @@ const UpdateChoiceForm = ({ event, onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
+            required
             id="additionalPrice"
             name="additionalPrice"
             label="Giá bổ sung"

@@ -65,36 +65,12 @@ const CreateOptionalForm = ({ onClose, onSuccess }) => {
             fullWidth
             id="eventName"
             name="eventName"
-            label="Food event"
+            label="Tên tùy chọn"
             variant="outlined"
             onChange={handleInputChange}
             value={formData.eventName}
+            required
           ></TextField>
-          {/* <TextField
-            fullWidth
-            id="discountPercent"
-            name="discountPercent"
-            label="Giảm giá"
-            variant="outlined"
-            onChange={handleInputChange}
-            value={formData.discountPercent}
-          ></TextField>
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DatePicker
-              className="w-full"
-              label="Ngày hết hạn"
-              value={formData.expDate}
-              onChange={(newValue) => {
-                setFormData({ ...formData, expDate: newValue });
-              }}
-              format="dd/MM/yyyy"
-              inputFormat="dd/MM/yyyy"
-              fullWidth
-              renderInput={(params) => (
-                <TextField {...params} className="w-96" variant="outlined" />
-              )}
-            />
-          </LocalizationProvider> */}
           <Button
             fullWidth
             variant="contained"
