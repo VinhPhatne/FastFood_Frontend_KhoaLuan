@@ -29,9 +29,9 @@ const AdminRoute = () => {
     dispatch(setUserRole(storedRole));
   }, [dispatch, jwt, storedRole]);
 
-  if (isLoading) {
-    return <Spin tip="Loading..." />;
-  }
+  // if (isLoading) {
+  //   return <Spin tip="Loading..." />;
+  // }
 
   if (!role) {
     dispatch(getUserProfile());
