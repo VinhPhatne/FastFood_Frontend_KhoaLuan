@@ -67,11 +67,11 @@ const Header = () => {
   };
 
   const handleCartClick = () => {
-    if (isLoggedIn) {
+    //if (isLoggedIn) {
       navigate("/cart");
-    } else {
-      setIsModalVisible(true);
-    }
+    //} else {
+      //setIsModalVisible(true);
+    //}
   };
 
   const handleCancel = () => {

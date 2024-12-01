@@ -77,12 +77,12 @@ const Card = () => {
     }
   };
   const handleAddToCartModal = (product) => {
-    if (!jwt) {
-      notification.error({
-        message: "Bạn cần đăng nhập để thêm vào giỏ hàng!!!",
-      });
-      return;
-    }
+    // if (!jwt) {
+    //   notification.error({
+    //     message: "Bạn cần đăng nhập để thêm vào giỏ hàng!!!",
+    //   });
+    //   return;
+    // }
 
     const selectedOptions = Object.entries(selectedChoices).map(
       ([optionId, choiceId]) => {
@@ -112,12 +112,12 @@ const Card = () => {
   };
 
   const handleAddToCart = (product) => {
-    if (!jwt) {
-      notification.error({
-        message: "Bạn cần đăng nhập để thêm vào giỏ hàng!!!",
-      });
-      return;
-    }
+    // if (!jwt) {
+    //   notification.error({
+    //     message: "Bạn cần đăng nhập để thêm vào giỏ hàng!!!",
+    //   });
+    //   return;
+    // }
     addToCart(product, quantity);
     notification.success({
       message: "Sản phẩm đã được thêm vào giỏ hàng!",
@@ -207,7 +207,7 @@ const Card = () => {
                   <div className={styles.left}>
                     <p>{category.name}</p>
                   </div>
-                  <div
+                  {/* <div
                     className={styles.right}
                     onClick={() => handleRedirect(category._id)}
                   >
@@ -215,7 +215,7 @@ const Card = () => {
                     <MdOutlineKeyboardDoubleArrowRight
                       className={styles.icon}
                     />
-                  </div>
+                  </div> */}
                 </div>
 
                 <div id={category._id} className={styles.container}>
@@ -253,13 +253,13 @@ const Card = () => {
                               <div className={styles.cost}>
                                 {item.price !== item.currentPrice ? (
                                   <>
-                                    <span>{item.currentPrice} đ</span>
+                                    <span>{item.currentPrice.toLocaleString()} đ</span>
                                     <span className={styles.discountPrice}>
-                                      {item.price}{" "}
+                                      {item.price.toLocaleString()}{" "}
                                     </span>
                                   </>
                                 ) : (
-                                  <span>{item.currentPrice} đ</span>
+                                  <span>{item.currentPrice.toLocaleString()} đ</span>
                                 )}
                               </div>
                             </div>
@@ -310,7 +310,7 @@ const Card = () => {
                 {selectedProduct.description}
               </p>
               <div className="product-price">
-                <strong>{selectedProduct.price} đ</strong>
+                <strong>{selectedProduct.price.toLocaleString()} đ</strong>
               </div>
 
               <hr></hr>
@@ -338,7 +338,7 @@ const Card = () => {
                               {choice.name} (+{choice.extraPrice} đ)
                             </Radio> */}
                           <span className="choice-name">
-                            {choice.name} (+{choice.additionalPrice} đ)
+                            {choice.name} (+{choice.additionalPrice.toLocaleString()} đ)
                           </span>
                           <Radio value={choice._id} className="choice-radio" />
                         </div>
