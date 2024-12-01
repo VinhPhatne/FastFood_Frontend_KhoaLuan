@@ -32,11 +32,6 @@ const Checkout = () => {
 
   const { state } = useLocation();
   const { discount, voucherId, finalTotal, pointsUsed } = state || {};
-
-  console.log("discount", discount);
-  console.log("voucher", voucherId);
-  console.log("finalTotal", finalTotal);
-  console.log("pointsUsed", pointsUsed);
   const [serverResponse, setServerResponse] = useState(null);
 
   const userProfile = useSelector((state) => state.auth.user);
@@ -92,9 +87,11 @@ const Checkout = () => {
         })),
       })),
       note: formData.note || "",
-      account: userProfile._id,
+      //account: userProfile?._id ? userProfile?._id : {},
     };
-
+    if (userProfile?._id) {
+      billData.account = userProfile._id; 
+    }
     socket.emit("createBill", billData);
   };
 
