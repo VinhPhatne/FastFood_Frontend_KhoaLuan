@@ -127,7 +127,7 @@ const Header = () => {
         </Menu.Item>
       )}
       <Menu.Item key="profile" onClick={() => navigate("/profile")}>
-        Profile
+        Tài khoản
       </Menu.Item>
       <Menu.Item
         key="change-password"
@@ -167,7 +167,7 @@ const Header = () => {
       </div>
 
       <div className={styles.action}>
-        <div className={styles.search}>
+        {/* <div className={styles.search}>
           <AiOutlineSearch className={styles.searchIcon} />
           <input
             type="text"
@@ -176,10 +176,11 @@ const Header = () => {
             onBlur={handleBlur}
           />
         </div>
+        */}
         <div className={styles.cart} onClick={handleCartClick}>
           <FaCartShopping />
           <span className={styles.cartBadge}>{totalQuantity}</span>
-        </div>
+        </div> 
 
         {isLoggedIn && userProfile && (
           <div className={styles.points}>

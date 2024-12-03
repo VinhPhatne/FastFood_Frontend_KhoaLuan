@@ -31,7 +31,6 @@ import {
 import { Delete } from "@mui/icons-material";
 import CreateEventForm from "./CreateEventForm";
 import UpdateEventForm from "./UpdateEventForm";
-import { getProductsByCategory } from "../../components/State/Product/Action";
 import { getCategories } from "../../components/State/Category/Action";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";

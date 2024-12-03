@@ -1,14 +1,13 @@
 import { Button, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { notification } from "antd";
 import { updateChoice } from "../../components/State/Choice/Action";
 
 const UpdateChoiceForm = ({ event, onClose, onSuccess }) => {
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { optionalId } = useParams(); 
 
 

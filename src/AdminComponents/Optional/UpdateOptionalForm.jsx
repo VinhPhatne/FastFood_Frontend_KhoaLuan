@@ -27,11 +27,6 @@ const UpdateOptionalForm = ({ event, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = {
-      name: formData.eventName,
-      discountPercent: formData.discountPercent,
-      expDate: formData.expDate,
-    };
     try {
       await dispatch(
         updateOptional({

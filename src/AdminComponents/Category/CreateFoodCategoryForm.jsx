@@ -1,9 +1,8 @@
 import { Button, TextField } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import {
   createCategory,
-  getCategories,
 } from "../../components/State/Category/Action";
 import { notification } from "antd";
 

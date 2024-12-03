@@ -2,9 +2,6 @@ import { Button, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { updateVoucher } from "../../components/State/voucher/Action";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { notification } from "antd";
 
 const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
@@ -14,7 +11,6 @@ const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
     name: "",
     discount: "",
     code: "",
-    //expDate: null,
   });
 
   useEffect(() => {
@@ -23,7 +19,6 @@ const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
         name: voucher.data.name || "",
         discount: voucher.data.discount || "",
         code: voucher.data.code || "",
-        //expDate: voucher.data.expDate || null,
       });
     }
   }, [voucher]);

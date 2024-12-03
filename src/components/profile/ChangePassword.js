@@ -46,7 +46,7 @@ const ChangePassword = () => {
           email: userProfile?.email || "",
         }}
         autoComplete="off"
-        className="w-full max-w-md" // Chiều rộng tối đa cho form
+        className="w-full max-w-md" 
       >
         <Form.Item
           name="currentPassword"

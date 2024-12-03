@@ -224,7 +224,7 @@ const StockInTable = () => {
       <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
         <Box sx={style}>
           <Typography variant="h6">Xác nhận xóa</Typography>
-          <Typography>Bạn có chắc chắn muốn xóa sự kiện này không?</Typography>
+          <Typography>Bạn có chắc chắn muốn xóa đơn nhập hàng này không?</Typography>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
             <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
             <Button onClick={handleDelete}>Xóa</Button>

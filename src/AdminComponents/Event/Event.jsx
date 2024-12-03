@@ -1,5 +1,4 @@
 import React from 'react'
-import FoodCategoryTable from './EventTable'
 import EventTable from './EventTable'
 
 const Event = () => {

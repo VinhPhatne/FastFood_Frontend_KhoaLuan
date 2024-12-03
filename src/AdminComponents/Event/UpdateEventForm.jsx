@@ -5,17 +5,13 @@ import { updateEvent } from "../../components/State/Event/Action";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { format, isValid, parse } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 import { notification } from "antd";
 
-//import { createeventAction } from "../../component/State/Restaurant/Action";
 
 const UpdateEventForm = ({ event, onClose, onSuccess }) => {
-  //const {restaurant} = useSelector(store => store)
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     eventName: "",
