@@ -8,16 +8,13 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import {
   updateUser,
-  updateUserProfile,
 } from "../../components/State/User/Action";
 import { notification } from "antd";
 
 const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (account) {

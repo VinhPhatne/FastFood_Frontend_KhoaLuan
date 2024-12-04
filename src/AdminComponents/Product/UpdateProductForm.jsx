@@ -16,7 +16,6 @@ import { uploadImageToCloudinary } from "../util/UploadToCloudaniry";
 import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "../../components/State/Category/Action";
 import {
-  createProduct,
   getProductById,
   updateProduct,
 } from "../../components/State/Product/Action";
@@ -49,12 +48,6 @@ const UpdateProductForm = () => {
   const { id } = useParams();
 
   const [selectedProduct, setSelectedProduct] = useState("");
-  const [formData, setFormData] = useState({
-    categoryName: "",
-    categoryId: "",
-  });
-
-  console.log("id", id);
   const jwt = localStorage.getItem("jwt");
 
   const { categories } = useSelector(

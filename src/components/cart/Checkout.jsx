@@ -115,44 +115,6 @@ const Checkout = () => {
     return acc + (item.price + totalAddPrice) * item.quantity;
   }, 0);
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   const billData = {
-  //     fullName: formData.fullName,
-  //     address_shipment: formData.address,
-  //     phone_shipment: formData.phone,
-  //     ship: shippingFee,
-  //     total_price: finalTotal,
-  //     pointDiscount: pointsUsed,
-  //     isPaid: false,
-  //     voucher: voucherId,
-  //     lineItems: cart.map((item) => ({
-  //       product: item.id,
-  //       quantity: item.quantity,
-  //       subtotal: item.price * item.quantity,
-  //       options: item.options.map((option) => ({
-  //         optionId: option.optionId,
-  //         choiceId: option.choiceId,
-  //         addPrice: option.addPrice,
-  //       })),
-  //     })),
-  //     note: formData.note || "",
-  //     account: userProfile._id,
-  //   };
-
-  //   console.log("billData", billData);
-
-  //   dispatch(createBill(billData)).then(() => {
-  //     // Gọi Socket để thông báo cho server về việc hóa đơn đã được tạo
-  //     socket.emit("billCreated", { billData, status: "success" });
-
-  //     Cookies.remove(jwt);
-  //     clearCart();
-  //     dispatch(getUserProfile());
-  //     navigate("/success");
-  //   });
-  // };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -167,7 +129,6 @@ const Checkout = () => {
     }
     const option = optionals.find((opt) => opt._id === optionalId);
 
-    // Gọi dispatch mà không chờ kết quả trả về để tránh trả về Promise
     dispatch(getChoicesByOptionalId({ optionalId, jwt }))
       .then((response) => {
         console.log("response", response);

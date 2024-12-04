@@ -23,17 +23,10 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useEffect, useState } from "react";
-import CreateIcon from "@mui/icons-material/Create";
-import { useFormik } from "formik";
 import ClearIcon from "@mui/icons-material/Clear";
 import { Delete, Edit } from "@mui/icons-material";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getProducts,
-  getProductsListPage,
-} from "../../components/State/Product/Action";
-import { getCategories } from "../../components/State/Category/Action";
 import {
   deleteUser,
   getUserById,
@@ -69,7 +62,6 @@ const AccountTable = () => {
 
   const [open, setOpen] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
-  const [filteredEvents, setFilteredEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
@@ -165,7 +157,6 @@ const AccountTable = () => {
   };
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
 
   return (
     <Box
@@ -181,7 +172,6 @@ const AccountTable = () => {
       <Box
         sx={{
           display: "flex",
-          // justifyContent: "space-between",
           alignItems: "center",
           marginBottom: "20px",
         }}
@@ -197,18 +187,6 @@ const AccountTable = () => {
               height: "50px",
             },
           }}
-          // InputProps={{
-          //   endAdornment: (
-          //     <InputAdornment position="end">
-          //       <IconButton onClick={handleSearch}>
-          //         <SearchIcon />
-          //       </IconButton>
-          //       <IconButton onClick={() => handleClearSearch()} edge="end">
-          //         <ClearIcon />
-          //       </IconButton>
-          //     </InputAdornment>
-          //   ),
-          // }}
         />
 
         <FormControl sx={{ minWidth: 150, marginLeft: 2 }}>
@@ -339,7 +317,7 @@ const AccountTable = () => {
                       <IconButton
                         color="error"
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevent row click
+                          e.stopPropagation(); 
                           handleOpenDeleteModal(user._id);
                         }}
                       >
@@ -377,7 +355,7 @@ const AccountTable = () => {
           <Typography>Bạn có chắc chắn muốn xóa sự kiện này không?</Typography>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
             <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
-            <Button onClick={handleDelete}>Xóa</Button>
+            <Button variant="contained" color="primary" onClick={handleDelete}>Xóa</Button>
           </Box>
         </Box>
       </Modal>

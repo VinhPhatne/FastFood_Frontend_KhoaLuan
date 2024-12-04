@@ -8,8 +8,6 @@ import { notification, Avatar } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { useCartContext } from "../cart/CartContext";
 
-//navigate(`/admin/bill?accountId=${user._id}`)
-
 const ProfileSideBar = () => {
   const [activeItem, setActiveItem] = useState("");
   const navigate = useNavigate();

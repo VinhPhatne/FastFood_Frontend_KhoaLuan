@@ -1,11 +1,6 @@
 import { Button, TextField } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { createEvent } from "../../components/State/Event/Action";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { format } from "date-fns";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { notification } from "antd";
 import { createOptional } from "../../components/State/Optional/Action";
@@ -16,23 +11,13 @@ const CreateOptionalForm = ({ onClose, onSuccess }) => {
 
   const [formData, setFormData] = useState({
     eventName: "",
-    //discountPercent: "",
-    //expDate: null,
   });
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = {
-      name: formData.eventName,
-      //discountPercent: formData.discountPercent,
-      //expDate: formData.expDate ? format(formData.expDate, "yyyy/MM/dd") : "",
-    };
     try {
       const result = await dispatch(
         createOptional({
           name: formData.eventName,
-          //discountPercent: formData.discountPercent,
-          //expDate: data.expDate,
-          //jwt: localStorage.getItem("jwt"),
         })
       );
       if (result) {

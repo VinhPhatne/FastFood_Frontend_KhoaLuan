@@ -8,13 +8,11 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { createUser } from "../../components/State/User/Action";
 import { notification } from "antd";
 
 const CreateAccountForm = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     fullname: "",

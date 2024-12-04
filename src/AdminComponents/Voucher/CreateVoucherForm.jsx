@@ -1,13 +1,9 @@
 import { Button, TextField } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   createVoucher,
-  updateVoucher,
 } from "../../components/State/voucher/Action";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { notification } from "antd";
 
 const CreateVoucherForm = ({ onClose, onSuccess }) => {
@@ -17,7 +13,6 @@ const CreateVoucherForm = ({ onClose, onSuccess }) => {
     name: "",
     discount: "",
     code: "",
-    //expDate: null,
   });
 
   const handleSubmit = async (e) => {
@@ -28,7 +23,6 @@ const CreateVoucherForm = ({ onClose, onSuccess }) => {
           code: formData.code,
           name: formData.name,
           discount: formData.discount,
-          //expDate: formData.expDate,
           jwt: localStorage.getItem("jwt"),
         })
       );

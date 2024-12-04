@@ -27,7 +27,7 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { notification } from "antd";
 import CreateOptionalForm from "./CreateChoiceForm";
 import UpdateOptionalForm from "./UpdateChoiceForm";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { deleteChoice, getChoiceById, getChoicesByOptionalId } from "../../components/State/Choice/Action";
 
 const style = {
@@ -60,10 +60,6 @@ const ChoiceTable = () => {
   const fetchEvents = async () => {
     await dispatch(getChoicesByOptionalId({ optionalId, jwt }));
   };
-
-  // useEffect(() => {
-  //   fetchEvents();
-  // }, [dispatch, jwt]);
 
   useEffect(() => {
     if (optionalId) {
@@ -178,11 +174,11 @@ const ChoiceTable = () => {
           <Table sx={{ minWidth: 650 }} aria-label="Event Table">
             <TableHead sx={{ backgroundColor: "#fdba74" }}>
               <TableRow>
-                <TableCell align="left">Id</TableCell>
-                <TableCell align="left">Name</TableCell>
+                <TableCell align="left">#</TableCell>
+                <TableCell align="left">Tên</TableCell>
                 <TableCell align="center">Giá bổ sung</TableCell>
-                <TableCell align="center">Active</TableCell>
-                <TableCell align="right">Action</TableCell>
+                <TableCell align="center">Hoạt động</TableCell>
+                <TableCell align="right">Hành động</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

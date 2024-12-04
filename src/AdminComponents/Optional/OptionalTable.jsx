@@ -182,8 +182,8 @@ const OptionalTable = () => {
             <TableHead sx={{ backgroundColor: "#fdba74" }}>
               <TableRow>
                 <TableCell align="left">#</TableCell>
-                <TableCell align="left">Name</TableCell>
-                <TableCell align="right">Action</TableCell>
+                <TableCell align="left">Tên</TableCell>
+                <TableCell align="right">Hành động</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -260,7 +260,7 @@ const OptionalTable = () => {
       <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
         <Box sx={style}>
           <Typography variant="h6">Xác nhận xóa</Typography>
-          <Typography>Bạn có chắc chắn muốn xóa sự kiện này không?</Typography>
+          <Typography>Bạn có chắc chắn muốn xóa lựa chọn này không?</Typography>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
             <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
             <Button onClick={handleDelete}>Xóa</Button>

@@ -21,33 +21,14 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
-import CreateIcon from "@mui/icons-material/Create";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteEvent,
-  getEvents,
-  getEventById,
-} from "../../components/State/Event/Action";
-import { Delete } from "@mui/icons-material";
 import { getBills, updateBillStatus } from "../../components/State/Bill/Action";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import socket from "../../components/config/socket"; 
 import { notification } from "antd";
-
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 450,
-  bgcolor: "background.paper",
-  border: "none",
-  boxShadow: 24,
-  p: 4,
-};
 
 const BillTable = () => {
   const dispatch = useDispatch();

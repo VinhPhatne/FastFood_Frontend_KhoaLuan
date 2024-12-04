@@ -1,16 +1,13 @@
 import { Button, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
-  createCategory,
-  getCategories,
+
   updateCategory,
 } from "../../components/State/Category/Action";
 import { notification } from "antd";
-//import { createCategoryAction } from "../../component/State/Restaurant/Action";
 
 const UpdateFoodCategoryForm = ({ category, onClose, onSuccess }) => {
-  //const {restaurant} = useSelector(store => store)
 
   const dispatch = useDispatch();
 

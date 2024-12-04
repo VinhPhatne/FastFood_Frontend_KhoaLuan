@@ -14,8 +14,6 @@ const Cart = () => {
   const dispatch = useDispatch();
 
   const jwt = localStorage.getItem("jwt");
-  //const [cart, setCart] = useState([]);
-
   const {
     cart,
     addToCart,
@@ -24,15 +22,14 @@ const Cart = () => {
     removeFromCart,
   } = useCart();
 
-  const [voucher, setVoucher] = useState(""); // State cho mã voucher
-  const [discount, setDiscount] = useState(0); // State cho tiền giảm giá
-  const [voucherError, setVoucherError] = useState(""); // State cho lỗi nếu có
+  const [voucher, setVoucher] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [voucherError, setVoucherError] = useState("");
   const [voucherId, setVoucherId] = useState(null);
-  const [pointsUsed, setPointsUsed] = useState(0); // State để nhập điểm
-  const [pointsError, setPointsError] = useState(""); // State để thông báo lỗi
+  const [pointsUsed, setPointsUsed] = useState(0);
+  const [pointsError, setPointsError] = useState("");
   const [optionNames, setOptionNames] = useState({});
 
-  //const [choices, setChoices] = useState({});
   const { optionals } = useSelector((state) => state.optionalReducer.optionals);
   const [choices, setChoices] = useState({});
 
@@ -45,8 +42,6 @@ const Cart = () => {
 
   const userProfile = useSelector((state) => state.auth.user);
   const userPoints = userProfile ? userProfile.point : "";
-
-  console.log("userPoints", userPoints);
 
   const handleIncrease = (id, options) => {
     increaseQuantity(id, options);
@@ -78,27 +73,6 @@ const Cart = () => {
     0
   );
 
-  // const handleApplyVoucher = async () => {
-  //   try {
-  //     const response = await axios.get(
-  //       `http://localhost:8080/v1/voucher/getcode?code=${voucher}`
-  //     );
-  //     console.log("response", response);
-  //     if (response.data && response.data.data) {
-  //       setDiscount(response.data.data.discount);
-  //       setVoucherId(response.data.data._id);
-  //       setVoucherError("");
-  //     } else {
-  //       setVoucherError("Mã giảm giá không hợp lệ");
-  //       setDiscount(0);
-  //       setVoucherId(null);
-  //     }
-  //   } catch (error) {
-  //     setVoucherError("Có lỗi xảy ra khi áp dụng mã giảm giá");
-  //     console.error(error);
-  //   }
-  // };
-
   const handleApplyVoucher = async () => {
     try {
       const response = await axios.get(
@@ -107,7 +81,7 @@ const Cart = () => {
       console.log("response", response);
       if (response.data && response.data.data) {
         const voucherData = response.data.data;
-        if (voucherData.isActive) { 
+        if (voucherData.isActive) {
           setDiscount(voucherData.discount);
           setVoucherId(voucherData._id);
           setVoucherError("");
@@ -149,8 +123,6 @@ const Cart = () => {
     });
   };
 
-  console.log("cart", cart);
-  console.log("optionals", optionals);
 
   const getOptionName = async (optionalId) => {
     if (!optionals || optionals.length === 0) {
@@ -158,7 +130,6 @@ const Cart = () => {
     }
     const option = optionals.find((opt) => opt._id === optionalId);
 
-    // Gọi dispatch mà không chờ kết quả trả về để tránh trả về Promise
     dispatch(getChoicesByOptionalId({ optionalId, jwt }))
       .then((response) => {
         console.log("response", response);
@@ -317,19 +288,21 @@ const Cart = () => {
                 )}
               </div>
 
-              <div className="mb-4">
-                <p>Dùng điểm thưởng</p>
-                <input
-                  type="number"
-                  value={pointsUsed}
-                  onChange={handlePointsChange}
-                  placeholder={`Bạn có ${userPoints} điểm`}
-                  className="w-full border rounded px-4 py-2 mt-2"
-                />
-                {pointsError && (
-                  <p className="text-red-500 mt-2">{pointsError}</p>
-                )}
-              </div>
+              {userPoints && (
+                <div className="mb-4">
+                  <p>Dùng điểm thưởng</p>
+                  <input
+                    type="number"
+                    value={pointsUsed}
+                    onChange={handlePointsChange}
+                    placeholder={`Bạn có ${userPoints} điểm`}
+                    className="w-full border rounded px-4 py-2 mt-2"
+                  />
+                  {pointsError && (
+                    <p className="text-red-500 mt-2">{pointsError}</p>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <div className="flex justify-between">
