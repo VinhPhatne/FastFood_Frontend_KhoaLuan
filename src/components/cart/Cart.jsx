@@ -22,12 +22,12 @@ const Cart = () => {
     removeFromCart,
   } = useCart();
 
-  const [voucher, setVoucher] = useState(""); 
+  const [voucher, setVoucher] = useState("");
   const [discount, setDiscount] = useState(0);
   const [voucherError, setVoucherError] = useState("");
   const [voucherId, setVoucherId] = useState(null);
-  const [pointsUsed, setPointsUsed] = useState(0); 
-  const [pointsError, setPointsError] = useState(""); 
+  const [pointsUsed, setPointsUsed] = useState(0);
+  const [pointsError, setPointsError] = useState("");
   const [optionNames, setOptionNames] = useState({});
 
   const { optionals } = useSelector((state) => state.optionalReducer.optionals);
@@ -81,7 +81,7 @@ const Cart = () => {
       console.log("response", response);
       if (response.data && response.data.data) {
         const voucherData = response.data.data;
-        if (voucherData.isActive) { 
+        if (voucherData.isActive) {
           setDiscount(voucherData.discount);
           setVoucherId(voucherData._id);
           setVoucherError("");
@@ -123,8 +123,6 @@ const Cart = () => {
     });
   };
 
-  console.log("cart", cart);
-  console.log("optionals", optionals);
 
   const getOptionName = async (optionalId) => {
     if (!optionals || optionals.length === 0) {
@@ -290,19 +288,21 @@ const Cart = () => {
                 )}
               </div>
 
-              <div className="mb-4">
-                <p>Dùng điểm thưởng</p>
-                <input
-                  type="number"
-                  value={pointsUsed}
-                  onChange={handlePointsChange}
-                  placeholder={`Bạn có ${userPoints} điểm`}
-                  className="w-full border rounded px-4 py-2 mt-2"
-                />
-                {pointsError && (
-                  <p className="text-red-500 mt-2">{pointsError}</p>
-                )}
-              </div>
+              {userPoints && (
+                <div className="mb-4">
+                  <p>Dùng điểm thưởng</p>
+                  <input
+                    type="number"
+                    value={pointsUsed}
+                    onChange={handlePointsChange}
+                    placeholder={`Bạn có ${userPoints} điểm`}
+                    className="w-full border rounded px-4 py-2 mt-2"
+                  />
+                  {pointsError && (
+                    <p className="text-red-500 mt-2">{pointsError}</p>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <div className="flex justify-between">
