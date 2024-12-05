@@ -64,8 +64,6 @@ const VoucherTable = () => {
     fetchVouchers();
   }, [dispatch, jwt]);
 
-  console.log("vouchers>>", vouchers.voucher);
-
   const handleClearSearch = () => setSearchTerm("");
 
   const handleOpenFormModal = async (id) => {
@@ -106,12 +104,12 @@ const VoucherTable = () => {
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "end",
           alignItems: "center",
           marginBottom: "20px",
         }}
       >
-        <TextField
+        {/* <TextField
           label="Search"
           variant="outlined"
           value={searchTerm}
@@ -134,7 +132,7 @@ const VoucherTable = () => {
               </InputAdornment>
             ),
           }}
-        />
+        /> */}
         <Button
           variant="contained"
           color="primary"
@@ -153,6 +151,9 @@ const VoucherTable = () => {
                 <TableCell align="left">Mã voucher</TableCell>
                 <TableCell align="left">Tên voucher</TableCell>
                 <TableCell align="center">Giảm giá</TableCell>
+                <TableCell align="center" sx={{ color: "#000" }}>
+                  Trạng thái
+                </TableCell>
                 <TableCell align="right">Hành động</TableCell>
               </TableRow>
             </TableHead>
@@ -168,13 +169,14 @@ const VoucherTable = () => {
                       {item.code}
                     </TableCell>
                     <TableCell align="left">{item.name}</TableCell>
-                    <TableCell align="center">{item.discount} đ</TableCell>
-
+                    <TableCell align="center">{item.discount.toLocaleString()} đ</TableCell>
+                    <TableCell align="center">
+                      {item.isActive ? "Hoạt động" : "Khóa"}
+                    </TableCell>
                     <TableCell align="right">
                       <IconButton
                         color="error"
                         onClick={() => {
-                          console.log("IDDDD", item._id);
                           handleOpenFormModal(item._id);
                         }}
                       >
@@ -183,7 +185,6 @@ const VoucherTable = () => {
                       <IconButton
                         color="error"
                         onClick={() => {
-                          console.log("IDDDD", item._id);
                           handleOpenDeleteModal(item._id);
                         }}
                       >

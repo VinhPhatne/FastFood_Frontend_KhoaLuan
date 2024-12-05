@@ -41,23 +41,23 @@ export default function RecentOrders() {
   return (
     <div className="bg-white px-4 pt-3 pb-4 rounded-sm border border-gray-200 flex-1">
       <div className="flex justify-between items-center mb-3">
-        <strong className="text-gray-700 font-medium">Recent Orders</strong>
+        <strong className="text-gray-700 text-xl font-medium">Top sản phẩm bán chạy</strong>
         <button
           onClick={exportToExcel}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
-          Export Excel
+          Xuất Excel
         </button>
       </div>
       <div className="border-x border-gray-200 rounded-sm mt-3">
         <table className="w-full text-gray-700">
           <thead>
             <tr>
-              <th className="text-center">ID</th>
-              <th className="text-left">Product Name</th>
-              <th className="">Image</th>
-              <th className="text-center">Quantity</th>
-              <th className="text-center">Price</th>
+              <th className="text-center">#</th>
+              <th className="text-left">Tên sản phẩm</th>
+              <th className="">Hình ảnh</th>
+              <th className="text-center">Số lượng đã bán</th>
+              <th className="text-center">Giá</th>
             </tr>
           </thead>
           <tbody>
@@ -77,7 +77,7 @@ export default function RecentOrders() {
                   </div>
                 </td>
                 <td className="text-center">{product.quantity}</td>
-                <td className="text-center">{product.price} VND</td>
+                <td className="text-center">{product.price.toLocaleString()} VND</td>
               </tr>
             ))}
           </tbody>

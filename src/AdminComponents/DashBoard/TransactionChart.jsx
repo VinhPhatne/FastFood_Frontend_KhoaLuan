@@ -60,7 +60,7 @@ export default function TransactionChart() {
   return (
     <div className="h-[22rem] bg-white p-4 rounded-sm border border-gray-200 flex flex-col flex-1">
       <div className="flex items-center justify-between mb-3">
-        <strong className="text-gray-700 font-medium">Transactions</strong>
+        <strong className="text-gray-700 text-xl font-medium">Biểu đồ doanh thu</strong>
         <select
           className="border border-gray-300 rounded-sm p-1 text-sm"
           value={selectedYear}

@@ -204,13 +204,13 @@ const OptionalTable = () => {
                     </TableCell>
                    
                     <TableCell align="right">
-                      <IconButton onClick={() => handleBlockUnblock(item)}>
+                      {/* <IconButton onClick={() => handleBlockUnblock(item)}>
                         {item.isActive ? (
                           <LockIcon style={{ color: "#D32F2F" }} />
                         ) : (
                           <LockOpenIcon style={{ color: "#43A047" }} />
                         )}
-                      </IconButton>
+                      </IconButton> */}
                       <IconButton
                         color="error"
                         onClick={(e) => {

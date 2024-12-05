@@ -99,7 +99,7 @@ const Promotion = () => {
         return {
           optionId,
           choiceId,
-          addPrice: choice ? choice.additionalPrice : 0, // Lấy giá của choice
+          addPrice: choice ? choice.additionalPrice : 0, 
         };
       }
     );
@@ -107,7 +107,7 @@ const Promotion = () => {
     addToCart(
       {
         ...product,
-        options: selectedOptions, // Thêm các lựa chọn vào product
+        options: selectedOptions, 
       },
       quantity
     );
@@ -135,10 +135,6 @@ const Promotion = () => {
       [optionId]: choiceId,
     }));
   };
-
-  console.log("optionals", optionals);
-  console.log("selectedProduct", selectedProduct);
-  console.log("selectedChoices", selectedChoices);
 
   return (
     <div>
@@ -221,15 +217,7 @@ const Promotion = () => {
                   <div className={styles.left}>
                     <p>{category.name}</p>
                   </div>
-                  <div
-                    className={styles.right}
-                    onClick={() => handleRedirect(category._id)}
-                  >
-                    <p>Xem thêm </p>
-                    <MdOutlineKeyboardDoubleArrowRight
-                      className={styles.icon}
-                    />
-                  </div>
+                  
                 </div>
 
                 <div id={category._id} className={styles.container}>

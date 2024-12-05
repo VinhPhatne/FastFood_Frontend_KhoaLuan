@@ -55,11 +55,6 @@ const Card = () => {
     dispatch(getCategories({ jwt }));
   }, [dispatch, jwt]);
 
-  const navigate = useNavigate();
-  const handleRedirect = () => {
-    navigate("/category/7089338599931904");
-  };
-
   const [active, setActive] = useState(null);
   const [startIndex, setStartIndex] = useState(0);
   const visibleCount = 5;
@@ -91,7 +86,7 @@ const Card = () => {
         return {
           optionId,
           choiceId,
-          addPrice: choice ? choice.additionalPrice : 0, // Lấy giá của choice
+          addPrice: choice ? choice.additionalPrice : 0, 
         };
       }
     );
@@ -99,7 +94,7 @@ const Card = () => {
     addToCart(
       {
         ...product,
-        options: selectedOptions, // Thêm các lựa chọn vào product
+        options: selectedOptions,
       },
       quantity
     );
@@ -176,7 +171,7 @@ const Card = () => {
               ))}
         </ul>
         {Array.isArray(categories) &&
-          startIndex + visibleCount < categories.length - 4 && (
+          startIndex + visibleCount < categories.length - 0 && (
             <button
               className="absolute right-[180px] top-1/2 transform -translate-y-1/2 px-2 py-1 mt-2 text-3xl font-bold text-black hover:text-orange-600"
               onClick={handleNext}
@@ -206,15 +201,6 @@ const Card = () => {
                   <div className={styles.left}>
                     <p>{category.name}</p>
                   </div>
-                  {/* <div
-                    className={styles.right}
-                    onClick={() => handleRedirect(category._id)}
-                  >
-                    <p>Xem thêm </p>
-                    <MdOutlineKeyboardDoubleArrowRight
-                      className={styles.icon}
-                    />
-                  </div> */}
                 </div>
 
                 <div id={category._id} className={styles.container}>
