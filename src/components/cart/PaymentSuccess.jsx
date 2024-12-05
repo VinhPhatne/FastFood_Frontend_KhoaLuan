@@ -1,10 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import socket from "../config/socket";
+import { useCartContext } from "./CartContext";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
+  const { clearCart } = useCartContext();
 
+  useEffect(() => {
+    const pendingBillData = JSON.parse(localStorage.getItem("pendingBillData"));
+
+    if (pendingBillData) {
+      socket.emit("createBill", pendingBillData);
+      localStorage.removeItem("pendingBillData");
+      clearCart();
+    }
+  }, []); 
   const handleReturnHome = () => {
     navigate("/"); 
   };

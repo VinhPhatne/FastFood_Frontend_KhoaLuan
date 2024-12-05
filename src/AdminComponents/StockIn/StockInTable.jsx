@@ -159,7 +159,7 @@ const StockInTable = () => {
                 <TableCell align="center">Số lượng</TableCell>
                 <TableCell align="center">Đơn vị</TableCell>
                 <TableCell align="center">Giá tiền</TableCell>
-                <TableCell align="right">Action</TableCell>
+                <TableCell align="right">Hành động</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -175,7 +175,7 @@ const StockInTable = () => {
                     <TableCell align="left">{item.name}</TableCell>
                     <TableCell align="center">{item.quantity}</TableCell>
                     <TableCell align="center">{item.unit}</TableCell>
-                    <TableCell align="center">{item.price}</TableCell>
+                    <TableCell align="center">{item.price.toLocaleString()}</TableCell>
                     <TableCell align="right">
                       <IconButton
                         color="error"

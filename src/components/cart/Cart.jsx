@@ -105,7 +105,7 @@ const Cart = () => {
     const value = parseInt(e.target.value) || 0;
     if (value > userPoints) {
       setPointsError("Số điểm nhập vượt quá số điểm bạn đang có");
-      setPointsUsed(0);
+      setPointsUsed(userPoints);
     } else {
       setPointsError("");
       setPointsUsed(value);
@@ -113,6 +113,10 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
+    localStorage.setItem(
+      "checkoutData",
+      JSON.stringify({ discount, voucherId, pointsUsed, finalTotal })
+    );
     navigate("/checkout", {
       state: {
         discount,

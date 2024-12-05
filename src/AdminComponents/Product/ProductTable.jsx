@@ -366,10 +366,10 @@ const ProductTable = () => {
                 <TableCell align="right" sx={{ color: "#000" }}>
                   Danh mục
                 </TableCell>
-                <TableCell align="right" sx={{ color: "#000" }}>
-                  Đang bán
+                <TableCell align="center" sx={{ color: "#000" }}>
+                  Trạng thái
                 </TableCell>
-                <TableCell align="right" sx={{ color: "#000" }}>
+                <TableCell align="center" sx={{ color: "#000" }}>
                   Hành động
                 </TableCell>
               </TableRow>
@@ -399,19 +399,19 @@ const ProductTable = () => {
                       />
                     </TableCell>
                     <TableCell align="left">{item.name}</TableCell>
-                    <TableCell align="right">{item.price} VND</TableCell>
-                    <TableCell align="right">{item.currentPrice} VND</TableCell>
+                    <TableCell align="right">{item.price.toLocaleString()} VND</TableCell>
+                    <TableCell align="right">{item.currentPrice.toLocaleString()} VND</TableCell>
                     <TableCell align="right">
-                      {item.category ? item.category.name : "N/A"}{" "}
+                      {item.category ? item.category.name : ""}{" "}
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="center">
                       {item.isSelling ? (
-                        <span style={{ color: "#43A047" }}>Selling</span>
+                        <span style={{ color: "#43A047" }}>Đang bán</span>
                       ) : (
-                        <span style={{ color: "#D32F2F" }}>Block</span>
+                        <span style={{ color: "#D32F2F" }}>Khóa</span>
                       )}
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="center">
                       {/* Nút khóa */}
                       <IconButton
                         onClick={() => handleBlockUnblockProduct(item)}

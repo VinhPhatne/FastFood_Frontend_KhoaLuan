@@ -10,6 +10,7 @@ import { useCartContext } from "./CartContext";
 import { getOptionals } from "../State/Optional/Action";
 import { getChoicesByOptionalId } from "../State/Choice/Action";
 import socket from "../config/socket";
+import axios from "axios";
 const Checkout = () => {
   const jwt = localStorage.getItem("jwt");
   const {
@@ -26,12 +27,26 @@ const Checkout = () => {
     phone: "",
     note: "",
   });
+  const [paymentMethod, setPaymentMethod] = useState("cod");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { clearCart } = useCartContext();
 
   const { state } = useLocation();
-  const { discount, voucherId, finalTotal, pointsUsed } = state || {};
+  //const { discount, voucherId, finalTotal, pointsUsed } = state || {};
+  const {
+    discount,
+    voucherId,
+    finalTotal,
+    pointsUsed,
+  } = state || JSON.parse(localStorage.getItem("checkoutData")) || {};
+
+  useEffect(() => {
+    // Lưu dữ liệu vào localStorage khi vào trang
+    if (state) {
+      localStorage.setItem("checkoutData", JSON.stringify(state));
+    }
+  }, [state]);
   const [serverResponse, setServerResponse] = useState(null);
 
   const userProfile = useSelector((state) => state.auth.user);
@@ -65,7 +80,7 @@ const Checkout = () => {
     };
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const billData = {
       fullName: formData.fullName,
@@ -74,7 +89,8 @@ const Checkout = () => {
       ship: shippingFee,
       total_price: finalTotal,
       pointDiscount: pointsUsed,
-      isPaid: false,
+      //isPaid: false,
+      isPaid: paymentMethod === "online",
       voucher: voucherId,
       lineItems: cart.map((item) => ({
         product: item.id,
@@ -90,9 +106,34 @@ const Checkout = () => {
       //account: userProfile?._id ? userProfile?._id : {},
     };
     if (userProfile?._id) {
-      billData.account = userProfile._id; 
+      billData.account = userProfile._id;
     }
-    socket.emit("createBill", billData);
+    //socket.emit("createBill", billData);
+
+    if (paymentMethod === "cod") {
+      socket.emit("createBill", billData);
+    } else if (paymentMethod === "online") {
+      try {
+        localStorage.setItem("pendingBillData", JSON.stringify(billData));
+        const response = await axios.post(
+          "http://localhost:8080/create-payment-link",
+          {
+            amount: finalTotal,
+            returnUrl: "http://localhost:3000/success",
+            cancelUrl: "http://localhost:3000/checkout",
+          }
+        );
+
+        if (response.data && response.data.paymentLink) {
+          window.location.href = response.data.paymentLink; // Chuyển hướng đến trang thanh toán
+        } else {
+          alert("Không thể tạo liên kết thanh toán.");
+        }
+      } catch (error) {
+        console.error("Lỗi khi tạo liên kết thanh toán:", error);
+        alert("Đã xảy ra lỗi khi tạo liên kết thanh toán.");
+      }
+    }
   };
 
   useEffect(() => {
@@ -238,13 +279,45 @@ const Checkout = () => {
               value={formData.note}
               style={{ marginBottom: "16px" }}
             />
+
+            {/* Radio chọn phương thức thanh toán */}
+            <div className="mb-6">
+              <label className="text-lg font-semibold mb-2 block">
+                Phương thức thanh toán
+              </label>
+              <div className="flex items-center mb-2">
+                <input
+                  type="radio"
+                  id="cod"
+                  name="paymentMethod"
+                  value="cod"
+                  checked={paymentMethod === "cod"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="mr-2"
+                />
+                <label htmlFor="cod">Thanh toán khi nhận hàng</label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="online"
+                  name="paymentMethod"
+                  value="online"
+                  checked={paymentMethod === "online"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="mr-2"
+                />
+                <label htmlFor="online">Thanh toán online</label>
+              </div>
+            </div>
+
             <Button
               fullWidth
               variant="contained"
               type="submit"
               style={{ color: "#fff", backgroundColor: "#ff7d01" }}
             >
-              Thanh toán {finalTotal.toLocaleString()} đ
+              Thanh toán {finalTotal ? finalTotal.toLocaleString() : "0"} đ
             </Button>
           </form>
         </div>
@@ -335,7 +408,7 @@ const Checkout = () => {
                 )}
                 <div className="flex justify-between font-bold text-xl">
                   <span>Tổng thanh toán</span>
-                  <span>{finalTotal.toLocaleString()} đ</span>
+                  <span>{finalTotal ? finalTotal.toLocaleString() : "0"}  đ</span>
                 </div>
               </div>
             )}

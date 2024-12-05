@@ -261,7 +261,7 @@ const AccountTable = () => {
                   Trạng thái
                 </TableCell>
                 <TableCell align="right" sx={{ color: "#000" }}>
-                  Action
+                  Hành động
                 </TableCell>
               </TableRow>
             </TableHead>

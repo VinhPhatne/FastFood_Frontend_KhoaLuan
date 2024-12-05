@@ -27,7 +27,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getBills, updateBillStatus } from "../../components/State/Bill/Action";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import socket from "../../components/config/socket"; 
+import socket from "../../components/config/socket";
 import { notification } from "antd";
 
 const BillTable = () => {
@@ -69,26 +69,22 @@ const BillTable = () => {
     );
   };
 
-
-
-
   useEffect(() => {
     socket.on("connect", () => {
       console.log("Connected to server via WebSocket in BillTable");
     });
-  
+
     socket.on("billCreated", (response) => {
       console.log("Server response in BillTable:", response);
       handleSearch();
       notification.success({ message: "Có đơn hàng mới !!!" });
     });
-  
+
     return () => {
       socket.off("connect");
       socket.off("billCreated");
     };
   }, []);
-  
 
   const handleSearch = () => {
     setCurrentPage(1);
@@ -133,7 +129,7 @@ const BillTable = () => {
     const page = params.get("page") || 1;
     const phone = params.get("phone") || "";
     const state = params.get("state") || "";
-    const accountId = params.get("accountId") || ""; 
+    const accountId = params.get("accountId") || "";
     console.log("check params:", { page, phone, state, accountId });
 
     dispatch(
@@ -166,6 +162,9 @@ const BillTable = () => {
           state: state,
         })
       );
+      notification.success({
+        message: "Cập nhật trạng thái đơn hàng thành công !",
+      });
     } catch (error) {
       console.error("Error updating bill status:", error);
     }
@@ -221,7 +220,6 @@ const BillTable = () => {
           marginBottom: "20px",
         }}
       >
-
         <TextField
           label="Search"
           variant="outlined"
@@ -232,9 +230,8 @@ const BillTable = () => {
               borderRadius: "20px",
               height: "40px",
             },
-            marginRight: 2, 
+            marginRight: 2,
           }}
-         
         />
 
         <FormControl variant="outlined" sx={{ width: 200 }}>
@@ -267,13 +264,15 @@ const BillTable = () => {
           <Table sx={{ minWidth: 650 }} aria-label="Event Table">
             <TableHead sx={{ backgroundColor: "#fdba74" }}>
               <TableRow>
-                <TableCell align="left">Id</TableCell>
+                <TableCell align="left">#</TableCell>
                 <TableCell align="left">Tên người nhận</TableCell>
                 <TableCell align="left">Số điện thoại</TableCell>
                 <TableCell align="center">Giá trị đơn hàng</TableCell>
                 <TableCell align="right">Ngày tạo</TableCell>
                 <TableCell align="center">Trạng thái thanh toán</TableCell>
-                <TableCell align="center">Trạng thái đơn hàng</TableCell>
+                <TableCell align="center" width={"300px"}>
+                  Trạng thái đơn hàng
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -290,7 +289,9 @@ const BillTable = () => {
                     <TableCell align="left">{item.fullName}</TableCell>
 
                     <TableCell align="left">{item.phone_shipment}</TableCell>
-                    <TableCell align="center">{item.total_price} đ</TableCell>
+                    <TableCell align="center">
+                      {item.total_price.toLocaleString()} đ
+                    </TableCell>
                     <TableCell align="right">
                       {new Date(item.createdAt).toLocaleDateString()}
                     </TableCell>
@@ -307,18 +308,65 @@ const BillTable = () => {
                         variant="outlined"
                         size="small"
                         onClick={(e) => e.stopPropagation()}
-                        InputProps={{ readOnly: false }}
+                        sx={{
+                          "& .MuiSelect-select": {
+                            borderRadius: "8px", 
+                            backgroundColor:
+                              item.state === 1
+                                ? "#ff9800" 
+                                : item.state === 2
+                                ? "#3f51b5" 
+                                : item.state === 3
+                                ? "#4caf50" 
+                                : "#607d8b",
+                            color: "white", 
+                            fontWeight: "bold", 
+                          },
+                        }}
                       >
-                        <MenuItem value={1} disabled={item.state >= 2}>
+                        <MenuItem
+                          value={1}
+                          disabled={item.state >= 2}
+                          sx={{
+                            backgroundColor: "#ff9800",
+                            color: "white",
+                            borderRadius: "8px",
+                          }}
+                        >
                           Đang xử lí
                         </MenuItem>
-                        <MenuItem value={2} disabled={item.state >= 3}>
+                        <MenuItem
+                          value={2}
+                          disabled={item.state >= 3}
+                          sx={{
+                            backgroundColor: "#3f51b5",
+                            color: "white",
+                            borderRadius: "8px",
+                          }}
+                        >
                           Đang thực hiện món
                         </MenuItem>
-                        <MenuItem value={3} disabled={item.state === 4}>
+                        <MenuItem
+                          value={3}
+                          disabled={item.state === 4}
+                          sx={{
+                            backgroundColor: "#4caf50",
+                            color: "white",
+                            borderRadius: "8px",
+                          }}
+                        >
                           Đang giao hàng
                         </MenuItem>
-                        <MenuItem value={4}>Hoàn tất</MenuItem>
+                        <MenuItem
+                          value={4}
+                          sx={{
+                            backgroundColor: "#607d8b",
+                            color: "white",
+                            borderRadius: "8px",
+                          }}
+                        >
+                          Hoàn tất
+                        </MenuItem>
                       </TextField>
                     </TableCell>
                   </TableRow>

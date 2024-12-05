@@ -12,18 +12,21 @@ import { useDispatch } from "react-redux";
 import { logout } from "../../components/State/Authentication/Action";
 import DiscountIcon from "@mui/icons-material/Discount";
 import { useCartContext } from "../../components/cart/CartContext";
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import ListIcon from '@mui/icons-material/List';
 // import { logout } from "../../component/State/Authentication/Action";
 
 const menu = [
   { title: "Doanh thu", icon: <Dashboard />, path: "/" },
   { title: "Hóa đơn", icon: <ShoppingBag />, path: "/bill" },
-  { title: "Tài khoản", icon: <ShoppingBag />, path: "/account" },
+  { title: "Tài khoản", icon: <AccountBoxIcon />, path: "/account" },
   { title: "Sản phẩm", icon: <ShopTwoIcon />, path: "/product" },
   { title: "Danh mục", icon: <CategoryIcon />, path: "/category" },
   { title: "Sự kiện", icon: <EventIcon />, path: "/event" },
   { title: "Voucher", icon: <DiscountIcon />, path: "/voucher" },
-  { title: "Nhập hàng", icon: <DiscountIcon />, path: "/import" },
-  { title: "Tuỳ chọn món ăn kèm", icon: <DiscountIcon />, path: "/optional" },
+  { title: "Nhập hàng", icon: <InventoryIcon />, path: "/import" },
+  { title: "Tuỳ chọn món ăn", icon: <ListIcon />, path: "/optional" },
   { title: "Đăng xuất", icon: <LogoutIcon />, path: "/" },
 ];
 

@@ -196,7 +196,7 @@ const ChoiceTable = () => {
                       {(item.additionalPrice).toLocaleString()} đ
                     </TableCell>
                     <TableCell align="center">
-                      {item.isActive ? "Active" : "Inactive"}
+                      {item.isActive ? "Hoạt động" : "Khóa"}
                     </TableCell>
                     <TableCell align="right">
                       <IconButton onClick={() => handleBlockUnblock(item)}>

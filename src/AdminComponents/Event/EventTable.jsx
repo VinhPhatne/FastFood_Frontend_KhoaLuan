@@ -36,6 +36,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { notification } from "antd";
 import AddBoxIcon from "@mui/icons-material/AddBox";
+import { format } from "date-fns";
 
 const style = {
   position: "absolute",
@@ -222,7 +223,6 @@ const EventTable = () => {
 
   console.log("selectedProducts", selectedProducts);
 
-
   return (
     <Box sx={{ width: "95%", margin: "0px auto", marginTop: "100px" }}>
       {/* Search and Create Button Section */}
@@ -278,7 +278,7 @@ const EventTable = () => {
                 <TableCell align="center">Giảm giá</TableCell>
                 <TableCell align="right">Ngày hết hạn</TableCell>
                 <TableCell align="center">Hoạt động</TableCell>
-                <TableCell align="right">Hành động</TableCell>
+                <TableCell align="center">Hành động</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -295,11 +295,15 @@ const EventTable = () => {
                     <TableCell align="center">
                       {item.discountPercent} %
                     </TableCell>
-                    <TableCell align="right">{item.expDate}</TableCell>
+                    <TableCell align="right">
+                      {item.expDate
+                        ? format(new Date(item.expDate), "dd/MM/yyyy")
+                        : "N/A"}
+                    </TableCell>
                     <TableCell align="center">
                       {item.isActive ? "Hoạt động" : "Khóa"}
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="center">
                       <IconButton onClick={() => handleBlockUnblock(item)}>
                         {item.isActive ? (
                           <LockIcon style={{ color: "#D32F2F" }} />
