@@ -94,7 +94,6 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
-            required
             id="address"
             name="address"
             label="Địa chỉ"

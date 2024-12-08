@@ -114,11 +114,11 @@ const FoodCategoryTable = () => {
     try {
       if (item.isActive) {
         const response = await dispatch(blockCategory({ id: item._id, jwt }));
-        notification.success({ message: "Sản phẩm đã bị khóa thành công!" });
+        notification.success({ message: "Danh mục đã bị khóa thành công!" });
       } else {
         const response = await dispatch(unblockCategory({ id: item._id, jwt }));
         notification.success({
-          message: "Sản phẩm đã được mở khóa thành công!",
+          message: "Danh mục đã được mở khóa thành công!",
         });
       }
       fetchCategories();

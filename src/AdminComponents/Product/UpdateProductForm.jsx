@@ -289,7 +289,7 @@ const UpdateProductForm = () => {
                 type="submit"
                 sx={{ maxWidth: "400px" }}
               >
-                Thêm mới
+                Cập nhật
               </Button>
             </div>
           </Grid>
