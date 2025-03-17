@@ -30,7 +30,7 @@ const useCart = () => {
     const existingProduct = cart.find(
       (item) =>
         item.id === product._id &&
-        JSON.stringify(item.options) === JSON.stringify(product.options) 
+        JSON.stringify(item.options) === JSON.stringify(product.options)
     );
   
     let updatedCart;
@@ -50,7 +50,7 @@ const useCart = () => {
           price: product.price,
           picture: product.picture,
           quantity: quantity,
-          options: product.options || [], 
+          options: product.options || [],
         },
       ];
     }
@@ -111,6 +111,7 @@ const useCart = () => {
   // };
   return {
     cart,
+    setCart,
     addToCart,
     increaseQuantity,
     decreaseQuantity,
