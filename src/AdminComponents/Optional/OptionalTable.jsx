@@ -111,11 +111,11 @@ const OptionalTable = () => {
     try {
       if (item.isActive) {
         const response = await dispatch(blockEvent({ id: item._id, jwt }));
-        notification.success({ message: "Sản phẩm đã bị khóa thành công!" });
+        notification.success({ message: "Lựa chọn đã bị khóa thành công!" });
       } else {
         const response = await dispatch(unblockEvent({ id: item._id, jwt }));
         notification.success({
-          message: "Sản phẩm đã được mở khóa thành công!",
+          message: "Lựa chọn đã được mở khóa thành công!",
         });
       }
       fetchEvents();

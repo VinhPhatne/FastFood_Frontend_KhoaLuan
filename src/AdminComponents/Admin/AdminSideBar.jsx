@@ -40,7 +40,7 @@ const AdminSideBar = ({ handleClose }) => {
   const handleNavigate = (item) => {
     setActiveItem(item.title);
     navigate(`/admin${item.path}`);
-    if (item.title === "Logout") {
+    if (item.title === "Đăng xuất") {
       clearCart();
       navigate("/");
       dispatch(logout());

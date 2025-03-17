@@ -30,6 +30,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
       phonenumber: formData.phonenumber,
       password: formData.password,
       email: formData.email,
+      role: formData.role,
     };
     try {
       await dispatch(
@@ -50,7 +51,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: name === "role" ? parseInt(value, 10) : value,
     });
   };
 
@@ -94,7 +95,6 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
-            required
             id="address"
             name="address"
             label="Địa chỉ"

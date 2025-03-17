@@ -55,9 +55,8 @@ export const createUser = (reqData) => async (dispatch) => {
       phonenumber: reqData.phonenumber,
       password: reqData.password,
       email: reqData.email,
-      // role: reqData.role,
-      // email: reqData.email,
-      // address: reqData.address,
+      role: reqData.role,
+      address: reqData.address,
     });
     console.log("User created successfully", data);
     dispatch({ type: CREATE_USER_SUCCESS, payload: data });
