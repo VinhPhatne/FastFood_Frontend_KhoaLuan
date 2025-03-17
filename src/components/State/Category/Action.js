@@ -38,13 +38,13 @@ export const getCategories =
 
 // Tạo mới category
 export const createCategory =
-  ({ name, jwt }) =>
+  ({ name, image, jwt }) =>
   async (dispatch) => {
     dispatch({ type: CREATE_CATEGORY_REQUEST });
     try {
       const { data } = await api.post(
         `${API_URL}/v1/category/create`,
-        { name },
+        { name, image },
         {
           headers: {
             Authorization: `Bearer ${jwt}`,
@@ -63,24 +63,25 @@ export const createCategory =
 
 // Cập nhật category theo id
 export const updateCategory =
-  ({ id, name, jwt }) =>
+  ({ id, name, image, jwt }) =>
   async (dispatch) => {
     dispatch({ type: UPDATE_CATEGORY_REQUEST });
     try {
       const { data } = await api.put(
         `${API_URL}/v1/category/${id}`,
-        { name },
+        { name, image },
         {
           headers: {
             Authorization: `Bearer ${jwt}`,
           },
         }
       );
-      console.log("updateCategory", data);
+      console.log("updateCategory123", data);
       dispatch({ type: UPDATE_CATEGORY_SUCCESS, payload: data });
     } catch (error) {
       console.log("error", error);
       dispatch({ type: UPDATE_CATEGORY_FAILURE });
+      throw error;
     }
   };
 

@@ -1,26 +1,18 @@
+import { Button, FormControlLabel, Radio, RadioGroup, TextField } from "@mui/material";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
-import Cookies from "js-cookie";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserProfile } from "../State/Authentication/Action";
-import { createBill } from "../State/Bill/Action";
-import { Button, TextField } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import useCart from "../../hook/useCart";
-import { useCartContext } from "./CartContext";
-import { getOptionals } from "../State/Optional/Action";
+import { getUserProfile } from "../State/Authentication/Action";
 import { getChoicesByOptionalId } from "../State/Choice/Action";
+import { getOptionals } from "../State/Optional/Action";
 import socket from "../config/socket";
-import axios from "axios";
+import { useCartContext } from "./CartContext";
+import MapComponent from './MapComponent';
 const Checkout = () => {
   const jwt = localStorage.getItem("jwt");
-  const {
-    cart,
-    totalQuantity,
-    totalPrice,
-    handleIncrease,
-    handleDecrease,
-    handleRemove,
-  } = useCart(jwt);
+  const { cart, totalQuantity, totalPrice, handleRemove } = useCart(jwt);
   const [formData, setFormData] = useState({
     fullName: "",
     address: "",
@@ -28,12 +20,12 @@ const Checkout = () => {
     note: "",
   });
   const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [addressMethod, setAddressMethod] = useState("manual");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { clearCart } = useCartContext();
-
   const { state } = useLocation();
-  //const { discount, voucherId, finalTotal, pointsUsed } = state || {};
+
   const {
     discount,
     voucherId,
@@ -41,12 +33,18 @@ const Checkout = () => {
     pointsUsed,
   } = state || JSON.parse(localStorage.getItem("checkoutData")) || {};
 
+  const [showMap, setShowMap] = useState(false);
+  const [position, setPosition] = useState(null); 
+  const [suggestions, setSuggestions] = useState([]);
+  const [isPositionLoaded, setIsPositionLoaded] = useState(false);
+  const LOCATIONIQ_API_KEY = "pk.2b0fee32045c1896341b402c43932395"; 
+
   useEffect(() => {
-    // Lưu dữ liệu vào localStorage khi vào trang
     if (state) {
       localStorage.setItem("checkoutData", JSON.stringify(state));
     }
   }, [state]);
+
   const [serverResponse, setServerResponse] = useState(null);
 
   const userProfile = useSelector((state) => state.auth.user);
@@ -56,7 +54,13 @@ const Checkout = () => {
   useEffect(() => {
     dispatch(getUserProfile());
     dispatch(getOptionals({ jwt }));
+    handleUseCurrentLocation();
   }, [dispatch]);
+
+  useEffect(() => {
+    if (addressMethod == 'map') handleUseCurrentLocation();
+    else setFormData((prev) => ({ ...prev, address: "" }));
+  }, [addressMethod]);
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -89,7 +93,6 @@ const Checkout = () => {
       ship: shippingFee,
       total_price: finalTotal,
       pointDiscount: pointsUsed,
-      //isPaid: false,
       isPaid: paymentMethod === "online",
       voucher: voucherId,
       lineItems: cart.map((item) => ({
@@ -108,7 +111,6 @@ const Checkout = () => {
     if (userProfile?._id) {
       billData.account = userProfile._id;
     }
-    //socket.emit("createBill", billData);
 
     if (paymentMethod === "cod") {
       socket.emit("createBill", billData);
@@ -125,7 +127,7 @@ const Checkout = () => {
         );
 
         if (response.data && response.data.paymentLink) {
-          window.location.href = response.data.paymentLink; // Chuyển hướng đến trang thanh toán
+          window.location.href = response.data.paymentLink;
         } else {
           alert("Không thể tạo liên kết thanh toán.");
         }
@@ -134,6 +136,89 @@ const Checkout = () => {
         alert("Đã xảy ra lỗi khi tạo liên kết thanh toán.");
       }
     }
+  };
+
+  const handleUseCurrentLocation = async () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setPosition([latitude, longitude]);
+          console.log('isPositionLoaded', isPositionLoaded);
+          console.log('addressMethod', addressMethod);
+          if(isPositionLoaded || addressMethod == 'map') {
+            getAddressFromCoords(latitude, longitude);
+          }
+          setIsPositionLoaded(true);
+        },
+        async (error) => {
+          console.error("Geolocation error:", error);
+          alert("Không thể lấy vị trí từ trình duyệt. Thử lấy từ IP...");
+          try {
+            const response = await axios.get("https://ipapi.co/json/");
+            const { latitude, longitude } = response.data;
+            setPosition([latitude, longitude]);
+            setIsPositionLoaded(true);
+          } catch (ipError) {
+            console.error("IP geolocation error:", ipError);
+            alert("Không thể lấy vị trí. Sử dụng vị trí mặc định.");
+            setPosition([21.0285, 105.8542]); 
+            setIsPositionLoaded(true);
+          }
+        }
+      );
+    } else {
+      alert("Trình duyệt không hỗ trợ định vị. Thử lấy từ IP...");
+      try {
+        const response = await axios.get("https://ipapi.co/json/");
+        const { latitude, longitude } = response.data;
+        setPosition([latitude, longitude]);
+        setIsPositionLoaded(true);
+      } catch (ipError) {
+        console.error("IP geolocation error:", ipError);
+        alert("Không thể lấy vị trí. Sử dụng vị trí mặc định.");
+        setPosition([21.0285, 105.8542]);
+        setIsPositionLoaded(true);
+      }
+    }
+  };
+
+  const getAddressFromCoords = async (lat, lng) => {
+    try {
+      const url = `https://us1.locationiq.com/v1/reverse.php?key=${LOCATIONIQ_API_KEY}&lat=${lat}&lon=${lng}&format=json`;
+      console.log("Requesting address from:", url);
+      const response = await axios.get(url);
+      console.log("LocationIQ response:", response.data);
+      const address = response.data.display_name;
+      setFormData((prev) => ({ ...prev, address }));
+      //setShowMap(false);
+    } catch (error) {
+      console.error("Error fetching address:", error.response || error.message);
+      alert("Không thể lấy địa chỉ từ vị trí này. Kiểm tra console để debug.");
+    }
+  };
+
+  const handleAddressChange = async (e) => {
+    const value = e.target.value;
+    setFormData((prev) => ({ ...prev, address: value }));
+
+    if (value.length > 2) {
+      try {
+        const response = await axios.get(
+          `https://us1.locationiq.com/v1/autocomplete.php?key=${LOCATIONIQ_API_KEY}&q=${value}&limit=5&countrycodes=vn`
+        );
+        setSuggestions(response.data);
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      }
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setFormData((prev) => ({ ...prev, address: suggestion.display_name }));
+    setSuggestions([]);
   };
 
   useEffect(() => {
@@ -250,17 +335,6 @@ const Checkout = () => {
             <TextField
               fullWidth
               required
-              id="address"
-              name="address"
-              label="Địa chỉ"
-              variant="outlined"
-              onChange={handleInputChange}
-              value={formData.address}
-              style={{ marginBottom: "16px" }}
-            />
-            <TextField
-              fullWidth
-              required
               id="phone"
               name="phone"
               label="Số điện thoại"
@@ -269,6 +343,88 @@ const Checkout = () => {
               value={formData.phone}
               style={{ marginBottom: "16px" }}
             />
+            <div className="mb-4">
+              <label className="text-lg font-semibold mb-2 block">
+                Chọn cách nhập địa chỉ
+              </label>
+              <RadioGroup
+                value={addressMethod}
+                onChange={(e) => {
+                  setAddressMethod(e.target.value);
+                  if (e.target.value === "map") {
+                    setShowMap(true);
+                    if (!isPositionLoaded) {
+                      handleUseCurrentLocation();
+                    }
+                  } else {
+                    setShowMap(false);
+                  }
+                }}
+              >
+                <FormControlLabel
+                  value="manual"
+                  control={<Radio />}
+                  label="Nhập địa chỉ thủ công"
+                />
+                <FormControlLabel
+                  value="map"
+                  control={<Radio />}
+                  label="Chọn từ bản đồ"
+                />
+              </RadioGroup>
+            </div>
+            {showMap && (
+              <MapComponent
+                position={position}
+                setPosition={setPosition}
+                setAddress={getAddressFromCoords}
+              />
+            )}
+
+            <div style={{ position: "relative" }}>
+              <TextField
+                fullWidth
+                required
+                id="address"
+                name="address"
+                label="Địa chỉ"
+                variant="outlined"
+                onChange={handleAddressChange}
+                value={formData.address}
+                style={{ marginBottom: "16px" }}
+              />
+              {suggestions.length > 0 && (
+                <ul
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    right: 0,
+                    background: "white",
+                    border: "1px solid #ccc",
+                    zIndex: 1000,
+                    listStyle: "none",
+                    padding: 0,
+                    margin: 0,
+                  }}
+                >
+                  {suggestions.map((suggestion) => (
+                    <li
+                      key={suggestion.place_id}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      style={{
+                        padding: "8px",
+                        cursor: "pointer",
+                        borderBottom: "1px solid #eee",
+                      }}
+                    >
+                      {suggestion.display_name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            
             <TextField
               fullWidth
               id="note"
@@ -285,30 +441,24 @@ const Checkout = () => {
               <label className="text-lg font-semibold mb-2 block">
                 Phương thức thanh toán
               </label>
-              <div className="flex items-center mb-2">
-                <input
-                  type="radio"
-                  id="cod"
-                  name="paymentMethod"
+              <RadioGroup
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+              >
+                <FormControlLabel
                   value="cod"
-                  checked={paymentMethod === "cod"}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="mr-2"
+                  control={<Radio />}
+                  label="Thanh toán khi nhận hàng"
+                  sx={{ margin: 0 }}
                 />
-                <label htmlFor="cod">Thanh toán khi nhận hàng</label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  id="online"
-                  name="paymentMethod"
+                <FormControlLabel
                   value="online"
-                  checked={paymentMethod === "online"}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="mr-2"
+                  control={<Radio />}
+                  label="Thanh toán online"
+                  sx={{ margin: 0 }}
                 />
-                <label htmlFor="online">Thanh toán online</label>
-              </div>
+              </RadioGroup>
             </div>
 
             <Button

@@ -351,8 +351,8 @@ const AccountTable = () => {
 
       <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
         <Box sx={style}>
-          <Typography variant="h6">Xác nhận xóa</Typography>
-          <Typography>Bạn có chắc chắn muốn xóa sự kiện này không?</Typography>
+          <Typography variant="h6">Xác nhận khóa</Typography>
+          <Typography>Bạn có chắc chắn muốn khóa tài khoản này không?</Typography>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
             <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
             <Button variant="contained" color="primary" onClick={handleDelete}>Xóa</Button>

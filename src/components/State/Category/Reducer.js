@@ -3,6 +3,7 @@ import {
   DELETE_CATEGORY_SUCCESS,
   GET_CATEGORIES,
   GET_CATEGORY_BY_ID_SUCCESS,
+  UPDATE_CATEGORY_FAILURE,
   UPDATE_CATEGORY_SUCCESS,
 } from "./ActionType";
 
@@ -28,10 +29,24 @@ export const categoryReducer = (state = initialState, action) => {
     case UPDATE_CATEGORY_SUCCESS:
       return {
         ...state,
-        categories: state.categories.map((item) =>
-          item.id === action.payload.id ? action.payload : item
-        ),
+        // categories: Array.isArray(state.categories)
+        //   ? state.categories.map((item) =>
+        //       item.id === action.payload.id ? action.payload : item
+        //     )
+        //   : [action.payload],
+
+       categories: Array.isArray(state.categories)
+        ? state.categories.map((item) =>
+            item.id === action.payload.id ? action.payload : item
+          )
+        : [action.payload],
       };
+
+    case UPDATE_CATEGORY_FAILURE:
+          return {
+            ...state,
+            error: action.payload,
+          };
 
     case DELETE_CATEGORY_SUCCESS:
       return {

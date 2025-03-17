@@ -1,23 +1,15 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { MdOutlineKeyboardDoubleArrowRight } from "react-icons/md";
-import styles from "./Card.module.scss";
-import { FaRegStar } from "react-icons/fa";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import { PrevArrow, NextArrow } from "../Arrow";
-import { useDispatch, useSelector } from "react-redux";
-import { getCategories } from "../State/Category/Action";
-import { getProducts, getProductsByCategory } from "../State/Product/Action";
-import Cookies from "js-cookie";
-import { notification, Radio } from "antd";
-import { Modal, InputNumber, Button } from "antd";
-import "./productModal.css";
-import useCart from "../../hook/useCart";
-import { getOptionals } from "../State/Optional/Action";
-import { getChoicesByOptionalId } from "../State/Choice/Action";
 import { PlusOutlined } from "@ant-design/icons";
+import { Button, InputNumber, Modal, notification, Radio } from "antd";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import "slick-carousel/slick/slick-theme.css";
+import "slick-carousel/slick/slick.css";
+import useCart from "../../hook/useCart";
+import { getCategories } from "../State/Category/Action";
+import { getOptionals } from "../State/Optional/Action";
+import { getProducts } from "../State/Product/Action";
+import styles from "./Card.module.scss";
+import "./productModal.css";
 
 const Card = () => {
   const dispatch = useDispatch();

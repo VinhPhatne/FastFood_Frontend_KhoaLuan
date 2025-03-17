@@ -189,6 +189,9 @@ const FoodCategoryTable = () => {
                 <TableCell align="left" sx={{ color: "#000" }}>
                   #
                 </TableCell>
+                 <TableCell align="left" sx={{ color: "#000" }}>
+                  Hình ảnh
+                </TableCell>
                 <TableCell align="left" sx={{ color: "#000" }}>
                   Tên danh mục
                 </TableCell>
@@ -211,6 +214,18 @@ const FoodCategoryTable = () => {
                   >
                     <TableCell component="th" scope="row">
                       {index + 1}
+                    </TableCell>
+                     <TableCell component="th" scope="row">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{
+                          width: "100px",
+                          height: "80px",
+                          objectFit: "cover",
+                          borderRadius: "8px",
+                        }}
+                      />
                     </TableCell>
                     <TableCell align="left">{item.name}</TableCell>
                     <TableCell align="center">

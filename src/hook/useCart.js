@@ -30,12 +30,11 @@ const useCart = () => {
     const existingProduct = cart.find(
       (item) =>
         item.id === product._id &&
-        JSON.stringify(item.options) === JSON.stringify(product.options) // Kiểm tra nếu sản phẩm cùng options đã tồn tại
+        JSON.stringify(item.options) === JSON.stringify(product.options) 
     );
   
     let updatedCart;
     if (existingProduct) {
-      // Tăng số lượng nếu sản phẩm cùng options đã tồn tại
       updatedCart = cart.map((item) =>
         item.id === product._id &&
         JSON.stringify(item.options) === JSON.stringify(product.options)
@@ -43,7 +42,6 @@ const useCart = () => {
           : item
       );
     } else {
-      // Thêm sản phẩm mới nếu chưa tồn tại trong giỏ
       updatedCart = [
         ...cart,
         {
