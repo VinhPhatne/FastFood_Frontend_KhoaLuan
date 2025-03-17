@@ -1,10 +1,6 @@
 import {
   Box,
-  Button,
   Card,
-  CardHeader,
-  IconButton,
-  Modal,
   Pagination,
   Paper,
   Table,
@@ -13,23 +9,12 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  Typography,
-  InputAdornment,
+  Typography
 } from "@mui/material";
-import CreateIcon from "@mui/icons-material/Create";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteEvent,
-  getEvents,
-  getEventById,
-} from "../../components/State/Event/Action";
-import { Delete } from "@mui/icons-material";
-import { getBills } from "../../components/State/Bill/Action";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { getBills } from "../../components/State/Bill/Action";
 
 const style = {
   position: "absolute",

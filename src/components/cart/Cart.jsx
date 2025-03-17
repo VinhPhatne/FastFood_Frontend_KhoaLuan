@@ -196,7 +196,7 @@ const Cart = () => {
         </Button>
       </div>
 
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between" style={{ gap: '40px' }}>
         <div
           className="flex flex-col justify-start gap-6 md:grid-cols-2"
           style={{ width: "760px", minHeight: "250px" }}

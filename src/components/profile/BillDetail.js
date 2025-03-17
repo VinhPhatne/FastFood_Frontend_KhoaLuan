@@ -4,6 +4,8 @@ import { useDispatch } from "react-redux";
 import { getBillById } from "../../components/State/Bill/Action";
 import { useNavigate, useParams } from "react-router-dom";
 import { getVoucherById } from "../../components/State/voucher/Action";
+import useCart from '../../hook/useCart';
+import { notification } from 'antd';
 
 const BillDetail = () => {
   const dispatch = useDispatch();
@@ -13,6 +15,7 @@ const BillDetail = () => {
   const [billData, setBillData] = useState(null);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
 
+  const { addToCart, cart, setCart } = useCart();
   useEffect(() => {
     const fetchData = async () => {
       const response = await dispatch(getBillById({ id, jwt }));
@@ -48,6 +51,53 @@ const BillDetail = () => {
       return total + (item.subtotal || 0);
     }, 0) || 0;
 
+    const handleReorder = () => {
+      if (billData?.lineItem) {
+        
+        const newItems = billData.lineItem.map((item, index) => {
+          const productData = {
+            id: item.product._id,
+            name: item.product.name,
+            price: item.product.price,
+            picture: item.product.picture,
+            quantity: item.quantity,
+            options: item.options.map(option => ({
+              optionId: option.option._id,
+              choiceId: option.choices._id,
+              addPrice: option.addPrice
+            })),
+            uniqueKey: `${item.product._id}-${index}-${Date.now()}`
+          };
+          return productData;
+        });
+  
+        setCart(prevCart => {
+          let updatedCart = [...prevCart];
+          
+          newItems.forEach(newItem => {
+            const existingItemIndex = updatedCart.findIndex(
+              item => 
+                item.id === newItem.id &&
+                JSON.stringify(item.options) === JSON.stringify(newItem.options)
+            );
+  
+            if (existingItemIndex !== -1) {
+              updatedCart[existingItemIndex] = {
+                ...updatedCart[existingItemIndex],
+                quantity: updatedCart[existingItemIndex].quantity + newItem.quantity
+              };
+            } else {
+              updatedCart.push(newItem);
+            }
+          });
+          return updatedCart;
+        });
+        notification.success({
+              message: "Đặt lại sản phẩm thành công. Sản phẩm đã được thêm vào giỏ hàng!",
+            });
+      }
+    };
+
   return (
     <Box
       sx={{
@@ -64,18 +114,33 @@ const BillDetail = () => {
         >
           CHI TIẾT HÓA ĐƠN
         </h1>
-        <Button
-          variant="contained"
-          style={{
-            color: "#fff",
-            backgroundColor: "#ff7d01",
-            width: "100px",
-            marginBottom: "20px",
-          }}
-          onClick={() => navigate(-1)}
-        >
-          Quay về
-        </Button>
+        <div>
+          <Button
+              variant="contained"
+              style={{
+                color: "#fff",
+                backgroundColor: "#ff7d01",
+                width: "170px",
+                marginBottom: "20px",
+                marginRight:'20px',
+              }}
+              onClick={handleReorder}
+            >
+              Đặt lại sản phẩm
+            </Button>
+          <Button
+            variant="contained"
+            style={{
+              color: "#fff",
+              backgroundColor: "#ff7d01",
+              width: "100px",
+              marginBottom: "20px",
+            }}
+            onClick={() => navigate(-1)}
+          >
+            Quay về
+          </Button>
+        </div>
       </div>
       <div className="flex justify-between">
         <div className="w-1/2 border rounded-lg p-6 mr-6">
