@@ -1,4 +1,4 @@
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button, TextField, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getBillById } from "../../components/State/Bill/Action";
@@ -6,6 +6,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getVoucherById } from "../../components/State/voucher/Action";
 import useCart from '../../hook/useCart';
 import { notification } from 'antd';
+
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
+import RestaurantIcon from '@mui/icons-material/Restaurant';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const BillDetail = () => {
   const dispatch = useDispatch();
@@ -25,10 +30,8 @@ const BillDetail = () => {
         const voucherResponse = await dispatch(
           getVoucherById({ id: response.data?.voucher, jwt })
         );
-        console.log("voucherResponse", voucherResponse);
         if (voucherResponse) {
           setVoucherDiscount(voucherResponse.data?.discount);
-          console.log("OK");
         }
       }
     };
@@ -53,7 +56,6 @@ const BillDetail = () => {
 
     const handleReorder = () => {
       if (billData?.lineItem) {
-        
         const newItems = billData.lineItem.map((item, index) => {
           const productData = {
             id: item.product._id,
@@ -70,7 +72,7 @@ const BillDetail = () => {
           };
           return productData;
         });
-  
+
         setCart(prevCart => {
           let updatedCart = [...prevCart];
           
@@ -80,7 +82,7 @@ const BillDetail = () => {
                 item.id === newItem.id &&
                 JSON.stringify(item.options) === JSON.stringify(newItem.options)
             );
-  
+
             if (existingItemIndex !== -1) {
               updatedCart[existingItemIndex] = {
                 ...updatedCart[existingItemIndex],
@@ -97,6 +99,15 @@ const BillDetail = () => {
             });
       }
     };
+
+  const timelineSteps = [
+    { label: "Đơn Hàng Đã Đặt", icon: <AssignmentTurnedInIcon />, state: 1 },
+    { label: "Đang Thực Hiện Món", icon: <RestaurantIcon />, state: 2 },
+    { label: "Đang Giao Hàng", icon: <LocalShippingIcon />, state: 3 },
+    { label: "Giao Hàng Thành Công", icon: <CheckCircleIcon />, state: 4 },
+  ];
+
+  const currentStep = billData?.state || 0;
 
   return (
     <Box
@@ -142,6 +153,69 @@ const BillDetail = () => {
           </Button>
         </div>
       </div>
+
+      <Box sx={{ marginTop: "16px", marginBottom: '16px' }}>
+        <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: "16px" }}>
+          Trạng thái đơn hàng
+        </Typography>
+        <Box sx={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "20px",
+              left: "13%",
+              right: "13%",
+              height: "2px",
+              width: "calc(100%-120px)",
+              backgroundColor: "#e0e0e0",
+              zIndex: -2,
+            }}
+          />
+          {timelineSteps.map((step, index) => (
+            <Box key={index} sx={{ textAlign: "center", flex: 1 }}>
+              <Box
+                sx={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "50%",
+                  backgroundColor: step.state <= currentStep ? "#ff7d01" : "#e0e0e0",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto",
+                  color: "#fff",
+                }}
+              >
+                {step.icon}
+              </Box>
+              <Typography
+                variant="body2"
+                sx={{
+                  marginTop: "8px",
+                  color: step.state <= currentStep ? "#ff7d01" : "#757575",
+                  fontWeight: step.state <= currentStep ? "bold" : "normal",
+                }}
+              >
+                {step.label}
+              </Typography>
+              {index < timelineSteps.length - 1 && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "20px",
+                    left: `calc(${index * 25}% + 13%)`,
+                    width: "calc(25%)",
+                    height: "2px",
+                    backgroundColor: step.state < currentStep ? "#ff7d01" : "transparent",
+                    zIndex: -1,
+                  }}
+                />
+              )}
+            </Box>
+          ))}
+        </Box>
+      </Box>
+
       <div className="flex justify-between">
         <div className="w-1/2 border rounded-lg p-6 mr-6">
           <h2 className="text-xl font-bold mb-4">Thông tin đơn hàng</h2>
@@ -202,28 +276,6 @@ const BillDetail = () => {
               label="Trạng thái thanh toán"
               variant="outlined"
               value={billData?.isPaid ? "Đã thanh toán" : "Chưa thanh toán"}
-              style={{ marginBottom: "16px" }}
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-            <TextField
-              fullWidth
-              id="state"
-              name="state"
-              label="Trạng thái đơn hàng"
-              variant="outlined"
-              value={
-                billData?.state === 1
-                  ? "Đang xử lý"
-                  : billData?.state === 2
-                  ? "Đang thực hiện món"
-                  : billData?.state === 3
-                  ? "Đang giao hàng"
-                  : billData?.state === 4
-                  ? "Giao hàng thành công"
-                  : "Không rõ trạng thái"
-              }
               style={{ marginBottom: "16px" }}
               InputProps={{
                 readOnly: true,
