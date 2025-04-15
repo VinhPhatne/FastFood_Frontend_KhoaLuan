@@ -143,14 +143,14 @@ const OptionalTable = () => {
         }}
       >
         <TextField
-          label="Search"
+          label="Tìm kiếm"
           variant="outlined"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "20px",
-              height: "40px",
+              height: "50px",
             },
           }}
           InputProps={{
