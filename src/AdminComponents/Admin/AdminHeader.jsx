@@ -381,8 +381,10 @@ const AdminHeader = () => {
             <div
               data-noti-open={isNotiOpen}
               className={styles.dropdownNoti}
+              ref={notiContentRef}
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className={styles.menuNoti} ref={notiContentRef}>
+              <div className={styles.menuNoti} >
                 <div
                   style={{
                     padding: 8,
@@ -489,8 +491,10 @@ const AdminHeader = () => {
             <div
               data-noti-open={isReviewOpen}
               className={styles.dropdownNoti}
+              ref={reviewContentRef}
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className={styles.menuNoti} ref={reviewContentRef}>
+              <div className={styles.menuNoti} >
                 <div
                   style={{
                     padding: 8,
