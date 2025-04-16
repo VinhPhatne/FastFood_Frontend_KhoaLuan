@@ -61,7 +61,6 @@ const BillDetail = () => {
       }
     });
 
-    // Dọn dẹp socket khi component unmount
     return () => {
       socket.off("order_status_updated");
     };

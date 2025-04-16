@@ -45,8 +45,6 @@ const Checkout = () => {
     }
   }, [state]);
 
-  const [serverResponse, setServerResponse] = useState(null);
-
   const userProfile = useSelector((state) => state.auth.user);
   const { optionals } = useSelector((state) => state.optionalReducer.optionals);
   const [choices, setChoices] = useState({});
@@ -69,10 +67,9 @@ const Checkout = () => {
 
     socket.on("billCreated", (response) => {
       console.log("Server response:", response);
-      setServerResponse(response);
-      if (response.status === "success") {
+      if (response.status === "success" && response.data?._id) {
         clearCart();
-        navigate("/success");
+        navigate(`/success?orderId=${response.data._id}`);
       } else {
         alert("Error creating bill");
       }
@@ -82,7 +79,7 @@ const Checkout = () => {
       socket.off("connect");
       socket.off("billCreated");
     };
-  }, []);
+  }, [navigate, clearCart]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -106,7 +103,6 @@ const Checkout = () => {
         })),
       })),
       note: formData.note || "",
-      //account: userProfile?._id ? userProfile?._id : {},
     };
     if (userProfile?._id) {
       billData.account = userProfile._id;
@@ -144,8 +140,6 @@ const Checkout = () => {
         (pos) => {
           const { latitude, longitude } = pos.coords;
           setPosition([latitude, longitude]);
-          console.log('isPositionLoaded', isPositionLoaded);
-          console.log('addressMethod', addressMethod);
           if(isPositionLoaded || addressMethod == 'map') {
             getAddressFromCoords(latitude, longitude);
           }
@@ -191,7 +185,6 @@ const Checkout = () => {
       console.log("LocationIQ response:", response.data);
       const address = response.data.display_name;
       setFormData((prev) => ({ ...prev, address }));
-      //setShowMap(false);
     } catch (error) {
       console.error("Error fetching address:", error.response || error.message);
       alert("Không thể lấy địa chỉ từ vị trí này. Kiểm tra console để debug.");
@@ -267,8 +260,6 @@ const Checkout = () => {
         console.error("Error setting choices:", error);
       });
 
-    console.log("Choices123", choices);
-
     return option ? option.name : "";
   };
 
@@ -317,7 +308,6 @@ const Checkout = () => {
       </div>
 
       <div className="flex justify-between">
-        {/* Form thông tin người dùng */}
         <div className="w-1/2 border rounded-lg p-6 mr-6">
           <h2 className="text-xl font-bold mb-4">Thông tin giao hàng</h2>
           <form onSubmit={handleSubmit}>
@@ -436,7 +426,6 @@ const Checkout = () => {
               style={{ marginBottom: "16px" }}
             />
 
-            {/* Radio chọn phương thức thanh toán */}
             <div className="mb-6">
               <label className="text-lg font-semibold mb-2 block">
                 Phương thức thanh toán
@@ -472,7 +461,6 @@ const Checkout = () => {
           </form>
         </div>
 
-        {/* Hiển thị giỏ hàng */}
         <div className="w-1/2">
           <div className="border rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">{totalQuantity} MÓN</h2>
@@ -496,7 +484,6 @@ const Checkout = () => {
                     >
                       x {item.quantity}
                     </button>
-                    {/* Hiển thị options */}
                     {item.options && item.options.length > 0 && (
                       <div className="text-sm text-gray-500">
                         {item.options.map((option) => (
