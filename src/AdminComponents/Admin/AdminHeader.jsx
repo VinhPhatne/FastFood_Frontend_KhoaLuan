@@ -60,40 +60,39 @@ const AdminHeader = () => {
     handleClose();
   };
 
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/v1/order-notify/list", {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+      const data = Array.isArray(response.data) ? response.data : [];
+      setNotifications(data);
+      setNotificationCount(data.filter((n) => !n.isRead).length);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      setNotifications([]);
+    }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/v1/review/list", {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+      const data = Array.isArray(response.data.review) ? response.data.review : [];
+      setReviews(data);
+      setReviewCount(data.filter((r) => !r.isRead).length);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      setReviews([]);
+    }
+  };
+
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await axios.get("http://localhost:8080/v1/order-notify/list", {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-          },
-        });
-        const data = Array.isArray(response.data) ? response.data : [];
-        setNotifications(data);
-        setNotificationCount(data.filter((n) => !n.isRead).length);
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-        setNotifications([]);
-      }
-    };
-
-    const fetchReviews = async () => {
-      try {
-        const response = await axios.get("http://localhost:8080/v1/review/list", {
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-          },
-        });
-        console.log('response', response);
-        const data = Array.isArray(response.data.review) ? response.data.review : [];
-        setReviews(data);
-        setReviewCount(data.filter((r) => !r.isRead).length);
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
-        setReviews([]);
-      }
-    };
-
     if (jwt) {
       fetchNotifications();
       fetchReviews();
@@ -107,8 +106,7 @@ const AdminHeader = () => {
     });
 
     socket.on("order_notification", (newNotification) => {
-      setNotifications((prev) => [newNotification, ...prev]);
-      setNotificationCount((prev) => prev + 1);
+      fetchNotifications();
       notification.success({
         message: "Thông báo mới",
         description: newNotification.message || "Bạn có thông báo mới!",
@@ -116,8 +114,7 @@ const AdminHeader = () => {
     });
 
     socket.on("review_notification", (newReview) => {
-      setReviews((prev) => [newReview, ...prev]);
-      setReviewCount((prev) => prev + 1);
+      fetchReviews();
       notification.success({
         message: "Review mới",
         description: newReview.message || "Bạn có review mới!",
@@ -132,7 +129,7 @@ const AdminHeader = () => {
   }, []);
 
   const [isNotiOpen, setIsNotiOpen] = useState(false);
-  const [isReviewOpen, setIsReviewOpen] = useState(false); // State cho dropdown Review
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
   const notiContentRef = useRef(null);
   const bellRef = useRef(null);
   const reviewContentRef = useRef(null);
@@ -183,7 +180,6 @@ const AdminHeader = () => {
     };
   }, [isNotiOpen, isReviewOpen]);
 
-  // Đọc một thông báo
   const handleReadNotification = async (id) => {
     try {
       await axios.patch(
@@ -209,7 +205,6 @@ const AdminHeader = () => {
     }
   };
 
-  // Đọc tất cả thông báo
   const handleReadAllNotifications = async (e) => {
     e.stopPropagation();
     if (notifications.length === 0) return;
@@ -239,7 +234,6 @@ const AdminHeader = () => {
     }
   };
 
-  // Xóa tất cả thông báo
   const handleDeleteAllNotifications = async (e) => {
     e.stopPropagation();
     if (notifications.length === 0) return;
@@ -263,7 +257,6 @@ const AdminHeader = () => {
     }
   };
 
-  // Đọc một đánh giá
   const handleReadReview = async (id) => {
     try {
       await axios.patch(
@@ -289,7 +282,6 @@ const AdminHeader = () => {
     }
   };
 
-  // Đọc tất cả đánh giá
   const handleReadAllReviews = async (e) => {
     e.stopPropagation();
     if (reviews.length === 0) return;
@@ -319,7 +311,6 @@ const AdminHeader = () => {
     }
   };
 
-  // Xóa tất cả đánh giá
   const handleDeleteAllReviews = async (e) => {
     e.stopPropagation();
     if (reviews.length === 0) return;
@@ -473,7 +464,6 @@ const AdminHeader = () => {
             </div>
           </div>
 
-          {/* Icon Đánh Giá */}
           <div className={styles.icon} onClick={handleReviewClick} ref={reviewRef}>
             <div className={styles.iconNoti}>
               <Avatar
