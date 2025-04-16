@@ -145,6 +145,12 @@ const BillTable = () => {
     try {
       await dispatch(updateBillStatus(id, newStatus));
 
+      const payload = {
+        billId: id,
+        state: parseInt(newStatus),
+      };
+      socket.emit("updateOrderStatus", payload);
+
       const params = new URLSearchParams(location.search);
       const accountId = params.get("accountId");
 

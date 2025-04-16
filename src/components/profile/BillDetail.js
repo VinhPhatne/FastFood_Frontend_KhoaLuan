@@ -6,7 +6,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getVoucherById } from "../../components/State/voucher/Action";
 import useCart from '../../hook/useCart';
 import { notification } from 'antd';
-import axios from "axios";
 import socket from "../config/socket";
 
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
@@ -48,6 +47,24 @@ const BillDetail = () => {
     };
 
     fetchData();
+
+    socket.on("order_status_updated", (data) => {
+      if (data.billId === id) {
+        setBillData((prev) => ({
+          ...prev,
+          state: data.newState,
+        }));
+        notification.success({
+          message: "Cập nhật trạng thái",
+          description: "Trạng thái đơn hàng đã được cập nhật thành công!",
+        });
+      }
+    });
+
+    // Dọn dẹp socket khi component unmount
+    return () => {
+      socket.off("order_status_updated");
+    };
   }, [dispatch, id, jwt]);
 
   let totalPrice;
@@ -74,22 +91,22 @@ const BillDetail = () => {
           price: item.product.price,
           picture: item.product.picture,
           quantity: item.quantity,
-          options: item.options.map(option => ({
+          options: item.options.map((option) => ({
             optionId: option.option._id,
             choiceId: option.choices._id,
-            addPrice: option.addPrice
+            addPrice: option.addPrice,
           })),
-          uniqueKey: `${item.product._id}-${index}-${Date.now()}`
+          uniqueKey: `${item.product._id}-${index}-${Date.now()}`,
         };
         return productData;
       });
 
-      setCart(prevCart => {
+      setCart((prevCart) => {
         let updatedCart = [...prevCart];
-        
-        newItems.forEach(newItem => {
+
+        newItems.forEach((newItem) => {
           const existingItemIndex = updatedCart.findIndex(
-            item => 
+            (item) => 
               item.id === newItem.id &&
               JSON.stringify(item.options) === JSON.stringify(newItem.options)
           );
@@ -97,7 +114,7 @@ const BillDetail = () => {
           if (existingItemIndex !== -1) {
             updatedCart[existingItemIndex] = {
               ...updatedCart[existingItemIndex],
-              quantity: updatedCart[existingItemIndex].quantity + newItem.quantity
+              quantity: updatedCart[existingItemIndex].quantity + newItem.quantity,
             };
           } else {
             updatedCart.push(newItem);
@@ -191,7 +208,7 @@ const BillDetail = () => {
               backgroundColor: "#ff7d01",
               width: "170px",
               marginBottom: "20px",
-              marginRight: '20px',
+              marginRight: "20px",
             }}
             onClick={handleReorder}
           >
@@ -212,11 +229,21 @@ const BillDetail = () => {
         </div>
       </div>
 
-      <Box sx={{ marginTop: "16px", marginBottom: '16px' }}>
-        <Typography variant="h6" sx={{ fontWeight: "bold", marginBottom: "16px" }}>
+      <Box sx={{ marginTop: "16px", marginBottom: "16px" }}>
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: "bold", marginBottom: "16px" }}
+        >
           Trạng thái đơn hàng
         </Typography>
-        <Box sx={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Box
+          sx={{
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <Box
             sx={{
               position: "absolute",
@@ -236,7 +263,8 @@ const BillDetail = () => {
                   width: "40px",
                   height: "40px",
                   borderRadius: "50%",
-                  backgroundColor: step.state <= currentStep ? "#ff7d01" : "#e0e0e0",
+                  backgroundColor:
+                    step.state <= currentStep ? "#ff7d01" : "#e0e0e0",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -264,7 +292,8 @@ const BillDetail = () => {
                     left: `calc(${index * 25}% + 13%)`,
                     width: "calc(25%)",
                     height: "2px",
-                    backgroundColor: step.state < currentStep ? "#ff7d01" : "transparent",
+                    backgroundColor:
+                      step.state < currentStep ? "#ff7d01" : "transparent",
                     zIndex: -1,
                   }}
                 />
@@ -432,7 +461,12 @@ const BillDetail = () => {
             p: 4,
           }}
         >
-          <Typography id="review-modal-title" variant="h6" component="h2" sx={{ mb: 2 }}>
+          <Typography
+            id="review-modal-title"
+            variant="h6"
+            component="h2"
+            sx={{ mb: 2 }}
+          >
             Đánh giá
           </Typography>
           <Box sx={{ mb: 2 }}>
