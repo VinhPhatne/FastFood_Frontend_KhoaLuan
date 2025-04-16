@@ -145,6 +145,12 @@ const BillTable = () => {
     try {
       await dispatch(updateBillStatus(id, newStatus));
 
+      const payload = {
+        billId: id,
+        state: parseInt(newStatus),
+      };
+      socket.emit("updateOrderStatus", payload);
+
       const params = new URLSearchParams(location.search);
       const accountId = params.get("accountId");
 
@@ -221,14 +227,14 @@ const BillTable = () => {
         }}
       >
         <TextField
-          label="Search"
+          label="Tìm kiếm"
           variant="outlined"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "20px",
-              height: "40px",
+              height: "50px",
             },
             marginRight: 2,
           }}

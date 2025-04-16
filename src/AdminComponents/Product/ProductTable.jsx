@@ -279,7 +279,7 @@ const ProductTable = () => {
         }}
       >
         <TextField
-          label="Tình kiếm"
+          label="Tìm kiếm"
           variant="outlined"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
