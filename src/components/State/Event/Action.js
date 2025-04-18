@@ -27,7 +27,6 @@ export const getEvents =
       const { data } = await api.get(`${API_URL}/v1/event/list`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
-      console.log("getEvents", data);
       dispatch({ type: GET_EVENTS, payload: data });
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -45,7 +44,6 @@ export const createEvent =
         { name, discountPercent, expDate },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
-      console.log("createEvent", data);
       dispatch({ type: CREATE_EVENT_SUCCESS, payload: data });
       return data;
     } catch (error) {
@@ -66,7 +64,6 @@ export const updateEvent =
         { name, discountPercent, expDate },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
-      console.log("updateEvent", data);
       dispatch({ type: UPDATE_EVENT_SUCCESS, payload: data });
     } catch (error) {
       console.error("Error updating event:", error);
@@ -84,7 +81,6 @@ export const getEventById =
       const response = await axios.get(`${API_URL}/v1/event/get/${id}`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
-      console.log("getEventById", response.data);
       dispatch({ type: GET_EVENT_BY_ID_SUCCESS, payload: response.data });
       return response.data;
     } catch (error) {

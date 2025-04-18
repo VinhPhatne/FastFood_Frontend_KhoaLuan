@@ -22,10 +22,8 @@ const BillDetailTable = () => {
         const voucherResponse = await dispatch(
           getVoucherById({ id: response.data?.voucher, jwt })
         );
-        console.log("voucherResponse", voucherResponse);
         if (voucherResponse) {
           setVoucherDiscount(voucherResponse.data?.discount);
-          console.log("OK");
         }
       }
     };
@@ -49,8 +47,6 @@ const BillDetailTable = () => {
       (item.options ? item.options.reduce((sum, option) => sum + (option.addPrice || 0), 0) : 0);
     return total + itemTotal;
   }, 0) || 0;
-
-  console.log("billData", billData);
 
   return (
     <Box sx={{ width: "95%", margin: "0px auto", marginTop: "100px" }}>

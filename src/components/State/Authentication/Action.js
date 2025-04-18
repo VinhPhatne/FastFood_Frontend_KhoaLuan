@@ -36,7 +36,6 @@ export const registerUser = (reqData) => async (dispatch) => {
         fullname: reqData.fullname,
       }
     );
-    console.log("signup user", data);
 
     if (data.jwt) {
       localStorage.setItem("jwt", data.jwt);
@@ -64,7 +63,6 @@ export const loginUser = (reqData) => async (dispatch) => {
         password: reqData.userData.password,
       }
     );
-    console.log("login user", data);
 
     if (data.accountLogin.access_token) {
       localStorage.setItem("jwt", data.accountLogin.access_token);
@@ -93,7 +91,6 @@ export const loginUser = (reqData) => async (dispatch) => {
     });
     return { type: LOGIN_SUCCESS, payload: data };
   } catch (error) {
-    console.log("ER", error);
     const message = error.response?.data?.message || "Đăng nhập thất bại";
     dispatch({ type: LOGIN_FAILURE, payload: message });
     notification.error({
@@ -106,7 +103,6 @@ export const loginUser = (reqData) => async (dispatch) => {
 export const getUserProfile = () => async (dispatch) => {
   const jwt = localStorage.getItem("jwt");
   if (!jwt) {
-    console.log("No JWT found");
     return;
   }
   dispatch({ type: GET_USER_REQUEST });
@@ -116,12 +112,10 @@ export const getUserProfile = () => async (dispatch) => {
         Authorization: `Bearer ${jwt}`,
       },
     });
-    console.log("user profile", data);
 
     dispatch({ type: GET_USER_SUCCESS, payload: data });
     return data;
   } catch (error) {
-    console.log(error);
     dispatch({ type: GET_USER_FAILURE, payload: error.message });
   }
 };
@@ -147,11 +141,8 @@ export const logout = () => async (dispatch) => {
   try {
     localStorage.removeItem("jwt");
     localStorage.removeItem("role");
-    console.log("logout");
     dispatch({ type: LOGOUT });
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 };
 
 export const sendOtp = (reqData) => async (dispatch) => {
@@ -163,14 +154,12 @@ export const sendOtp = (reqData) => async (dispatch) => {
       password: reqData.password,
       fullname: reqData.fullname,
     });
-    console.log("OTP sent", data);
 
     dispatch({ type: SEND_OTP_SUCCESS, payload: data });
     notification.success({
       message: "OTP đã được gửi thành công!",
     });
   } catch (error) {
-    console.log(error);
     dispatch({ type: SEND_OTP_FAILURE, payload: error.message });
     notification.error({
       message: "Gửi OTP thất bại!",

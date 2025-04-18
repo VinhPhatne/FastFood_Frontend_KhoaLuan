@@ -35,8 +35,6 @@ const CreateFoodCategoryForm = ({ onClose, onSuccess }) => {
           })
         );
 
-        console.log("result", values);
-
         if (result) {
           onSuccess();
           notification.success({ message: "Thêm mới thành công!" });

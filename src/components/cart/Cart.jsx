@@ -78,7 +78,7 @@ const Cart = () => {
       const response = await axios.get(
         `http://localhost:8080/v1/voucher/getcode?code=${voucher}`
       );
-      console.log("response", response);
+      
       if (response.data && response.data.data) {
         const voucherData = response.data.data;
         if (voucherData.isActive) {
@@ -136,7 +136,7 @@ const Cart = () => {
 
     dispatch(getChoicesByOptionalId({ optionalId, jwt }))
       .then((response) => {
-        console.log("response", response);
+        
         setChoices((prevChoices) => ({
           ...prevChoices,
           [optionalId]: response,
@@ -145,8 +145,6 @@ const Cart = () => {
       .catch((error) => {
         console.error("Error setting choices:", error);
       });
-
-    console.log("Choices123", choices);
 
     return option ? option.name : "";
   };

@@ -85,8 +85,6 @@ const UpdateProductForm = () => {
     fetchProduct();
   }, [dispatch, id, jwt]);
 
-  console.log("selectedProduct", selectedProduct);
-
   useEffect(() => {
     dispatch(getCategories({ jwt }));
   }, [dispatch, jwt]);

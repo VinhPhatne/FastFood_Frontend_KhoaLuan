@@ -215,7 +215,7 @@ const OptionalTable = () => {
                         color="error"
                         onClick={(e) => {
                           e.preventDefault();
-                          console.log("IDDDD", item._id);
+                          
                           handleOpenFormModal(item._id);
                         }}
                       >
@@ -225,7 +225,7 @@ const OptionalTable = () => {
                         color="error"
                         onClick={(e) => {
                           e.preventDefault();
-                          console.log("IDDDD", item._id);
+                          
                           handleOpenDeleteModal(item._id);
                         }}
                       >

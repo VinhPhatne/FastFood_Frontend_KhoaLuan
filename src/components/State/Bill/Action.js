@@ -30,7 +30,6 @@ export const getBills = ({ page = 1, accountId, phone, state }) => async (dispat
         state: state, 
       },
     });
-    console.log("getBills", response.data.data);
     dispatch({
       type: GET_BILLS_SUCCESS,
       payload: response.data.data,
@@ -48,7 +47,6 @@ export const getListBills = () => async (dispatch) => {
   try {
     const response = await axios.get(`${API_URL}/v1/bill/list`, {
     });
-    console.log("getListBills", response.data.data);
     dispatch({
       type: GET_LIST_BILLS_SUCCESS,
       payload: response.data.data,

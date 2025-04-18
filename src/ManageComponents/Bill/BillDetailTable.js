@@ -22,10 +22,8 @@ const BillDetailTable = () => {
         const voucherResponse = await dispatch(
           getVoucherById({ id: response.data?.voucher, jwt })
         );
-        console.log("voucherResponse", voucherResponse);
         if (voucherResponse) {
           setVoucherDiscount(voucherResponse.data?.discount);
-          console.log("OK");
         }
       }
     };

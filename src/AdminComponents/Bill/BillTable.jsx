@@ -92,8 +92,6 @@ const BillTable = () => {
     const params = new URLSearchParams(location.search);
     const accountId = params.get("accountId");
     const state = params.get("state");
-    console.log("check param", accountId);
-
     if (searchTerm) {
       params.set("phone", searchTerm);
     } else {
@@ -130,7 +128,6 @@ const BillTable = () => {
     const phone = params.get("phone") || "";
     const state = params.get("state") || "";
     const accountId = params.get("accountId") || "";
-    console.log("check params:", { page, phone, state, accountId });
 
     dispatch(
       getBills({

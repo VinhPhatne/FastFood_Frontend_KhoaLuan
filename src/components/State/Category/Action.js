@@ -29,10 +29,8 @@ export const getCategories =
           Authorization: `Bearer ${jwt}`,
         },
       });
-      console.log("getCategories", data);
       dispatch({ type: GET_CATEGORIES, payload: data });
     } catch (error) {
-      console.log("error", error);
     }
   };
 
@@ -51,11 +49,9 @@ export const createCategory =
           },
         }
       );
-      console.log("createCategory", data);
       dispatch({ type: CREATE_CATEGORY_SUCCESS, payload: data });
       return data;
     } catch (error) {
-      console.log("error", error);
       dispatch({ type: CREATE_CATEGORY_FAILURE });
       throw error;
     }
@@ -76,10 +72,8 @@ export const updateCategory =
           },
         }
       );
-      console.log("updateCategory123", data);
       dispatch({ type: UPDATE_CATEGORY_SUCCESS, payload: data });
     } catch (error) {
-      console.log("error", error);
       dispatch({ type: UPDATE_CATEGORY_FAILURE });
       throw error;
     }
@@ -138,10 +132,8 @@ export const blockCategory =
           },
         }
       );
-      console.log("deleteCategory", data);
       dispatch({ type: BLOCK_CATEGORY_SUCCESS, payload: id });
     } catch (error) {
-      console.log("error", error);
       dispatch({ type: BLOCK_CATEGORY_FAILURE });
     }
   };
@@ -160,10 +152,8 @@ export const blockCategory =
           },
         }
       );
-      console.log("deleteCategory", data);
       dispatch({ type: BLOCK_CATEGORY_SUCCESS, payload: id });
     } catch (error) {
-      console.log("error", error);
       dispatch({ type: BLOCK_CATEGORY_FAILURE });
     }
   };

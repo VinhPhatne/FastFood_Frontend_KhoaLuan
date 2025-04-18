@@ -10,6 +10,7 @@ import { getOptionals } from "../State/Optional/Action";
 import { getProducts } from "../State/Product/Action";
 import styles from "./Card.module.scss";
 import "./productModal.css";
+import RelatedProducts from './RelatedProducts';
 
 const Card = () => {
   const dispatch = useDispatch();
@@ -270,6 +271,7 @@ const Card = () => {
         width={1000}
       >
         {selectedProduct && (
+          <>
           <div className="modal-content">
             {/* Left Side - Product Image */}
             <div className="modal-left">
@@ -354,6 +356,9 @@ const Card = () => {
               </Button>
             </div>
           </div>
+
+          <RelatedProducts productId={selectedProduct._id} />
+          </>
         )}
       </Modal>
     </div>

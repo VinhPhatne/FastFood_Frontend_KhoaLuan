@@ -83,13 +83,10 @@ const VoucherTable = () => {
 
   const handleOpenDeleteModal = (id) => {
     setDeleteId(id);
-    console.log("setDeleteId", deleteId);
-    console.log("id", id);
     setOpenDeleteModal(true);
   };
 
   const handleDelete = async () => {
-    console.log("setDeleteId>>>", deleteId);
     await dispatch(deleteVoucher({ id: deleteId, jwt }));
     setOpenDeleteModal(false);
     fetchVouchers();

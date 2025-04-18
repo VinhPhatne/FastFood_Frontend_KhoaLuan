@@ -221,8 +221,6 @@ const EventTable = () => {
     }
   };
 
-  console.log("selectedProducts", selectedProducts);
-
   return (
     <Box sx={{ width: "95%", margin: "0px auto", marginTop: "100px" }}>
       {/* Search and Create Button Section */}
@@ -314,7 +312,7 @@ const EventTable = () => {
                       <IconButton
                         color="error"
                         onClick={() => {
-                          console.log("IDDDD", item._id);
+                          
                           handleOpenFormModal(item._id);
                         }}
                       >
@@ -323,7 +321,7 @@ const EventTable = () => {
                       <IconButton
                         color="error"
                         onClick={() => {
-                          console.log("IDDDD", item._id);
+                          
                           handleOpenDeleteModal(item._id);
                         }}
                       >
@@ -406,9 +404,7 @@ const EventTable = () => {
                         <Checkbox
                           checked={selectedProducts.has(product._id)}
                           onChange={() => {
-                            console.log("selectedProducts 1", selectedProducts);
                             handleToggleProduct(product._id);
-                            console.log("selectedProducts 2", selectedProducts);
                           }}
                         />
                       </Box>
