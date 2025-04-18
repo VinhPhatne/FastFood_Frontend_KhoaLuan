@@ -11,9 +11,11 @@ import { getProducts } from "../State/Product/Action";
 import styles from "./Card.module.scss";
 import "./productModal.css";
 import RelatedProducts from './RelatedProducts';
+import { useNavigate } from 'react-router-dom';
 
 const Card = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { categories } = useSelector(
     (state) => state.categoryReducer.categories
   );
@@ -215,7 +217,8 @@ const Card = () => {
                         <div
                           key={item._id}
                           className={styles.item}
-                          onClick={() => showModal(item)}
+                          // onClick={() => showModal(item)}
+                          onClick={() => navigate(`/detail/${item._id}`)}
                         >
                           <img
                             className={styles.img}
@@ -264,7 +267,7 @@ const Card = () => {
         )}
       </div>
 
-      <Modal
+      {/* <Modal
         open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
@@ -273,7 +276,7 @@ const Card = () => {
         {selectedProduct && (
           <>
           <div className="modal-content">
-            {/* Left Side - Product Image */}
+
             <div className="modal-left">
               <img
                 src={selectedProduct.picture}
@@ -282,7 +285,7 @@ const Card = () => {
               />
             </div>
 
-            {/* Right Side - Product Details */}
+
             <div className="modal-right">
               <h2 className="product-title">{selectedProduct.name}</h2>
               <p className="product-description">
@@ -294,7 +297,7 @@ const Card = () => {
 
               <hr></hr>
 
-              {/* Options Selection */}
+              
               {selectedProduct.options &&
                 selectedProduct.options.map((option) => (
                   <div key={option._id} className="option-group">
@@ -313,9 +316,6 @@ const Card = () => {
                     >
                       {option.choices.map((choice) => (
                         <div className="option-choice" key={choice._id}>
-                          {/* <Radio key={choice._id} value={choice._id}>
-                              {choice.name} (+{choice.extraPrice} đ)
-                            </Radio> */}
                           <span className="choice-name">
                             {choice.name} (+{choice.additionalPrice.toLocaleString()} đ)
                           </span>
@@ -327,7 +327,6 @@ const Card = () => {
                   </div>
                 ))}
 
-              {/* Quantity Selector */}
               <div className="quantity-selector">
                 <span>Số lượng:</span>
                 <InputNumber
@@ -338,7 +337,6 @@ const Card = () => {
                 />
               </div>
 
-              {/* Add to Cart Button */}
               <Button
                 type="primary"
                 className="add-to-cart-button"
@@ -360,7 +358,7 @@ const Card = () => {
           <RelatedProducts productId={selectedProduct._id} />
           </>
         )}
-      </Modal>
+      </Modal> */}
     </div>
   );
 };

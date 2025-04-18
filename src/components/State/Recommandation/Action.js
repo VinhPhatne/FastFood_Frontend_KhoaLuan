@@ -9,9 +9,10 @@ export const getRecommendations = ({jwt}) => async (dispatch) => {
         Authorization: `Bearer ${jwt}`,
       },
     });
+    console.log('response', response);
     dispatch({
       type: GET_RECOMMENDATIONS_SUCCESS,
-      payload: response.data,
+      payload: response.data.recommendedProducts,
     });
   } catch (error) {
     dispatch({
@@ -30,7 +31,7 @@ export const getRelatedProducts = (productId) => async (dispatch) => {
     });
     dispatch({
       type: GET_RELATED_PRODUCTS_SUCCESS,
-      payload: response.data,
+      payload: response.data.relatedProducts,
     });
   } catch (error) {
     dispatch({

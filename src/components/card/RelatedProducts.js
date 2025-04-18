@@ -6,9 +6,11 @@ import 'swiper/css/navigation';
 import { Navigation } from 'swiper/modules';
 import { getRelatedProducts } from '../State/Recommandation/Action';
 import useCart from '../../hook/useCart';
+import { useNavigate } from 'react-router-dom';
 
 const RelatedProducts = ({ productId }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { relatedProducts, error } = useSelector((state) => state.relatedProducts);
   const { addToCart } = useCart();
 
@@ -17,7 +19,7 @@ const RelatedProducts = ({ productId }) => {
   }, [dispatch, productId]);
 
   if (error) return <div className="text-red-500 text-center">Lỗi: {error}</div>;
-  if (!relatedProducts.length) return null;
+  if (!relatedProducts?.length) return null;
 
   return (
     <div className="my-8">
@@ -29,9 +31,9 @@ const RelatedProducts = ({ productId }) => {
         navigation
         className="mySwiper"
       >
-        {relatedProducts.map((item) => (
+        {relatedProducts?.map((item) => (
           <SwiperSlide key={item._id}>
-            <div className="border p-4 rounded-lg shadow-md">
+            <div className="border p-4 rounded-lg shadow-md cursor-pointer" onClick={() => navigate(`/detail/${item._id}`)}>
               <img
                 src={item.picture}
                 alt={item.name}
@@ -40,7 +42,8 @@ const RelatedProducts = ({ productId }) => {
               <h3 className="text-lg font-semibold">{item.name}</h3>
               <p className="text-red-500">{item.currentPrice.toLocaleString()} VND</p>
               <button
-                className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                className="mt-2 text-white px-4 py-2 rounded"
+                style={{ backgroundColor: '#ff7d01' }}
                 onClick={() =>
                   addToCart(
                     {
@@ -54,7 +57,7 @@ const RelatedProducts = ({ productId }) => {
                   )
                 }
               >
-                Thêm vào giỏ
+                Thêm vào giỏ hàng
               </button>
             </div>
           </SwiperSlide>

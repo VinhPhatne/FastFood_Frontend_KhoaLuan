@@ -18,6 +18,7 @@ import {
   setUserRole,
 } from "../components/State/Authentication/Action";
 import { useDispatch, useSelector } from "react-redux";
+import ProductDetail from '../components/card/ProductDetail';
 
 const CustomerRoute = () => {
 
@@ -53,6 +54,7 @@ const CustomerRoute = () => {
           <Route path="/about" element={<AboutUs />} />
           <Route path="/promotion" element={<Promotion />} />
           <Route path="/otp" element={<OTP />} />
+          <Route path="/detail/:id" element={<ProductDetail />} />
         </Routes>
         <Footer />
       </div>
