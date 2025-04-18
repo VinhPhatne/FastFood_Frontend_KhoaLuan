@@ -7,6 +7,7 @@ import { Navigation } from 'swiper/modules';
 import { getRelatedProducts } from '../State/Recommandation/Action';
 import useCart from '../../hook/useCart';
 import { useNavigate } from 'react-router-dom';
+import './RelatedProducts.scss'
 
 const RelatedProducts = ({ productId }) => {
   const dispatch = useDispatch();
@@ -34,30 +35,29 @@ const RelatedProducts = ({ productId }) => {
         {relatedProducts?.map((item) => (
           <SwiperSlide key={item._id}>
             <div className="border p-4 rounded-lg shadow-md cursor-pointer" onClick={() => navigate(`/detail/${item._id}`)}>
-              <img
-                src={item.picture}
-                alt={item.name}
-                className="w-full h-40 object-cover mb-2 rounded"
-              />
+              <div className='image-wrapper'>
+                <img
+                  src={item.picture}
+                  alt={item.name}
+                  className="img"
+                />
+              </div>
               <h3 className="text-lg font-semibold">{item.name}</h3>
-              <p className="text-red-500">{item.currentPrice.toLocaleString()} VND</p>
+              {item.price !== item.currentPrice ? (
+                <div>
+                  <span className='currentPrice'>{item.currentPrice.toLocaleString()} đ</span>
+                  <span className='discountPrice'>
+                    {item.price.toLocaleString()}{" "}
+                  </span>
+                </div>
+              ) : (
+                <div className='currentPrice'>{item.currentPrice.toLocaleString()} đ</div>
+              )}
               <button
                 className="mt-2 text-white px-4 py-2 rounded"
                 style={{ backgroundColor: '#ff7d01' }}
-                onClick={() =>
-                  addToCart(
-                    {
-                      _id: item._id,
-                      name: item.name,
-                      price: item.currentPrice,
-                      picture: item.picture,
-                      options: [],
-                    },
-                    1
-                  )
-                }
               >
-                Thêm vào giỏ hàng
+                Xem chi tiết món
               </button>
             </div>
           </SwiperSlide>

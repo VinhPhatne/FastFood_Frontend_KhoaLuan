@@ -1,0 +1,144 @@
+.recommendations-container {
+    max-width: 1340px;
+    margin: 0 auto;
+    padding: 20px;
+
+  
+  .recommendations-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff7d01;
+    margin-bottom: 20px;
+  }
+  
+  .recommendations-swiper {
+    position: relative;
+    padding: 0 60px;
+  }
+  
+  .recommendation-item {
+    background-color: #f3f4f9;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    height: 440px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s;
+  }
+  
+  .recommendation-item:hover {
+    transform: translateY(-5px);
+  }
+  
+  .recommendation-item:hover .recommendation-image {
+    transform: scale(1.1);
+  }
+  
+  .recommendation-item:hover .recommendation-name {
+    color: #ff7d01;
+  }
+  
+  .recommendation-image {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-top-left-radius: 13px;
+    border-top-right-radius: 13px;
+    transition: transform 0.3s;
+  }
+  
+  .recommendation-content {
+    padding: 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .recommendation-name {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #333;
+  }
+  
+  .recommendation-description {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.2;
+    margin-bottom: 8px;
+    height: 40px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+  }
+  
+  .recommendation-price {
+    margin-bottom: 10px;
+  }
+  
+  .current-price {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ff7d01;
+  }
+  
+  .original-price {
+    font-size: 18px;
+    color: #707070;
+    text-decoration: line-through;
+    margin-left: 8px;
+  }
+  
+  .add-to-cart-button {
+    background-color: #fff;
+    color: #ff7d01;
+    border: 1px solid #ff7d01;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    margin-top: auto;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .add-to-cart-button:hover {
+    background-color: #ff7d01;
+    color: #fff;
+  }
+
+  // .swiper-slide {
+  //   width: 20% !important;
+  // }
+  
+  .swiper-button-prev,
+  .swiper-button-next {
+    color: white !important;
+    background-color: #ff7d01 !important;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .swiper-button-prev:after,
+  .swiper-button-next:after {
+    font-size: 20px !important;
+  }
+  
+  .swiper-button-prev {
+    left: 10px !important;
+  }
+  
+  .swiper-button-next {
+    right: 10px !important;
+  }
+}

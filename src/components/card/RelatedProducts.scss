@@ -1,0 +1,26 @@
+.image-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.img {
+  width: 100%;
+  border-top-left-radius: 13px;
+  border-top-right-radius: 13px;
+  height: 250px;
+  object-fit: cover;
+}
+
+.currentPrice {
+  font-size: 18px;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.discountPrice {
+  text-decoration: line-through;
+  color: #707070;
+  font-size: 18px;
+  margin-top: 2px;
+}

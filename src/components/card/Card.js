@@ -12,6 +12,7 @@ import styles from "./Card.module.scss";
 import "./productModal.css";
 import RelatedProducts from './RelatedProducts';
 import { useNavigate } from 'react-router-dom';
+import { getRecommendations } from '../State/Recommandation/Action';
 
 const Card = () => {
   const dispatch = useDispatch();
@@ -21,6 +22,7 @@ const Card = () => {
   );
   const { products } = useSelector((state) => state.productReducer);
   const { optionals } = useSelector((state) => state.optionalReducer.optionals);
+  const { recommendations, error } = useSelector((state) => state.recommendations);
 
   const jwt = localStorage.getItem("jwt");
   const { cart, addToCart } = useCart();
@@ -28,6 +30,8 @@ const Card = () => {
     dispatch(getCategories({ jwt }));
     dispatch(getProducts({ jwt }));
     dispatch(getOptionals({ jwt }));
+    dispatch(getRecommendations({ jwt }));
+
   }, [dispatch, jwt]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -174,6 +178,62 @@ const Card = () => {
               {">"}
             </button>
           )}
+      </div>
+
+      <div>
+        {Array.isArray(recommendations) && recommendations.length > 0 ? (
+          <div className={styles.card}>
+            <h2 className={styles.categoryTitle}>Gợi ý cho bạn</h2>
+            <div className={styles.container}>
+              {recommendations
+                .filter((item) => item.isSelling !== false) // nếu có trường isSelling
+                .map((item) => (
+                  <div
+                    key={item._id}
+                    className={styles.item}
+                    onClick={() => navigate(`/detail/${item._id}`)}
+                  >
+                    <img
+                      className={styles.img}
+                      src={item.picture}
+                      alt={item.name}
+                    />
+                    <div className={styles.course}>
+                      <p className={styles.title}>{item.name}</p>
+                      <div className={styles.info}>
+                        <p>{item.description}</p>
+                      </div>
+                      <div className={styles.footer}>
+                        <div className={styles.cost}>
+                          {item.price !== item.currentPrice ? (
+                            <>
+                              <span>{item.currentPrice.toLocaleString()} đ</span>
+                              <span className={styles.discountPrice}>
+                                {item.price.toLocaleString()}{" "}
+                              </span>
+                            </>
+                          ) : (
+                            <span>{item.currentPrice.toLocaleString()} đ</span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        className={styles.addToCartButton}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToCart(item);
+                        }}
+                      >
+                        Thêm vào giỏ hàng
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        ) : (
+          <p>Không có sản phẩm nào</p>
+        )}
       </div>
 
       <div>
