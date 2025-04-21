@@ -7,6 +7,9 @@ import { getChatHistory, receiveChatMessage, sendMessage } from '../State/ChatBo
 import { API_URL } from '../config/api';
 import { createChatBotMessage } from 'react-chatbot-kit';
 
+// Thêm icon X từ react-icons
+import { IoClose } from 'react-icons/io5';
+
 const socket = io(API_URL);
 
 const config = {
@@ -22,6 +25,83 @@ const config = {
     chatButton: { backgroundColor: '#ff7d01' },
   },
 };
+
+// CSS tùy chỉnh cho giao diện chatbox
+const chatboxStyles = `
+  .react-chatbot-kit-chat-container {
+    width: 400px !important; /* Tăng chiều rộng */
+    height: 600px !important; /* Tăng chiều cao */
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .react-chatbot-kit-chat-inner-container {
+    height: 100% !important;
+  }
+
+  .react-chatbot-kit-chat-header {
+    background-color: #4267B2 !important; /* Màu xanh dương giống Facebook */
+    color: white !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    padding: 12px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    border-top-left-radius: 12px !important;
+    border-top-right-radius: 12px !important;
+  }
+
+  .react-chatbot-kit-chat-message-container {
+    background-color: #f5f6f5 !important; /* Màu nền nhạt giống Facebook */
+    padding: 10px !important;
+    height: calc(100% - 120px) !important; /* Điều chỉnh chiều cao để không bị tràn */
+  }
+
+  .react-chatbot-kit-chat-bot-message {
+    background-color: #e4e6eb !important; /* Bong bóng chat của bot */
+    color: #000 !important;
+    border-radius: 18px !important;
+    padding: 8px 12px !important;
+    margin-left: 10px !important;
+    width: 100%;
+  }
+
+  .react-chatbot-kit-chat-bot-message-arrow {
+    border-right-color: #e4e6eb !important;
+  }
+
+  .react-chatbot-kit-user-chat-message {
+    background-color: #4267B2 !important; /* Bong bóng chat của người dùng */
+    color: white !important;
+    border-radius: 18px !important;
+    padding: 8px 12px !important;
+    margin-right: 10px !important;
+  }
+
+  .react-chatbot-kit-user-chat-message-arrow {
+    border-left-color: #4267B2 !important;
+  }
+
+  .react-chatbot-kit-chat-input-container {
+    border-top: 1px solid #ddd !important;
+    padding: 10px !important;
+  }
+
+  .react-chatbot-kit-chat-input {
+    border-radius: 20px !important;
+    padding: 8px 16px !important;
+    border: 1px solid #ddd !important;
+  }
+
+  .react-chatbot-kit-chat-btn-send {
+    background-color: #4267B2 !important;
+    border-radius: 50% !important;
+    width: 55px;
+    height: 40px; 
+    margin-left: 8px;
+  }
+`;
 
 const MessageParser = ({ children, actions }) => {
   const parse = (message) => {
@@ -188,17 +268,33 @@ const ChatbotComponent = () => {
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      <button
+      <style>{chatboxStyles}</style>
+      {!isOpen && <button
         className="bg-[#ff7d01] text-white p-3 rounded-full shadow-lg"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {isOpen ? 'Đóng' : 'Chat'}
-      </button>
+        Chat
+      </button>}
       {isOpen && (
-        <div className="mt-2 bg-white rounded-lg shadow-xl">
+        <div className="mt-2">
           <Chatbot
             key={messageKey}
-            config={config}
+            config={{
+              ...config,
+              customComponents: {
+                header: () => (
+                  <div className="react-chatbot-kit-chat-header">
+                    <span>FastFoodBot</span>
+                    <button
+                      onClick={() => setIsOpen(false)}
+                      className="text-white hover:text-gray-200 focus:outline-none"
+                    >
+                      <IoClose size={24} />
+                    </button>
+                  </div>
+                ),
+              },
+            }}
             messageParser={MessageParser}
             actionProvider={(props) => <ActionProvider {...props} actions={actions} />}
             messageHistory={messageHistory}
