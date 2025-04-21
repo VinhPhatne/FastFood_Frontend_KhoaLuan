@@ -75,8 +75,10 @@ export const loginUser = (reqData) => async (dispatch) => {
     // }
 
     const role = data.accountLogin.account.role;
+    const userId = data.accountLogin.account._id;
     // Lưu role vào localStorage
     localStorage.setItem("role", role);
+    localStorage.setItem('userId', userId);
     if (role === 1) {
       reqData.navigate("/admin");
     } else if (role === 2) {

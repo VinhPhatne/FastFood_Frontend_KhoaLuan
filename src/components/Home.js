@@ -2,6 +2,7 @@ import React from "react";
 import Slider from "./slider/Slider";
 import Card from "./card/Card";
 import Recommendations from './card/Recommendations';
+import ChatbotComponent from './card/Chatbot';
 
 const Home = () => {
   return (
@@ -9,6 +10,7 @@ const Home = () => {
       <Slider />
       {/* <Recommendations /> */}
       <Card />
+      <ChatbotComponent />
     </div>
   );
 };

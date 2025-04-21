@@ -32,7 +32,7 @@ export const getProducts = () => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: GET_PRODUCTS_FAILURE,
-      payload: error.response.data.message,
+      payload: error?.response?.data?.message,
     });
   }
 };
@@ -121,7 +121,7 @@ export const getProductsByCategory = (categoryId) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: GET_PRODUCTS_BY_CATEGORY_FAILURE,
-      payload: error.response.data.message,
+      payload: error?.response?.data?.message,
     });
   }
 };
