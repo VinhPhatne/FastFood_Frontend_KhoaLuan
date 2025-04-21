@@ -23,7 +23,6 @@ export const getOptionals =
       const { data } = await axios.get(`${API_URL}/v1/optional/list`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
-      console.log("getOptionals", data);
       dispatch({ type: GET_OPTIONALS, payload: data });
     } catch (error) {
       console.error("Error fetching optionals:", error);
@@ -41,7 +40,6 @@ export const createOptional =
         { name, details },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
-      console.log("createOptional", data);
       dispatch({ type: CREATE_OPTIONAL_SUCCESS, payload: data });
       return data;
     } catch (error) {
@@ -62,7 +60,6 @@ export const updateOptional =
         { name, details },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
-      console.log("updateOptional", data);
       dispatch({ type: UPDATE_OPTIONAL_SUCCESS, payload: data });
     } catch (error) {
       console.error("Error updating optional:", error);
@@ -80,7 +77,6 @@ export const getOptionalById =
       const response = await axios.get(`${API_URL}/v1/optional/get/${id}`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
-      console.log("getOptionalById", response.data);
       dispatch({ type: GET_OPTIONAL_BY_ID_SUCCESS, payload: response.data });
       return response.data;
     } catch (error) {

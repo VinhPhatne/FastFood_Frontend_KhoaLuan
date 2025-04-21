@@ -67,7 +67,6 @@ const AccountTable = () => {
   const [deleteId, setDeleteId] = useState(null);
 
   const { accounts, isLoading } = useSelector((state) => state.userReducer);
-  console.log("user", accounts);
 
   const fetchAccounts = () => {
     dispatch(getUsers({ jwt, page: currentPage }));

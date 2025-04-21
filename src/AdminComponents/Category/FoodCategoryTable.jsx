@@ -100,7 +100,6 @@ const FoodCategoryTable = () => {
 
   const handleOpenDeleteModal = (id) => {
     setDeleteId(id);
-    console.log("Open delete modal for ID:", id);
     setOpenDeleteModal(true);
   };
 
@@ -242,7 +241,6 @@ const FoodCategoryTable = () => {
                       <IconButton
                         color="error"
                         onClick={() => {
-                          console.log("IDDDD", item._id);
                           handleOpenFormModal(item._id);
                         }}
                       >
@@ -251,7 +249,6 @@ const FoodCategoryTable = () => {
                       <IconButton
                         color="error"
                         onClick={() => {
-                          console.log("IDDDD", item._id);
                           handleOpenDeleteModal(item._id);
                         }}
                       >

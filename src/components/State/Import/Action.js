@@ -26,7 +26,6 @@ export const getIngredient =
       const { data } = await api.get(`${API_URL}/v1/ingredient/list`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
-      console.log("getImports", data);
       dispatch({ type: GET_INGREDIENTS, payload: data });
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -44,7 +43,6 @@ export const createIngredient =
         { name, unit, quantity, price },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
-      console.log("createIngredient", data);
       dispatch({ type: CREATE_INGREDIENT_SUCCESS, payload: data });
     } catch (error) {
       console.error("Error creating Ingredient:", error);
@@ -64,7 +62,6 @@ export const updateIngredient =
         { name, unit, quantity, price },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
-      console.log("updateEvent", data);
       dispatch({ type: UPDATE_INGREDIENT_SUCCESS, payload: data });
     } catch (error) {
       console.error("Error updating event:", error);
@@ -82,7 +79,6 @@ export const getIngredientById =
       const response = await axios.get(`${API_URL}/v1/ingredient/get/${id}`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
-      console.log("getIngredientById", response.data);
       dispatch({ type: GET_INGREDIENT_BY_ID_SUCCESS, payload: response.data });
       return response.data;
     } catch (error) {

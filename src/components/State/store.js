@@ -10,6 +10,8 @@ import { billReducer } from "./Bill/Reducer";
 import { ingredientReducer } from "./Import/Reducer";
 import { optionalReducer } from "./Optional/Reducer";
 import { choiceReducer } from "./Choice/Reducer";
+import recommendationReducer, { relatedProductsReducer } from './Recommandation/Reducer';
+import chatbotReducer from './ChatBox/Reducer';
 
 const rooteReducer = combineReducers({
   auth: authReducer,
@@ -22,6 +24,9 @@ const rooteReducer = combineReducers({
   ingredientReducer: ingredientReducer,
   optionalReducer : optionalReducer,
   choiceReducer : choiceReducer,
+  recommendations: recommendationReducer,
+  relatedProducts: relatedProductsReducer,
+  chatbot: chatbotReducer,
 });
 
 export const store = legacy_createStore(rooteReducer, applyMiddleware(thunk));

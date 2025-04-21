@@ -250,7 +250,7 @@ const Checkout = () => {
 
     dispatch(getChoicesByOptionalId({ optionalId, jwt }))
       .then((response) => {
-        console.log("response", response);
+        
         setChoices((prevChoices) => ({
           ...prevChoices,
           [optionalId]: response,

@@ -29,8 +29,6 @@ const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
     }
   }, [account]);
 
-  console.log("account", account);
-
   const [formData, setFormData] = useState({
     fullname: "",
     phonenumber: "",

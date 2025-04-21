@@ -24,7 +24,6 @@ export const getChoicesByOptionalId =
         params: { optionalId },
         headers: { Authorization: `Bearer ${jwt}` },
       });
-      console.log("getChoicesByOptionalId", data);
       dispatch({ type: GET_CHOICES_BY_OPTIONAL_ID, payload: data });
       return data.choices;
     } catch (error) {
@@ -43,7 +42,6 @@ export const createChoice =
         additionalPrice,
         optional,
       });
-      console.log("createChoice", data);
       dispatch({ type: CREATE_CHOICE_SUCCESS, payload: data });
       return data;
     } catch (error) {
@@ -63,7 +61,6 @@ export const updateChoice =
         `${API_URL}/v1/choice/${id}`,
         { name, additionalPrice, optional },
       );
-      console.log("updateChoice", data);
       dispatch({ type: UPDATE_CHOICE_SUCCESS, payload: data });
     } catch (error) {
       console.error("Error updating choice:", error);
@@ -81,7 +78,6 @@ export const getChoiceById =
       const response = await axios.get(`${API_URL}/v1/choice/get/${id}`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
-      console.log("getChoiceById", response.data);
       dispatch({ type: GET_CHOICE_BY_ID_SUCCESS, payload: response.data });
       return response.data;
     } catch (error) {

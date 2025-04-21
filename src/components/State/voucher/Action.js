@@ -24,7 +24,6 @@ export const getVouchers =
       const response = await api.get(`${API_URL}/v1/voucher/list`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
-      console.log("getVouchers", response.data);
       dispatch({ type: GET_VOUCHERS, payload: response.data });
     } catch (error) {
       console.error("Error fetching voucher:", error);
@@ -42,7 +41,6 @@ export const createVoucher =
         { code, name, discount },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
-      console.log("createVoucher", data);
       dispatch({ type: CREATE_VOUCHER_SUCCESS, payload: data });
       return data;
     } catch (error) {
@@ -63,7 +61,6 @@ export const updateVoucher =
         { code, name, discount },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
-      console.log("updateVOUCHER", data);
       dispatch({ type: UPDATE_VOUCHER_SUCCESS, payload: data });
     } catch (error) {
       console.error("Error updating VOUCHER:", error);
@@ -81,7 +78,6 @@ export const getVoucherById =
       const response = await axios.get(`${API_URL}/v1/voucher/get/${id}`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
-      console.log("getVOUCHERById", response.data);
       dispatch({ type: GET_VOUCHER_BY_ID_SUCCESS, payload: response.data });
       return response.data;
     } catch (error) {

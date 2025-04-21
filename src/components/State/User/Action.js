@@ -38,7 +38,6 @@ export const getUsers =
         type: GET_USER_SUCCESS,
         payload: response.data.data,
       });
-      console.log(">>>", response.data.data);
     } catch (error) {
       dispatch({
         type: GET_USER_FAILURE,
@@ -58,10 +57,8 @@ export const createUser = (reqData) => async (dispatch) => {
       role: reqData.role,
       address: reqData.address,
     });
-    console.log("User created successfully", data);
     dispatch({ type: CREATE_USER_SUCCESS, payload: data });
   } catch (error) {
-    console.log(error);
     dispatch({ type: CREATE_USER_FAILURE, payload: error.message });
     throw error;
   }
@@ -120,7 +117,6 @@ export const getUserById =
 export const updateUserProfile = (id, reqData) => async (dispatch) => {
   const jwt = localStorage.getItem("jwt");
   if (!jwt) {
-    console.log("No JWT found");
     return;
   }
 
@@ -140,10 +136,8 @@ export const updateUserProfile = (id, reqData) => async (dispatch) => {
         },
       }
     );
-    console.log("Updated user profile", data);
     dispatch({ type: UPDATE_USER_SUCCESS, payload: data });
   } catch (error) {
-    console.log(error);
     dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
     throw error;
   }
@@ -157,7 +151,6 @@ export const updateUser = (id, reqData) => async (dispatch) => {
       phonenumber: reqData.phonenumber,
       email: reqData.email,
     });
-    console.log("Updated user profile", data);
     dispatch({ type: UPDATE_USER_SUCCESS, payload: data });
   } catch (error) {
     console.log(error);
@@ -180,10 +173,8 @@ export const deleteUser =
           },
         }
       );
-      console.log("deleteUser", data);
       dispatch({ type: DELETE_USER_SUCCESS, payload: id });
     } catch (error) {
-      console.log("error", error);
       dispatch({ type: DELETE_USER_FAILURE });
     }
   };
@@ -202,10 +193,8 @@ export const unBlockUser =
           },
         }
       );
-      console.log("unblockUser", data);
       dispatch({ type: DELETE_USER_SUCCESS, payload: id });
     } catch (error) {
-      console.log("error", error);
       dispatch({ type: DELETE_USER_FAILURE });
     }
   };
@@ -213,7 +202,6 @@ export const unBlockUser =
 export const changePassword = (id, reqData) => async (dispatch) => {
   const jwt = localStorage.getItem("jwt");
   if (!jwt) {
-    console.log("No JWT found");
     return;
   }
 

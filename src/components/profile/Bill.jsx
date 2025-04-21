@@ -61,7 +61,6 @@ const Bill = () => {
 
     const params = new URLSearchParams(location.search);
     const accountId = params.get("accountId");
-    console.log("check param", accountId);
     if (searchTerm) {
       params.set("phone", searchTerm);
     }
@@ -75,14 +74,12 @@ const Bill = () => {
   const search = params.get("search");
 
   const handleRowClick = (id) => {
-    console.log("id", id);
     navigate(`/profile/orders/bill/${id}`);
   };
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const accountId = params.get("accountId");
-    console.log("check param", accountId);
     dispatch(getBills({ page: 1, accountId }));
   }, [dispatch]);
 

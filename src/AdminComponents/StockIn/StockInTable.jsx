@@ -76,7 +76,7 @@ const StockInTable = () => {
 
   const handleOpenFormModal = async (id) => {
     const response = await dispatch(getIngredientById({ id }));
-    console.log("response", response);
+    
     if (response) {
       setSelectedEvent(response.ingredient);
     } else {
@@ -180,7 +180,7 @@ const StockInTable = () => {
                       <IconButton
                         color="error"
                         onClick={() => {
-                          console.log("IDDDD", item._id);
+                          
                           handleOpenFormModal(item._id);
                         }}
                       >
@@ -189,7 +189,7 @@ const StockInTable = () => {
                       <IconButton
                         color="error"
                         onClick={() => {
-                          console.log("IDDDD", item._id);
+                          
                           handleOpenDeleteModal(item._id);
                         }}
                       >

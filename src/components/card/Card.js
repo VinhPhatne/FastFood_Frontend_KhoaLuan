@@ -10,14 +10,19 @@ import { getOptionals } from "../State/Optional/Action";
 import { getProducts } from "../State/Product/Action";
 import styles from "./Card.module.scss";
 import "./productModal.css";
+import RelatedProducts from './RelatedProducts';
+import { useNavigate } from 'react-router-dom';
+import { getRecommendations } from '../State/Recommandation/Action';
 
 const Card = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { categories } = useSelector(
     (state) => state.categoryReducer.categories
   );
   const { products } = useSelector((state) => state.productReducer);
   const { optionals } = useSelector((state) => state.optionalReducer.optionals);
+  const { recommendations, error } = useSelector((state) => state.recommendations);
 
   const jwt = localStorage.getItem("jwt");
   const { cart, addToCart } = useCart();
@@ -25,6 +30,8 @@ const Card = () => {
     dispatch(getCategories({ jwt }));
     dispatch(getProducts({ jwt }));
     dispatch(getOptionals({ jwt }));
+    dispatch(getRecommendations({ jwt }));
+
   }, [dispatch, jwt]);
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -174,6 +181,62 @@ const Card = () => {
       </div>
 
       <div>
+        {Array.isArray(recommendations) && recommendations.length > 0 ? (
+          <div className={styles.card}>
+            <h2 className={styles.categoryTitle}>Gợi ý cho bạn</h2>
+            <div className={styles.container}>
+              {recommendations
+                .filter((item) => item.isSelling !== false) // nếu có trường isSelling
+                .map((item) => (
+                  <div
+                    key={item._id}
+                    className={styles.item}
+                    onClick={() => navigate(`/detail/${item._id}`)}
+                  >
+                    <img
+                      className={styles.img}
+                      src={item.picture}
+                      alt={item.name}
+                    />
+                    <div className={styles.course}>
+                      <p className={styles.title}>{item.name}</p>
+                      <div className={styles.info}>
+                        <p>{item.description}</p>
+                      </div>
+                      <div className={styles.footer}>
+                        <div className={styles.cost}>
+                          {item.price !== item.currentPrice ? (
+                            <>
+                              <span>{item.currentPrice.toLocaleString()} đ</span>
+                              <span className={styles.discountPrice}>
+                                {item.price.toLocaleString()}{" "}
+                              </span>
+                            </>
+                          ) : (
+                            <span>{item.currentPrice.toLocaleString()} đ</span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        className={styles.addToCartButton}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToCart(item);
+                        }}
+                      >
+                        Thêm vào giỏ hàng
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        ) : (
+          <p>Không có sản phẩm nào</p>
+        )}
+      </div>
+
+      <div>
         {Array.isArray(categories) && categories.length > 0 ? (
           categories
             .filter((category) => {
@@ -214,7 +277,8 @@ const Card = () => {
                         <div
                           key={item._id}
                           className={styles.item}
-                          onClick={() => showModal(item)}
+                          // onClick={() => showModal(item)}
+                          onClick={() => navigate(`/detail/${item._id}`)}
                         >
                           <img
                             className={styles.img}
@@ -263,15 +327,16 @@ const Card = () => {
         )}
       </div>
 
-      <Modal
+      {/* <Modal
         open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
         width={1000}
       >
         {selectedProduct && (
+          <>
           <div className="modal-content">
-            {/* Left Side - Product Image */}
+
             <div className="modal-left">
               <img
                 src={selectedProduct.picture}
@@ -280,7 +345,7 @@ const Card = () => {
               />
             </div>
 
-            {/* Right Side - Product Details */}
+
             <div className="modal-right">
               <h2 className="product-title">{selectedProduct.name}</h2>
               <p className="product-description">
@@ -292,7 +357,7 @@ const Card = () => {
 
               <hr></hr>
 
-              {/* Options Selection */}
+              
               {selectedProduct.options &&
                 selectedProduct.options.map((option) => (
                   <div key={option._id} className="option-group">
@@ -311,9 +376,6 @@ const Card = () => {
                     >
                       {option.choices.map((choice) => (
                         <div className="option-choice" key={choice._id}>
-                          {/* <Radio key={choice._id} value={choice._id}>
-                              {choice.name} (+{choice.extraPrice} đ)
-                            </Radio> */}
                           <span className="choice-name">
                             {choice.name} (+{choice.additionalPrice.toLocaleString()} đ)
                           </span>
@@ -325,7 +387,6 @@ const Card = () => {
                   </div>
                 ))}
 
-              {/* Quantity Selector */}
               <div className="quantity-selector">
                 <span>Số lượng:</span>
                 <InputNumber
@@ -336,7 +397,6 @@ const Card = () => {
                 />
               </div>
 
-              {/* Add to Cart Button */}
               <Button
                 type="primary"
                 className="add-to-cart-button"
@@ -354,8 +414,11 @@ const Card = () => {
               </Button>
             </div>
           </div>
+
+          <RelatedProducts productId={selectedProduct._id} />
+          </>
         )}
-      </Modal>
+      </Modal> */}
     </div>
   );
 };
