@@ -11,6 +11,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { getBillById } from '../State/Bill/Action';
 import { getVoucherById } from '../State/voucher/Action';
+import sound from "../../assets/sounds/sound.mp3";
 
 const PaymentSuccess = () => {
   const dispatch = useDispatch();
@@ -62,6 +63,11 @@ const PaymentSuccess = () => {
     }
 
     socket.on("order_status_updated", (data) => {
+      const audio = new Audio(sound);
+          audio.load();
+          audio.play().catch((error) => {
+            console.error("Error playing sound:", error);
+          });
       if (data.billId === orderId) {
         setBillData((prev) => ({
           ...prev,

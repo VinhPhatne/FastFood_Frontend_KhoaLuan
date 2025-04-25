@@ -23,6 +23,7 @@ const Card = () => {
   const { products } = useSelector((state) => state.productReducer);
   const { optionals } = useSelector((state) => state.optionalReducer.optionals);
   const { recommendations, error } = useSelector((state) => state.recommendations);
+  const userProfile = useSelector((state) => state.auth.user);
 
   const jwt = localStorage.getItem("jwt");
   const { cart, addToCart } = useCart();
@@ -69,59 +70,12 @@ const Card = () => {
       setStartIndex(startIndex - 1);
     }
   };
-  const handleAddToCartModal = (product) => {
-    // if (!jwt) {
-    //   notification.error({
-    //     message: "Bạn cần đăng nhập để thêm vào giỏ hàng!!!",
-    //   });
-    //   return;
-    // }
-
-    const selectedOptions = Object.entries(selectedChoices).map(
-      ([optionId, choiceId]) => {
-        const option = product.options.find((opt) => opt._id === optionId);
-        const choice = option?.choices.find((cho) => cho._id === choiceId);
-
-        return {
-          optionId,
-          choiceId,
-          addPrice: choice ? choice.additionalPrice : 0, 
-        };
-      }
-    );
-
-    addToCart(
-      {
-        ...product,
-        options: selectedOptions,
-      },
-      quantity
-    );
-    setQuantity(1);
-    setSelectedChoices({});
-    notification.success({
-      message: "Sản phẩm đã được thêm vào giỏ hàng!",
-    });
-  };
 
   const handleAddToCart = (product) => {
-    // if (!jwt) {
-    //   notification.error({
-    //     message: "Bạn cần đăng nhập để thêm vào giỏ hàng!!!",
-    //   });
-    //   return;
-    // }
     addToCart(product, quantity);
     notification.success({
       message: "Sản phẩm đã được thêm vào giỏ hàng!",
     });
-  };
-
-  const handleChoiceSelect = (optionId, choiceId) => {
-    setSelectedChoices((prevChoices) => ({
-      ...prevChoices,
-      [optionId]: choiceId,
-    }));
   };
 
   return (
@@ -180,13 +134,13 @@ const Card = () => {
           )}
       </div>
 
-      <div>
+      {userProfile && <div>
         {Array.isArray(recommendations) && recommendations.length > 0 ? (
           <div className={styles.card}>
             <h2 className={styles.categoryTitle}>Gợi ý cho bạn</h2>
             <div className={styles.container}>
               {recommendations
-                .filter((item) => item.isSelling !== false) // nếu có trường isSelling
+                .filter((item) => item.isSelling !== false)
                 .map((item) => (
                   <div
                     key={item._id}
@@ -232,9 +186,9 @@ const Card = () => {
             </div>
           </div>
         ) : (
-          <p>Không có sản phẩm nào</p>
+          <p></p>
         )}
-      </div>
+      </div>}
 
       <div>
         {Array.isArray(categories) && categories.length > 0 ? (
