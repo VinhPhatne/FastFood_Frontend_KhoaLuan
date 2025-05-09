@@ -1,6 +1,6 @@
-import { Button, FormControlLabel, Radio, RadioGroup, TextField } from "@mui/material";
+import { Button, FormControlLabel, Radio, RadioGroup, TextField, MenuItem, Select, InputLabel, FormControl } from "@mui/material";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import useCart from "../../hook/useCart";
@@ -9,7 +9,21 @@ import { getChoicesByOptionalId } from "../State/Choice/Action";
 import { getOptionals } from "../State/Optional/Action";
 import socket from "../config/socket";
 import { useCartContext } from "./CartContext";
-import MapComponent from './MapComponent';
+import { notification } from 'antd';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-routing-machine';
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
+
+// Fix default marker icon issue with Leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
+
 const Checkout = () => {
   const jwt = localStorage.getItem("jwt");
   const { cart, totalQuantity, totalPrice, handleRemove } = useCart(jwt);
@@ -18,9 +32,10 @@ const Checkout = () => {
     address: "",
     phone: "",
     note: "",
+    districtId: "",
+    wardCode: "",
   });
   const [paymentMethod, setPaymentMethod] = useState("cod");
-  const [addressMethod, setAddressMethod] = useState("manual");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { clearCart } = useCartContext();
@@ -29,15 +44,28 @@ const Checkout = () => {
   const {
     discount,
     voucherId,
-    finalTotal,
+    finalTotal: initialFinalTotal,
     pointsUsed,
   } = state || JSON.parse(localStorage.getItem("checkoutData")) || {};
 
-  const [showMap, setShowMap] = useState(false);
-  const [position, setPosition] = useState(null); 
-  const [suggestions, setSuggestions] = useState([]);
-  const [isPositionLoaded, setIsPositionLoaded] = useState(false);
-  const LOCATIONIQ_API_KEY = "pk.2b0fee32045c1896341b402c43932395"; 
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [shippingFee, setShippingFee] = useState(0);
+  const [availableServices, setAvailableServices] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [route, setRoute] = useState(null);
+
+  const GHN_API_TOKEN = "2d698e94-2c17-11f0-a0cd-12f647571c0a";
+  const GHN_SHOP_ID = "5767786";
+  const GHN_API_BASE_URL = "https://online-gateway.ghn.vn";
+  const STORE_LOCATION = {
+    districtId: 1452, // Thành phố Thủ Đức
+    wardCode: "21012", // Phường Linh Chiểu
+    lat: 10.850317, // Tọa độ 1 Võ Văn Ngân
+    lng: 106.772936,
+  };
+
+  const mapRef = useRef(null);
 
   useEffect(() => {
     if (state) {
@@ -52,26 +80,493 @@ const Checkout = () => {
   useEffect(() => {
     dispatch(getUserProfile());
     dispatch(getOptionals({ jwt }));
-    handleUseCurrentLocation();
+    if (!GHN_API_TOKEN || GHN_API_TOKEN === "your-ghn-api-token-here") {
+      notification.error({
+        message: "Lỗi cấu hình",
+        description: "Vui lòng cập nhật GHN_API_TOKEN hợp lệ trong mã nguồn",
+      });
+    } else if (!GHN_SHOP_ID || GHN_SHOP_ID === "your-shop-id-here") {
+      notification.error({
+        message: "Lỗi cấu hình",
+        description: "Vui lòng cập nhật GHN_SHOP_ID hợp lệ trong mã nguồn",
+      });
+    } else {
+      fetchDistricts();
+    }
   }, [dispatch]);
 
+  // Lấy danh sách quận/huyện từ GHN
+  const fetchDistricts = async () => {
+    try {
+      const response = await axios.get(`${GHN_API_BASE_URL}/shiip/public-api/master-data/district`, {
+        headers: { Token: GHN_API_TOKEN, "Content-Type": "application/json" },
+      });
+      if (response.data.code === 200) {
+        setDistricts(response.data.data);
+      } else {
+        throw new Error(response.data.message || "Lỗi khi lấy danh sách quận/huyện");
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách quận/huyện:", error.response?.data || error.message);
+      notification.error({
+        message: "Không thể tải danh sách quận/huyện",
+        description: error.response?.data?.message || "Vui lòng kiểm tra token API hoặc kết nối mạng",
+      });
+    }
+  };
+
+  // Lấy danh sách phường/xã dựa trên quận/huyện đã chọn
+  const fetchWards = async (districtId) => {
+    try {
+      const response = await axios.get(`${GHN_API_BASE_URL}/shiip/public-api/master-data/ward`, {
+        headers: { Token: GHN_API_TOKEN, "Content-Type": "application/json" },
+        params: { district_id: parseInt(districtId) },
+      });
+      if (response.data.code === 200) {
+        setWards(response.data.data);
+        console.log("Wards fetched for DistrictID:", districtId, response.data.data);
+        return response.data.data;
+      } else {
+        throw new Error(response.data.message || "Lỗi khi lấy danh sách phường/xã");
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách phường/xã:", error.response?.data || error.message);
+      notification.error({
+        message: "Không thể tải danh sách phường/xã",
+        description: error.response?.data?.message || "Vui lòng kiểm tra token API",
+      });
+      return [];
+    }
+  };
+
+  // Lấy danh sách dịch vụ vận chuyển khả dụng
+  const fetchAvailableServices = async () => {
+    if (!formData.districtId || isNaN(parseInt(formData.districtId))) {
+      console.warn("districtId không hợp lệ:", formData.districtId);
+      return;
+    }
+
+    try {
+      console.log("Gọi fetchAvailableServices với districtId:", formData.districtId);
+      const response = await axios.post(
+        `${GHN_API_BASE_URL}/shiip/public-api/v2/shipping-order/available-services`,
+        {
+          shop_id: parseInt(GHN_SHOP_ID),
+          from_district: STORE_LOCATION.districtId,
+          to_district: parseInt(formData.districtId),
+        },
+        { headers: { Token: GHN_API_TOKEN, "Content-Type": "application/json" } }
+      );
+      if (response.data.code === 200) {
+        console.log("Available services:", response.data.data);
+        setAvailableServices(response.data.data);
+      } else {
+        throw new Error(response.data.message || "Lỗi khi lấy dịch vụ vận chuyển");
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy dịch vụ vận chuyển:", error.response?.data || error.message);
+      notification.error({
+        message: "Không thể tải danh sách dịch vụ",
+        description: error.response?.data?.message || "Vui lòng kiểm tra token API hoặc Shop ID",
+      });
+    }
+  };
+
+  // Tính phí vận chuyển bằng API GHN
+  const calculateShippingFee = async () => {
+    if (!formData.districtId || !formData.wardCode || availableServices.length === 0) {
+      console.warn("Không thể tính phí vận chuyển: Thiếu districtId, wardCode hoặc availableServices", {
+        districtId: formData.districtId,
+        wardCode: formData.wardCode,
+        availableServices,
+      });
+      return;
+    }
+
+    try {
+      console.log("Gọi calculateShippingFee với:", {
+        districtId: formData.districtId,
+        wardCode: formData.wardCode,
+        serviceId: availableServices[0]?.service_id,
+      });
+      const totalWeight = cart.reduce((acc, item) => acc + (item.weight || 1000), 0);
+      const response = await axios.post(
+        `${GHN_API_BASE_URL}/shiip/public-api/v2/shipping-order/fee`,
+        {
+          from_district_id: STORE_LOCATION.districtId,
+          from_ward_code: STORE_LOCATION.wardCode,
+          to_district_id: parseInt(formData.districtId),
+          to_ward_code: formData.wardCode,
+          service_id: availableServices[0]?.service_id || 53320,
+          weight: totalWeight,
+          length: 30,
+          width: 20,
+          height: 20,
+          insurance_value: totalPrice,
+          items: cart.map((item) => ({
+            name: item.name,
+            quantity: item.quantity,
+            weight: item.weight || 1000,
+          })),
+        },
+        {
+          headers: {
+            Token: GHN_API_TOKEN,
+            ShopId: GHN_SHOP_ID,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.data.code === 200) {
+        console.log("Phí vận chuyển:", response.data.data.total);
+        setShippingFee(response.data.data.total);
+      } else {
+        throw new Error(response.data.message || "Lỗi khi tính phí vận chuyển");
+      }
+    } catch (error) {
+      console.error("Lỗi khi tính phí vận chuyển:", error.response?.data || error.message);
+      setShippingFee(10000);
+      notification.error({
+        message: "Không thể tính phí giao hàng",
+        description: error.response?.data?.message || "Vui lòng kiểm tra token API hoặc Shop ID",
+      });
+    }
+  };
+
+  // Component để xử lý sự kiện nhấp chuột trên bản đồ
+  const MapClickHandler = () => {
+    const map = useMapEvents({
+      click: async (e) => {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+        console.log("Map clicked:", { lat, lng });
+        setSelectedLocation({ lat, lng });
+
+        try {
+          const response = await axios.get(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&addressdetails=1`
+          );
+          if (response.data && response.data.address) {
+          console.log('response12345', response);
+
+            const address = response.data.display_name;
+            const addressComponents = response.data.address;
+
+            let districtName = addressComponents.suburb || addressComponents.city_district || addressComponents.city || "";
+            let wardName = addressComponents.quarter || addressComponents.village || addressComponents.neighbourhood || "";
+
+            console.log("Nominatim response:", { districtName, wardName, addressComponents });
+
+            const districtMapping = {
+              "Thủ Đức": "Thành phố Thủ Đức",
+              "Thu Duc City": "Thành phố Thủ Đức",
+              "Thủ Đức City": "Thành phố Thủ Đức",
+              "Ho Chi Minh City": "Thành phố Thủ Đức",
+              "District 1": "Quận 1",
+              "District 3": "Quận 3",
+              "District 4": "Quận 4",
+              "District 5": "Quận 5",
+              "District 6": "Quận 6",
+              "District 7": "Quận 7",
+              "District 8": "Quận 8",
+              "District 10": "Quận 10",
+              "District 11": "Quận 11",
+              "Bình Thạnh": "Quận Bình Thạnh",
+              "Tân Bình": "Quận Tân Bình",
+              "Tân Phú": "Quận Tân Phú",
+              "Phú Nhuận": "Quận Phú Nhuận",
+              "Gò Vấp": "Quận Gò Vấp",
+              "Bình Tân": "Quận Bình Tân",
+              "Củ Chi": "Huyện Củ Chi",
+              "Hóc Môn": "Huyện Hóc Môn",
+              "Bình Chánh": "Huyện Bình Chánh",
+              "Nhà Bè": "Huyện Nhà Bè",
+              "Cần Giờ": "Huyện Cần Giờ",
+            };
+            districtName = districtMapping[districtName] || districtName;
+
+            // Chuẩn hóa wardName
+            if (wardName && !wardName.toLowerCase().startsWith("phường")) {
+              wardName = `Phường ${wardName}`;
+            }
+
+            console.log('districtName', districtName);
+            console.log('wardName', wardName);
+            console.log('districts', districts);
+
+            const matchedDistrict = districts.find(
+              (d) => d.DistrictName.toLowerCase().trim() === districtName.toLowerCase().trim()
+            );
+            if (matchedDistrict) {
+              console.log("Matched District:", matchedDistrict);
+              const fetchedWards = await fetchWards(matchedDistrict.DistrictID);
+
+              console.log("fetchedWards", fetchedWards);
+
+              const matchedWard = fetchedWards.find(
+                (w) => w.WardName.toLowerCase().includes(wardName.toLowerCase())
+              );
+
+              
+
+              console.log("Matched Ward:", matchedWard);
+
+              if (matchedWard) {
+                setFormData({
+                  ...formData,
+                  address,
+                  districtId: matchedDistrict.DistrictID,
+                  wardCode: matchedWard.WardCode,
+                });
+              } else {
+                console.warn("Không tìm thấy phường/xã khớp:", wardName);
+                notification.error({
+                  message: "Không tìm thấy phường/xã",
+                  description: "Vui lòng chọn phường/xã từ danh sách hoặc nhập thủ công",
+                });
+                setFormData({
+                  ...formData,
+                  address,
+                  districtId: matchedDistrict.DistrictID,
+                  wardCode: "",
+                });
+              }
+            } else {
+              console.warn("Không tìm thấy quận/huyện khớp:", districtName);
+              notification.error({
+                message: "Không tìm thấy quận/huyện",
+                description: "Vui lòng chọn quận/huyện từ danh sách hoặc nhập thủ công",
+              });
+              setFormData({
+                ...formData,
+                address,
+                districtId: "",
+                wardCode: "",
+              });
+            }
+          } else {
+            throw new Error("Không thể lấy địa chỉ từ tọa độ");
+          }
+        } catch (error) {
+          console.error("Lỗi khi lấy địa chỉ từ bản đồ:", error);
+          notification.error({
+            message: "Lỗi bản đồ",
+            description: "Không thể lấy địa chỉ. Vui lòng thử lại.",
+          });
+          setFormData({
+            ...formData,
+            districtId: "",
+            wardCode: "",
+          });
+        }
+
+        // Vẽ đường đi
+        if (mapRef.current) {
+          try {
+            if (route) {
+              mapRef.current.removeControl(route);
+            }
+            const routingControl = L.Routing.control({
+              waypoints: [
+                L.latLng(STORE_LOCATION.lat, STORE_LOCATION.lng),
+                L.latLng(lat, lng),
+              ],
+              routeWhileDragging: true,
+              show: false,
+              lineOptions: {
+                styles: [{ color: "#ff7d01", weight: 4 }],
+              },
+            }).addTo(mapRef.current);
+
+            routingControl.on('routesfound', (e) => {
+              console.log("Tuyến đường được tìm thấy:", e.routes[0].summary);
+            }).on('routingerror', (e) => {
+              console.error("Lỗi định tuyến:", e.error);
+              notification.error({
+                message: "Lỗi định tuyến",
+                description: "Không thể vẽ tuyến đường. Vui lòng thử lại.",
+              });
+            });
+
+            setRoute(routingControl);
+          } catch (error) {
+            console.error("Lỗi khi vẽ tuyến đường:", error);
+            notification.error({
+              message: "Lỗi bản đồ",
+              description: "Không thể vẽ tuyến đường. Vui lòng thử lại.",
+            });
+          }
+        }
+      },
+    });
+    return null;
+  };
+
+  // Xử lý khi nhập địa chỉ thủ công
+  const handleAddressChange = async (e) => {
+    const address = e.target.value;
+    setFormData({ ...formData, address });
+
+    if (address.length > 5) {
+      try {
+        const response = await axios.get(
+          `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(address)}&countrycodes=VN&addressdetails=1`
+        );
+        if (response.data && response.data.length > 0) {
+          console.log('response12345', response);
+          const { lat, lon, address: addressDetails } = response.data[0];
+          setSelectedLocation({ lat: parseFloat(lat), lng: parseFloat(lon) });
+
+          let districtName = addressDetails.county || addressDetails.city_district || addressDetails.city || "";
+          let wardName = addressDetails.suburb || addressDetails.village || addressDetails.neighbourhood || "";
+
+          console.log("Nominatim response (address):", { districtName, wardName, addressDetails });
+
+          const districtMapping = {
+            "Thủ Đức": "Thành phố Thủ Đức",
+            "Thu Duc City": "Thành phố Thủ Đức",
+            "Thủ Đức City": "Thành phố Thủ Đức",
+            "Ho Chi Minh City": "Thành phố Thủ Đức",
+            "District 1": "Quận 1",
+            "District 3": "Quận 3",
+            "District 4": "Quận 4",
+            "District 5": "Quận 5",
+            "District 6": "Quận 6",
+            "District 7": "Quận 7",
+            "District 8": "Quận 8",
+            "District 10": "Quận 10",
+            "District 11": "Quận 11",
+            "Bình Thạnh": "Quận Bình Thạnh",
+            "Tân Bình": "Quận Tân Bình",
+            "Tân Phú": "Quận Tân Phú",
+            "Phú Nhuận": "Quận Phú Nhuận",
+            "Gò Vấp": "Quận Gò Vấp",
+            "Bình Tân": "Quận Bình Tân",
+            "Củ Chi": "Huyện Củ Chi",
+            "Hóc Môn": "Huyện Hóc Môn",
+            "Bình Chánh": "Huyện Bình Chánh",
+            "Nhà Bè": "Huyện Nhà Bè",
+            "Cần Giờ": "Huyện Cần Giờ",
+          };
+          districtName = districtMapping[districtName] || districtName;
+
+          if (wardName && !wardName.toLowerCase().startsWith("phường")) {
+            wardName = `Phường ${wardName}`;
+          }
+
+          const matchedDistrict = districts.find(
+            (d) => d.DistrictName.toLowerCase().includes(districtName.toLowerCase())
+          );
+          if (matchedDistrict) {
+            const fetchedWards = await fetchWards(matchedDistrict.DistrictID);
+            const matchedWard = fetchedWards.find(
+              (w) => w.WardName.toLowerCase().includes(wardName.toLowerCase())
+            );
+
+            console.log("Matched District (from address):", matchedDistrict);
+            console.log("Matched Ward (from address):", matchedWard);
+
+            if (matchedWard) {
+              setFormData((prev) => ({
+                ...prev,
+                districtId: matchedDistrict.DistrictID,
+                wardCode: matchedWard.WardCode,
+              }));
+            } else {
+              setFormData((prev) => ({
+                ...prev,
+                districtId: matchedDistrict.DistrictID,
+                wardCode: "",
+              }));
+              notification.error({
+                message: "Không tìm thấy phường/xã",
+                description: "Vui lòng chọn phường/xã từ danh sách",
+              });
+            }
+
+            if (mapRef.current) {
+              if (route) {
+                mapRef.current.removeControl(route);
+              }
+              const routingControl = L.Routing.control({
+                waypoints: [
+                  L.latLng(STORE_LOCATION.lat, STORE_LOCATION.lng),
+                  L.latLng(parseFloat(lat), parseFloat(lon)),
+                ],
+                routeWhileDragging: true,
+                show: false,
+                lineOptions: {
+                  styles: [{ color: "#ff7d01", weight: 4 }],
+                },
+              }).addTo(mapRef.current);
+
+              routingControl.on('routesfound', (e) => {
+                console.log("Tuyến đường được tìm thấy (từ địa chỉ):", e.routes[0].summary);
+              }).on('routingerror', (e) => {
+                console.error("Lỗi định tuyến (từ địa chỉ):", e.error);
+                notification.error({
+                  message: "Lỗi định tuyến",
+                  description: "Không thể vẽ tuyến đường. Vui lòng thử lại.",
+                });
+              });
+
+              setRoute(routingControl);
+            }
+          } else {
+            console.warn("Không tìm thấy quận/huyện khớp (từ địa chỉ):", districtName);
+            notification.error({
+              message: "Không tìm thấy quận/huyện",
+              description: "Vui lòng chọn quận/huyện từ danh sách",
+            });
+            setFormData((prev) => ({
+              ...prev,
+              districtId: "",
+              wardCode: "",
+            }));
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi khi tìm địa chỉ:", error);
+        setFormData((prev) => ({
+          ...prev,
+          districtId: "",
+          wardCode: "",
+        }));
+      }
+    }
+  };
+
   useEffect(() => {
-    if (addressMethod == 'map') handleUseCurrentLocation();
-    else setFormData((prev) => ({ ...prev, address: "" }));
-  }, [addressMethod]);
+    if (formData.districtId && !isNaN(parseInt(formData.districtId))) {
+      console.log("useEffect: Gọi fetchWards và fetchAvailableServices với districtId:", formData.districtId);
+      fetchWards(formData.districtId);
+      fetchAvailableServices();
+    } else {
+      setWards([]); // Xóa danh sách wards nếu districtId không hợp lệ
+      setAvailableServices([]); // Xóa danh sách dịch vụ
+      setShippingFee(0); // Đặt lại phí vận chuyển
+    }
+  }, [formData.districtId]);
+
+  useEffect(() => {
+    if (formData.districtId && formData.wardCode && availableServices.length > 0) {
+      console.log("useEffect: Gọi calculateShippingFee");
+      calculateShippingFee();
+    }
+  }, [formData.districtId, formData.wardCode, availableServices]);
 
   useEffect(() => {
     socket.on("connect", () => {
-      console.log("Connected to server via WebSocket");
+      console.log("Kết nối với server qua WebSocket");
     });
 
     socket.on("billCreated", (response) => {
-      console.log("Server response:", response);
+      console.log("Phản hồi từ server:", response);
       if (response.status === "success" && response.data?._id) {
         clearCart();
         navigate(`/success?orderId=${response.data._id}`);
       } else {
-        alert("Error creating bill");
+        alert("Lỗi khi tạo hóa đơn");
       }
     });
 
@@ -83,9 +578,10 @@ const Checkout = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const finalTotal = totalPrice1 + shippingFee - (discount || 0) - (pointsUsed || 0);
     const billData = {
       fullName: formData.fullName,
-      address_shipment: formData.address,
+      address_shipment: `${formData.address}, ${wards.find(w => w.WardCode === formData.wardCode)?.WardName || ''}, ${districts.find(d => d.DistrictID === parseInt(formData.districtId))?.DistrictName || ''}`,
       phone_shipment: formData.phone,
       ship: shippingFee,
       total_price: finalTotal,
@@ -134,84 +630,12 @@ const Checkout = () => {
     }
   };
 
-  const handleUseCurrentLocation = async () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setPosition([latitude, longitude]);
-          if(isPositionLoaded || addressMethod == 'map') {
-            getAddressFromCoords(latitude, longitude);
-          }
-          setIsPositionLoaded(true);
-        },
-        async (error) => {
-          console.error("Geolocation error:", error);
-          alert("Không thể lấy vị trí từ trình duyệt. Thử lấy từ IP...");
-          try {
-            const response = await axios.get("https://ipapi.co/json/");
-            const { latitude, longitude } = response.data;
-            setPosition([latitude, longitude]);
-            setIsPositionLoaded(true);
-          } catch (ipError) {
-            console.error("IP geolocation error:", ipError);
-            alert("Không thể lấy vị trí. Sử dụng vị trí mặc định.");
-            setPosition([21.0285, 105.8542]); 
-            setIsPositionLoaded(true);
-          }
-        }
-      );
-    } else {
-      alert("Trình duyệt không hỗ trợ định vị. Thử lấy từ IP...");
-      try {
-        const response = await axios.get("https://ipapi.co/json/");
-        const { latitude, longitude } = response.data;
-        setPosition([latitude, longitude]);
-        setIsPositionLoaded(true);
-      } catch (ipError) {
-        console.error("IP geolocation error:", ipError);
-        alert("Không thể lấy vị trí. Sử dụng vị trí mặc định.");
-        setPosition([21.0285, 105.8542]);
-        setIsPositionLoaded(true);
-      }
-    }
-  };
-
-  const getAddressFromCoords = async (lat, lng) => {
-    try {
-      const url = `https://us1.locationiq.com/v1/reverse.php?key=${LOCATIONIQ_API_KEY}&lat=${lat}&lon=${lng}&format=json`;
-      console.log("Requesting address from:", url);
-      const response = await axios.get(url);
-      console.log("LocationIQ response:", response.data);
-      const address = response.data.display_name;
-      setFormData((prev) => ({ ...prev, address }));
-    } catch (error) {
-      console.error("Error fetching address:", error.response || error.message);
-      alert("Không thể lấy địa chỉ từ vị trí này. Kiểm tra console để debug.");
-    }
-  };
-
-  const handleAddressChange = async (e) => {
-    const value = e.target.value;
-    setFormData((prev) => ({ ...prev, address: value }));
-
-    if (value.length > 2) {
-      try {
-        const response = await axios.get(
-          `https://us1.locationiq.com/v1/autocomplete.php?key=${LOCATIONIQ_API_KEY}&q=${value}&limit=5&countrycodes=vn`
-        );
-        setSuggestions(response.data);
-      } catch (error) {
-        console.error("Error fetching suggestions:", error);
-      }
-    } else {
-      setSuggestions([]);
-    }
-  };
-
-  const handleSuggestionClick = (suggestion) => {
-    setFormData((prev) => ({ ...prev, address: suggestion.display_name }));
-    setSuggestions([]);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
   useEffect(() => {
@@ -221,11 +645,12 @@ const Checkout = () => {
         address: userProfile.address || "",
         phone: userProfile.phonenumber || "",
         note: "",
+        districtId: "",
+        wardCode: "",
       });
     }
   }, [userProfile]);
 
-  const shippingFee = totalPrice > 0 ? 10000 : 0;
   const totalPrice1 = cart.reduce((acc, item) => {
     const totalAddPrice = item.options.reduce(
       (optionAcc, opt) => optionAcc + (opt.addPrice || 0),
@@ -234,13 +659,7 @@ const Checkout = () => {
     return acc + (item.price + totalAddPrice) * item.quantity;
   }, 0);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
+  const finalTotal = totalPrice1 + shippingFee - (discount || 0) - (pointsUsed || 0);
 
   const getOptionName = async (optionalId) => {
     if (!optionals || optionals.length === 0) {
@@ -250,14 +669,13 @@ const Checkout = () => {
 
     dispatch(getChoicesByOptionalId({ optionalId, jwt }))
       .then((response) => {
-        
         setChoices((prevChoices) => ({
           ...prevChoices,
           [optionalId]: response,
         }));
       })
       .catch((error) => {
-        console.error("Error setting choices:", error);
+        console.error("Lỗi khi lấy lựa chọn:", error);
       });
 
     return option ? option.name : "";
@@ -333,88 +751,51 @@ const Checkout = () => {
               value={formData.phone}
               style={{ marginBottom: "16px" }}
             />
-            <div className="mb-4">
-              <label className="text-lg font-semibold mb-2 block">
-                Chọn cách nhập địa chỉ
-              </label>
-              <RadioGroup
-                value={addressMethod}
-                onChange={(e) => {
-                  setAddressMethod(e.target.value);
-                  if (e.target.value === "map") {
-                    setShowMap(true);
-                    if (!isPositionLoaded) {
-                      handleUseCurrentLocation();
-                    }
-                  } else {
-                    setShowMap(false);
-                  }
-                }}
+            <FormControl fullWidth style={{ marginBottom: "16px" }}>
+              <InputLabel id="district-label">Quận/Huyện</InputLabel>
+              <Select
+                labelId="district-label"
+                id="districtId"
+                name="districtId"
+                value={formData.districtId}
+                label="Quận/Huyện"
+                onChange={handleInputChange}
               >
-                <FormControlLabel
-                  value="manual"
-                  control={<Radio />}
-                  label="Nhập địa chỉ thủ công"
-                />
-                <FormControlLabel
-                  value="map"
-                  control={<Radio />}
-                  label="Chọn từ bản đồ"
-                />
-              </RadioGroup>
-            </div>
-            {showMap && (
-              <MapComponent
-                position={position}
-                setPosition={setPosition}
-                setAddress={getAddressFromCoords}
-              />
-            )}
-
-            <div style={{ position: "relative" }}>
-              <TextField
-                fullWidth
-                required
-                id="address"
-                name="address"
-                label="Địa chỉ"
-                variant="outlined"
-                onChange={handleAddressChange}
-                value={formData.address}
-                style={{ marginBottom: "16px" }}
-              />
-              {suggestions.length > 0 && (
-                <ul
-                  style={{
-                    position: "absolute",
-                    top: "100%",
-                    left: 0,
-                    right: 0,
-                    background: "white",
-                    border: "1px solid #ccc",
-                    zIndex: 1000,
-                    listStyle: "none",
-                    padding: 0,
-                    margin: 0,
-                  }}
-                >
-                  {suggestions.map((suggestion) => (
-                    <li
-                      key={suggestion.place_id}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      style={{
-                        padding: "8px",
-                        cursor: "pointer",
-                        borderBottom: "1px solid #eee",
-                      }}
-                    >
-                      {suggestion.display_name}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            
+                {districts.map((district) => (
+                  <MenuItem key={district.DistrictID} value={district.DistrictID}>
+                    {district.DistrictName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth style={{ marginBottom: "16px" }}>
+              <InputLabel id="ward-label">Phường/Xã</InputLabel>
+              <Select
+                labelId="ward-label"
+                id="wardCode"
+                name="wardCode"
+                value={formData.wardCode}
+                label="Phường/Xã"
+                onChange={handleInputChange}
+              >
+                {wards.map((ward) => (
+                  <MenuItem key={ward.WardCode} value={ward.WardCode}>
+                    {ward.WardName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth
+              required
+              id="address"
+              name="address"
+              label="Địa chỉ chi tiết"
+              variant="outlined"
+              value={formData.address}
+              onChange={handleAddressChange}
+              style={{ marginBottom: "16px" }}
+            />
             <TextField
               fullWidth
               id="note"
@@ -425,7 +806,6 @@ const Checkout = () => {
               value={formData.note}
               style={{ marginBottom: "16px" }}
             />
-
             <div className="mb-6">
               <label className="text-lg font-semibold mb-2 block">
                 Phương thức thanh toán
@@ -449,7 +829,6 @@ const Checkout = () => {
                 />
               </RadioGroup>
             </div>
-
             <Button
               fullWidth
               variant="contained"
@@ -459,12 +838,36 @@ const Checkout = () => {
               Thanh toán {finalTotal ? finalTotal.toLocaleString() : "0"} đ
             </Button>
           </form>
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-2">Chọn vị trí giao hàng trên bản đồ</h3>
+            <MapContainer
+              center={[STORE_LOCATION.lat, STORE_LOCATION.lng]}
+              zoom={14}
+              style={{ height: "400px", width: "100%" }}
+              whenCreated={(map) => {
+                console.log("Map initialized");
+                mapRef.current = map;
+              }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <Marker position={[STORE_LOCATION.lat, STORE_LOCATION.lng]}>
+                <Popup>Cửa hàng</Popup>
+              </Marker>
+              {selectedLocation && (
+                <Marker position={[selectedLocation.lat, selectedLocation.lng]}>
+                  <Popup>Giao hàng</Popup>
+                </Marker>
+              )}
+              <MapClickHandler />
+            </MapContainer>
+          </div>
         </div>
-
         <div className="w-1/2">
           <div className="border rounded-lg p-6">
             <h2 className="text-xl font-bold mb-4">{totalQuantity} MÓN</h2>
-
             {cart.length > 0 ? (
               cart.map((item) => (
                 <div
@@ -491,8 +894,7 @@ const Checkout = () => {
                             key={option.optionId}
                             className="flex justify-between"
                           >
-                            {getChoiceName(option.optionId, option.choiceId) ||
-                              ""}
+                            {getChoiceName(option.optionId, option.choiceId) || ""}
                             {option.addPrice
                               ? ` (+${option.addPrice.toLocaleString()} đ)`
                               : ""}
@@ -520,7 +922,6 @@ const Checkout = () => {
             ) : (
               <p>Giỏ hàng trống</p>
             )}
-
             {cart.length > 0 && (
               <div className="space-y-2">
                 <div className="flex justify-between">
@@ -545,7 +946,7 @@ const Checkout = () => {
                 )}
                 <div className="flex justify-between font-bold text-xl">
                   <span>Tổng thanh toán</span>
-                  <span>{finalTotal ? finalTotal.toLocaleString() : "0"}  đ</span>
+                  <span>{finalTotal ? finalTotal.toLocaleString() : "0"} đ</span>
                 </div>
               </div>
             )}

@@ -10,7 +10,7 @@ const Home = () => {
       <Slider />
       {/* <Recommendations /> */}
       <Card />
-      {/* <ChatbotComponent /> */}
+      <ChatbotComponent />
     </div>
   );
 };
