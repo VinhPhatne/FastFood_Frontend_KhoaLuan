@@ -1,32 +1,110 @@
-import { Button, FormControlLabel, Radio, RadioGroup, TextField, MenuItem, Select, InputLabel, FormControl } from "@mui/material";
-import axios from "axios";
-import React, { useEffect, useState, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
-import useCart from "../../hook/useCart";
-import { getUserProfile } from "../State/Authentication/Action";
-import { getChoicesByOptionalId } from "../State/Choice/Action";
-import { getOptionals } from "../State/Optional/Action";
-import socket from "../config/socket";
-import { useCartContext } from "./CartContext";
-import { notification } from 'antd';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import 'leaflet-routing-machine';
-import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
+"use client"
+
+import {
+  Button,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  TextField,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+} from "@mui/material"
+import axios from "axios"
+import { useEffect, useState, useRef } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { useLocation, useNavigate } from "react-router-dom"
+import useCart from "../../hook/useCart"
+import { getUserProfile } from "../State/Authentication/Action"
+import { getChoicesByOptionalId } from "../State/Choice/Action"
+import { getOptionals } from "../State/Optional/Action"
+import socket from "../config/socket"
+import { useCartContext } from "./CartContext"
+import { notification } from "antd"
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
+import L from "leaflet"
+import "leaflet/dist/leaflet.css"
+import "leaflet-routing-machine"
+import "leaflet-routing-machine/dist/leaflet-routing-machine.css"
 
 // Fix default marker icon issue with Leaflet
-delete L.Icon.Default.prototype._getIconUrl;
+delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+})
+
+// Component to handle routing
+const RoutingMachine = ({ destination }) => {
+  const map = useMap()
+  const routingControlRef = useRef(null)
+  const STORE_LOCATION = {
+    lat: 10.850317,
+    lng: 106.772936,
+  }
+
+  useEffect(() => {
+    if (!destination) return
+
+    // Clean up previous routing control if it exists
+    if (routingControlRef.current) {
+      map.removeControl(routingControlRef.current)
+    }
+
+    try {
+      const routingControl = L.Routing.control({
+        waypoints: [L.latLng(STORE_LOCATION.lat, STORE_LOCATION.lng), L.latLng(destination.lat, destination.lng)],
+        routeWhileDragging: true,
+        showAlternatives: false,
+        lineOptions: {
+          styles: [{ color: "#ff7d01", weight: 4 }],
+        },
+        router: L.Routing.osrmv1({
+          serviceUrl: "https://router.project-osrm.org/route/v1",
+          profile: "driving",
+        }),
+        createMarker: () => null, // Don't create markers, we'll handle them separately
+      }).addTo(map)
+
+      routingControl.on("routesfound", (e) => {
+        const routes = e.routes
+        const summary = routes[0].summary
+        console.log("Tuyến đường được tìm thấy:", summary)
+        // You could update the shipping fee based on the distance here
+      })
+
+      routingControl.on("routingerror", (e) => {
+        console.error("Lỗi định tuyến:", e.error)
+        notification.error({
+          message: "Lỗi định tuyến",
+          description: `Không thể vẽ tuyến đường: ${e.error.message || "Lỗi không xác định"}`,
+        })
+      })
+
+      routingControlRef.current = routingControl
+    } catch (error) {
+      console.error("Lỗi khi vẽ tuyến đường:", error)
+      notification.error({
+        message: "Lỗi bản đồ",
+        description: "Không thể vẽ tuyến đường. Vui lòng thử lại.",
+      })
+    }
+
+    return () => {
+      if (routingControlRef.current) {
+        map.removeControl(routingControlRef.current)
+      }
+    }
+  }, [map, destination])
+
+  return null
+}
 
 const Checkout = () => {
-  const jwt = localStorage.getItem("jwt");
-  const { cart, totalQuantity, totalPrice, handleRemove } = useCart(jwt);
+  const jwt = localStorage.getItem("jwt")
+  const { cart, totalQuantity, totalPrice, handleRemove } = useCart(jwt)
   const [formData, setFormData] = useState({
     fullName: "",
     address: "",
@@ -34,143 +112,141 @@ const Checkout = () => {
     note: "",
     districtId: "",
     wardCode: "",
-  });
-  const [paymentMethod, setPaymentMethod] = useState("cod");
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { clearCart } = useCartContext();
-  const { state } = useLocation();
+  })
+  const [paymentMethod, setPaymentMethod] = useState("cod")
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { clearCart } = useCartContext()
+  const { state } = useLocation()
 
   const {
     discount,
     voucherId,
     finalTotal: initialFinalTotal,
     pointsUsed,
-  } = state || JSON.parse(localStorage.getItem("checkoutData")) || {};
+  } = state || JSON.parse(localStorage.getItem("checkoutData")) || {}
 
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
-  const [shippingFee, setShippingFee] = useState(0);
-  const [availableServices, setAvailableServices] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [route, setRoute] = useState(null);
+  const [districts, setDistricts] = useState([])
+  const [wards, setWards] = useState([])
+  const [shippingFee, setShippingFee] = useState(0)
+  const [availableServices, setAvailableServices] = useState([])
+  const [selectedLocation, setSelectedLocation] = useState(null)
 
-  const GHN_API_TOKEN = "2d698e94-2c17-11f0-a0cd-12f647571c0a";
-  const GHN_SHOP_ID = "5767786";
-  const GHN_API_BASE_URL = "https://online-gateway.ghn.vn";
+  const GHN_API_TOKEN = "2d698e94-2c17-11f0-a0cd-12f647571c0a"
+  const GHN_SHOP_ID = "5767786"
+  const GHN_API_BASE_URL = "https://online-gateway.ghn.vn"
   const STORE_LOCATION = {
-    districtId: 1452, // Thành phố Thủ Đức
-    wardCode: "21012", // Phường Linh Chiểu
-    lat: 10.850317, // Tọa độ 1 Võ Văn Ngân
+    districtId: 1452,
+    wardCode: "21012",
+    lat: 10.850317,
     lng: 106.772936,
-  };
-
-  const mapRef = useRef(null);
+  }
 
   useEffect(() => {
     if (state) {
-      localStorage.setItem("checkoutData", JSON.stringify(state));
+      localStorage.setItem("checkoutData", JSON.stringify(state))
     }
-  }, [state]);
+  }, [state])
 
-  const userProfile = useSelector((state) => state.auth.user);
-  const { optionals } = useSelector((state) => state.optionalReducer.optionals);
-  const [choices, setChoices] = useState({});
+  const userProfile = useSelector((state) => state.auth.user)
+  const { optionals } = useSelector((state) => state.optionalReducer.optionals)
+  const [choices, setChoices] = useState({})
 
   useEffect(() => {
-    dispatch(getUserProfile());
-    dispatch(getOptionals({ jwt }));
+    dispatch(getUserProfile())
+    dispatch(getOptionals({ jwt }))
     if (!GHN_API_TOKEN || GHN_API_TOKEN === "your-ghn-api-token-here") {
       notification.error({
         message: "Lỗi cấu hình",
         description: "Vui lòng cập nhật GHN_API_TOKEN hợp lệ trong mã nguồn",
-      });
+      })
     } else if (!GHN_SHOP_ID || GHN_SHOP_ID === "your-shop-id-here") {
       notification.error({
         message: "Lỗi cấu hình",
         description: "Vui lòng cập nhật GHN_SHOP_ID hợp lệ trong mã nguồn",
-      });
+      })
     } else {
-      fetchDistricts();
+      fetchDistricts()
     }
-  }, [dispatch]);
+  }, [dispatch])
 
   // Lấy danh sách quận/huyện từ GHN
   const fetchDistricts = async () => {
     try {
       const response = await axios.get(`${GHN_API_BASE_URL}/shiip/public-api/master-data/district`, {
         headers: { Token: GHN_API_TOKEN, "Content-Type": "application/json" },
-      });
+      })
       if (response.data.code === 200) {
-        setDistricts(response.data.data);
+        setDistricts(response.data.data)
+        console.log("Districts fetched:", response.data.data)
       } else {
-        throw new Error(response.data.message || "Lỗi khi lấy danh sách quận/huyện");
+        throw new Error(response.data.message || "Lỗi khi lấy danh sách quận/huyện")
       }
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách quận/huyện:", error.response?.data || error.message);
+      console.error("Lỗi khi lấy danh sách quận/huyện:", error.response?.data || error.message)
       notification.error({
         message: "Không thể tải danh sách quận/huyện",
         description: error.response?.data?.message || "Vui lòng kiểm tra token API hoặc kết nối mạng",
-      });
+      })
     }
-  };
+  }
 
   // Lấy danh sách phường/xã dựa trên quận/huyện đã chọn
   const fetchWards = async (districtId) => {
     try {
       const response = await axios.get(`${GHN_API_BASE_URL}/shiip/public-api/master-data/ward`, {
         headers: { Token: GHN_API_TOKEN, "Content-Type": "application/json" },
-        params: { district_id: parseInt(districtId) },
-      });
+        params: { district_id: Number.parseInt(districtId) },
+      })
       if (response.data.code === 200) {
-        setWards(response.data.data);
-        console.log("Wards fetched for DistrictID:", districtId, response.data.data);
-        return response.data.data;
+        setWards(response.data.data)
+        console.log("Wards fetched for DistrictID:", districtId, response.data.data)
+        return response.data.data
       } else {
-        throw new Error(response.data.message || "Lỗi khi lấy danh sách phường/xã");
+        throw new Error(response.data.message || "Lỗi khi lấy danh sách phường/xã")
       }
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách phường/xã:", error.response?.data || error.message);
+      console.error("Lỗi khi lấy danh sách phường/xã:", error.response?.data || error.message)
       notification.error({
         message: "Không thể tải danh sách phường/xã",
         description: error.response?.data?.message || "Vui lòng kiểm tra token API",
-      });
-      return [];
+      })
+      return []
     }
-  };
+  }
 
   // Lấy danh sách dịch vụ vận chuyển khả dụng
   const fetchAvailableServices = async () => {
-    if (!formData.districtId || isNaN(parseInt(formData.districtId))) {
-      console.warn("districtId không hợp lệ:", formData.districtId);
-      return;
+    if (!formData.districtId || isNaN(Number.parseInt(formData.districtId))) {
+      console.warn("districtId không hợp lệ:", formData.districtId)
+      return
     }
 
     try {
-      console.log("Gọi fetchAvailableServices với districtId:", formData.districtId);
+      console.log("Gọi fetchAvailableServices với districtId:", formData.districtId)
       const response = await axios.post(
         `${GHN_API_BASE_URL}/shiip/public-api/v2/shipping-order/available-services`,
         {
-          shop_id: parseInt(GHN_SHOP_ID),
+          shop_id: Number.parseInt(GHN_SHOP_ID),
           from_district: STORE_LOCATION.districtId,
-          to_district: parseInt(formData.districtId),
+          to_district: Number.parseInt(formData.districtId),
         },
-        { headers: { Token: GHN_API_TOKEN, "Content-Type": "application/json" } }
-      );
+        { headers: { Token: GHN_API_TOKEN, "Content-Type": "application/json" } },
+      )
       if (response.data.code === 200) {
-        console.log("Available services:", response.data.data);
-        setAvailableServices(response.data.data);
+        console.log("Available services:", response.data.data)
+        setAvailableServices(response.data.data)
       } else {
-        throw new Error(response.data.message || "Lỗi khi lấy dịch vụ vận chuyển");
+        throw new Error(response.data.message || "Lỗi khi lấy dịch vụ vận chuyển")
       }
     } catch (error) {
-      console.error("Lỗi khi lấy dịch vụ vận chuyển:", error.response?.data || error.message);
+      console.error("Lỗi khi lấy dịch vụ vận chuyển:", error.response?.data || error.message)
       notification.error({
         message: "Không thể tải danh sách dịch vụ",
         description: error.response?.data?.message || "Vui lòng kiểm tra token API hoặc Shop ID",
-      });
+      })
     }
-  };
+  }
 
   // Tính phí vận chuyển bằng API GHN
   const calculateShippingFee = async () => {
@@ -179,8 +255,8 @@ const Checkout = () => {
         districtId: formData.districtId,
         wardCode: formData.wardCode,
         availableServices,
-      });
-      return;
+      })
+      return
     }
 
     try {
@@ -188,14 +264,14 @@ const Checkout = () => {
         districtId: formData.districtId,
         wardCode: formData.wardCode,
         serviceId: availableServices[0]?.service_id,
-      });
-      const totalWeight = cart.reduce((acc, item) => acc + (item.weight || 1000), 0);
+      })
+      const totalWeight = cart.reduce((acc, item) => acc + (item.weight || 1000), 0)
       const response = await axios.post(
         `${GHN_API_BASE_URL}/shiip/public-api/v2/shipping-order/fee`,
         {
           from_district_id: STORE_LOCATION.districtId,
           from_ward_code: STORE_LOCATION.wardCode,
-          to_district_id: parseInt(formData.districtId),
+          to_district_id: Number.parseInt(formData.districtId),
           to_ward_code: formData.wardCode,
           service_id: availableServices[0]?.service_id || 53320,
           weight: totalWeight,
@@ -215,47 +291,52 @@ const Checkout = () => {
             ShopId: GHN_SHOP_ID,
             "Content-Type": "application/json",
           },
-        }
-      );
+        },
+      )
       if (response.data.code === 200) {
-        console.log("Phí vận chuyển:", response.data.data.total);
-        setShippingFee(response.data.data.total);
+        console.log("Phí vận chuyển:", response.data.data.total)
+        setShippingFee(response.data.data.total)
       } else {
-        throw new Error(response.data.message || "Lỗi khi tính phí vận chuyển");
+        throw new Error(response.data.message || "Lỗi khi tính phí vận chuyển")
       }
     } catch (error) {
-      console.error("Lỗi khi tính phí vận chuyển:", error.response?.data || error.message);
-      setShippingFee(10000);
+      console.error("Lỗi khi tính phí vận chuyển:", error.response?.data || error.message)
+      setShippingFee(0)
       notification.error({
         message: "Không thể tính phí giao hàng",
         description: error.response?.data?.message || "Vui lòng kiểm tra token API hoặc Shop ID",
-      });
+      })
     }
-  };
+  }
 
   // Component để xử lý sự kiện nhấp chuột trên bản đồ
   const MapClickHandler = () => {
-    const map = useMapEvents({
-      click: async (e) => {
-        const lat = e.latlng.lat;
-        const lng = e.latlng.lng;
-        console.log("Map clicked:", { lat, lng });
-        setSelectedLocation({ lat, lng });
+    const map = useMap()
+
+    useEffect(() => {
+      console.log("Map instance in MapClickHandler:", map)
+      map.on("click", async (e) => {
+        const lat = e.latlng.lat
+        const lng = e.latlng.lng
+        console.log("Map clicked:", { lat, lng })
+        setSelectedLocation({ lat, lng })
 
         try {
           const response = await axios.get(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&addressdetails=1`
-          );
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&addressdetails=1&bounded=1&viewbox=106.4,10.3,107.0,11.2`,
+          )
+          console.log("Nominatim full response:", response.data)
+
           if (response.data && response.data.address) {
-          console.log('response12345', response);
+            const address = response.data.display_name
+            const addressComponents = response.data.address
 
-            const address = response.data.display_name;
-            const addressComponents = response.data.address;
+            let districtName =
+              addressComponents.suburb || addressComponents.city_district || addressComponents.city || ""
+            let wardName =
+              addressComponents.quarter || addressComponents.village || addressComponents.neighbourhood || ""
 
-            let districtName = addressComponents.suburb || addressComponents.city_district || addressComponents.city || "";
-            let wardName = addressComponents.quarter || addressComponents.village || addressComponents.neighbourhood || "";
-
-            console.log("Nominatim response:", { districtName, wardName, addressComponents });
+            console.log("Nominatim response:", { districtName, wardName, addressComponents })
 
             const districtMapping = {
               "Thủ Đức": "Thành phố Thủ Đức",
@@ -263,53 +344,66 @@ const Checkout = () => {
               "Thủ Đức City": "Thành phố Thủ Đức",
               "Ho Chi Minh City": "Thành phố Thủ Đức",
               "District 1": "Quận 1",
+              "Quận 1": "Quận 1",
+              "Bến Nghé": "Quận 1",
               "District 3": "Quận 3",
+              "Quận 3": "Quận 3",
               "District 4": "Quận 4",
+              "Quận 4": "Quận 4",
               "District 5": "Quận 5",
+              "Quận 5": "Quận 5",
               "District 6": "Quận 6",
+              "Quận 6": "Quận 6",
               "District 7": "Quận 7",
+              "Quận 7": "Quận 7",
               "District 8": "Quận 8",
+              "Quận 8": "Quận 8",
               "District 10": "Quận 10",
+              "Quận 10": "Quận 10",
               "District 11": "Quận 11",
+              "Quận 11": "Quận 11",
               "Bình Thạnh": "Quận Bình Thạnh",
+              "Quận Bình Thạnh": "Quận Bình Thạnh",
               "Tân Bình": "Quận Tân Bình",
+              "Quận Tân Bình": "Quận Tân Bình",
               "Tân Phú": "Quận Tân Phú",
+              "Quận Tân Phú": "Quận Tân Phú",
               "Phú Nhuận": "Quận Phú Nhuận",
+              "Quận Phú Nhuận": "Quận Phú Nhuận",
               "Gò Vấp": "Quận Gò Vấp",
+              "Quận Gò Vấp": "Quận Gò Vấp",
               "Bình Tân": "Quận Bình Tân",
+              "Quận Bình Tân": "Quận Bình Tân",
               "Củ Chi": "Huyện Củ Chi",
+              "Huyện Củ Chi": "Huyện Củ Chi",
               "Hóc Môn": "Huyện Hóc Môn",
+              "Huyện Hóc Môn": "Huyện Hóc Môn",
               "Bình Chánh": "Huyện Bình Chánh",
+              "Huyện Bình Chánh": "Huyện Bình Chánh",
               "Nhà Bè": "Huyện Nhà Bè",
+              "Huyện Nhà Bè": "Huyện Nhà Bè",
               "Cần Giờ": "Huyện Cần Giờ",
-            };
-            districtName = districtMapping[districtName] || districtName;
+              "Huyện Cần Giờ": "Huyện Cần Giờ",
+            }
+            districtName = districtMapping[districtName] || districtName
 
-            // Chuẩn hóa wardName
             if (wardName && !wardName.toLowerCase().startsWith("phường")) {
-              wardName = `Phường ${wardName}`;
+              wardName = `Phường ${wardName}`
             }
 
-            console.log('districtName', districtName);
-            console.log('wardName', wardName);
-            console.log('districts', districts);
+            console.log("After mapping:", { districtName, wardName })
 
             const matchedDistrict = districts.find(
-              (d) => d.DistrictName.toLowerCase().trim() === districtName.toLowerCase().trim()
-            );
+              (d) => d.DistrictName.toLowerCase().trim() === districtName.toLowerCase().trim(),
+            )
             if (matchedDistrict) {
-              console.log("Matched District:", matchedDistrict);
-              const fetchedWards = await fetchWards(matchedDistrict.DistrictID);
+              console.log("Matched District:", matchedDistrict)
+              const fetchedWards = await fetchWards(matchedDistrict.DistrictID)
+              console.log("Fetched Wards:", fetchedWards)
 
-              console.log("fetchedWards", fetchedWards);
+              const matchedWard = fetchedWards.find((w) => w.WardName.toLowerCase().includes(wardName.toLowerCase()))
 
-              const matchedWard = fetchedWards.find(
-                (w) => w.WardName.toLowerCase().includes(wardName.toLowerCase())
-              );
-
-              
-
-              console.log("Matched Ward:", matchedWard);
+              console.log("Matched Ward:", matchedWard)
 
               if (matchedWard) {
                 setFormData({
@@ -317,110 +411,79 @@ const Checkout = () => {
                   address,
                   districtId: matchedDistrict.DistrictID,
                   wardCode: matchedWard.WardCode,
-                });
+                })
               } else {
-                console.warn("Không tìm thấy phường/xã khớp:", wardName);
+                console.warn("Không tìm thấy phường/xã khớp:", wardName)
                 notification.error({
                   message: "Không tìm thấy phường/xã",
                   description: "Vui lòng chọn phường/xã từ danh sách hoặc nhập thủ công",
-                });
+                })
                 setFormData({
                   ...formData,
                   address,
                   districtId: matchedDistrict.DistrictID,
                   wardCode: "",
-                });
+                })
               }
             } else {
-              console.warn("Không tìm thấy quận/huyện khớp:", districtName);
+              console.warn("Không tìm thấy quận/huyện khớp:", districtName)
               notification.error({
                 message: "Không tìm thấy quận/huyện",
                 description: "Vui lòng chọn quận/huyện từ danh sách hoặc nhập thủ công",
-              });
+              })
               setFormData({
                 ...formData,
                 address,
                 districtId: "",
                 wardCode: "",
-              });
+              })
             }
+            console.log("Updated formData:", formData)
           } else {
-            throw new Error("Không thể lấy địa chỉ từ tọa độ");
+            throw new Error("Không thể lấy địa chỉ từ tọa độ")
           }
         } catch (error) {
-          console.error("Lỗi khi lấy địa chỉ từ bản đồ:", error);
+          console.error("Lỗi khi lấy địa chỉ từ bản đồ:", error)
           notification.error({
             message: "Lỗi bản đồ",
             description: "Không thể lấy địa chỉ. Vui lòng thử lại.",
-          });
+          })
           setFormData({
             ...formData,
             districtId: "",
             wardCode: "",
-          });
+          })
         }
+      })
 
-        // Vẽ đường đi
-        if (mapRef.current) {
-          try {
-            if (route) {
-              mapRef.current.removeControl(route);
-            }
-            const routingControl = L.Routing.control({
-              waypoints: [
-                L.latLng(STORE_LOCATION.lat, STORE_LOCATION.lng),
-                L.latLng(lat, lng),
-              ],
-              routeWhileDragging: true,
-              show: false,
-              lineOptions: {
-                styles: [{ color: "#ff7d01", weight: 4 }],
-              },
-            }).addTo(mapRef.current);
+      return () => map.off("click")
+    }, [map])
 
-            routingControl.on('routesfound', (e) => {
-              console.log("Tuyến đường được tìm thấy:", e.routes[0].summary);
-            }).on('routingerror', (e) => {
-              console.error("Lỗi định tuyến:", e.error);
-              notification.error({
-                message: "Lỗi định tuyến",
-                description: "Không thể vẽ tuyến đường. Vui lòng thử lại.",
-              });
-            });
-
-            setRoute(routingControl);
-          } catch (error) {
-            console.error("Lỗi khi vẽ tuyến đường:", error);
-            notification.error({
-              message: "Lỗi bản đồ",
-              description: "Không thể vẽ tuyến đường. Vui lòng thử lại.",
-            });
-          }
-        }
-      },
-    });
-    return null;
-  };
+    return null
+  }
 
   // Xử lý khi nhập địa chỉ thủ công
   const handleAddressChange = async (e) => {
-    const address = e.target.value;
-    setFormData({ ...formData, address });
+    const address = e.target.value
+    setFormData({ ...formData, address, districtId: "", wardCode: "" })
 
     if (address.length > 5) {
       try {
         const response = await axios.get(
-          `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(address)}&countrycodes=VN&addressdetails=1`
-        );
+          `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(
+            address + ", Ho Chi Minh City, Vietnam",
+          )}&countrycodes=VN&addressdetails=1&bounded=1&viewbox=106.4,10.3,107.0,11.2`,
+        )
+        console.log("Nominatim full response (address):", response.data)
+
         if (response.data && response.data.length > 0) {
-          console.log('response12345', response);
-          const { lat, lon, address: addressDetails } = response.data[0];
-          setSelectedLocation({ lat: parseFloat(lat), lng: parseFloat(lon) });
+          const { lat, lon, address: addressDetails } = response.data[0]
+          setSelectedLocation({ lat: Number.parseFloat(lat), lng: Number.parseFloat(lon) })
 
-          let districtName = addressDetails.county || addressDetails.city_district || addressDetails.city || "";
-          let wardName = addressDetails.suburb || addressDetails.village || addressDetails.neighbourhood || "";
+          let districtName = addressDetails.county || addressDetails.city_district || addressDetails.city || ""
+          let wardName = addressDetails.village || addressDetails.neighbourhood || addressDetails.suburb || ""
 
-          console.log("Nominatim response (address):", { districtName, wardName, addressDetails });
+          console.log("Nominatim response (address):", { districtName, wardName, addressDetails })
 
           const districtMapping = {
             "Thủ Đức": "Thành phố Thủ Đức",
@@ -428,160 +491,170 @@ const Checkout = () => {
             "Thủ Đức City": "Thành phố Thủ Đức",
             "Ho Chi Minh City": "Thành phố Thủ Đức",
             "District 1": "Quận 1",
+            "Quận 1": "Quận 1",
+            "Bến Nghé": "Quận 1",
             "District 3": "Quận 3",
+            "Quận 3": "Quận 3",
             "District 4": "Quận 4",
+            "Quận 4": "Quận 4",
             "District 5": "Quận 5",
+            "Quận 5": "Quận 5",
             "District 6": "Quận 6",
+            "Quận 6": "Quận 6",
             "District 7": "Quận 7",
+            "Quận 7": "Quận 7",
             "District 8": "Quận 8",
+            "Quận 8": "Quận 8",
             "District 10": "Quận 10",
+            "Quận 10": "Quận 10",
             "District 11": "Quận 11",
+            "Quận 11": "Quận 11",
             "Bình Thạnh": "Quận Bình Thạnh",
+            "Quận Bình Thạnh": "Quận Bình Thạnh",
             "Tân Bình": "Quận Tân Bình",
+            "Quận Tân Bình": "Quận Tân Bình",
             "Tân Phú": "Quận Tân Phú",
+            "Quận Tân Phú": "Quận Tân Phú",
             "Phú Nhuận": "Quận Phú Nhuận",
+            "Quận Phú Nhuận": "Quận Phú Nhuận",
             "Gò Vấp": "Quận Gò Vấp",
+            "Quận Gò Vấp": "Quận Gò Vấp",
             "Bình Tân": "Quận Bình Tân",
+            "Quận Bình Tân": "Quận Bình Tân",
             "Củ Chi": "Huyện Củ Chi",
+            "Huyện Củ Chi": "Huyện Củ Chi",
             "Hóc Môn": "Huyện Hóc Môn",
+            "Huyện Hóc Môn": "Huyện Hóc Môn",
             "Bình Chánh": "Huyện Bình Chánh",
+            "Huyện Bình Chánh": "Huyện Bình Chánh",
             "Nhà Bè": "Huyện Nhà Bè",
+            "Huyện Nhà Bè": "Huyện Nhà Bè",
             "Cần Giờ": "Huyện Cần Giờ",
-          };
-          districtName = districtMapping[districtName] || districtName;
+            "Huyện Cần Giờ": "Huyện Cần Giờ",
+          }
+          districtName = districtMapping[districtName] || districtName
 
           if (wardName && !wardName.toLowerCase().startsWith("phường")) {
-            wardName = `Phường ${wardName}`;
+            wardName = `Phường ${wardName}`
           }
 
-          const matchedDistrict = districts.find(
-            (d) => d.DistrictName.toLowerCase().includes(districtName.toLowerCase())
-          );
-          if (matchedDistrict) {
-            const fetchedWards = await fetchWards(matchedDistrict.DistrictID);
-            const matchedWard = fetchedWards.find(
-              (w) => w.WardName.toLowerCase().includes(wardName.toLowerCase())
-            );
+          console.log("After mapping (address):", { districtName, wardName })
 
-            console.log("Matched District (from address):", matchedDistrict);
-            console.log("Matched Ward (from address):", matchedWard);
+          const matchedDistrict = districts.find(
+            (d) => d.DistrictName.toLowerCase().trim() === districtName.toLowerCase().trim(),
+          )
+          if (matchedDistrict) {
+            console.log("Matched District (from address):", matchedDistrict)
+            const fetchedWards = await fetchWards(matchedDistrict.DistrictID)
+            console.log("Fetched Wards (from address):", fetchedWards)
+            const matchedWard = fetchedWards.find((w) => w.WardName.toLowerCase().includes(wardName.toLowerCase()))
+
+            console.log("Matched Ward (from address):", matchedWard)
 
             if (matchedWard) {
               setFormData((prev) => ({
                 ...prev,
                 districtId: matchedDistrict.DistrictID,
                 wardCode: matchedWard.WardCode,
-              }));
+              }))
             } else {
               setFormData((prev) => ({
                 ...prev,
                 districtId: matchedDistrict.DistrictID,
                 wardCode: "",
-              }));
+              }))
               notification.error({
                 message: "Không tìm thấy phường/xã",
-                description: "Vui lòng chọn phường/xã từ danh sách",
-              });
-            }
-
-            if (mapRef.current) {
-              if (route) {
-                mapRef.current.removeControl(route);
-              }
-              const routingControl = L.Routing.control({
-                waypoints: [
-                  L.latLng(STORE_LOCATION.lat, STORE_LOCATION.lng),
-                  L.latLng(parseFloat(lat), parseFloat(lon)),
-                ],
-                routeWhileDragging: true,
-                show: false,
-                lineOptions: {
-                  styles: [{ color: "#ff7d01", weight: 4 }],
-                },
-              }).addTo(mapRef.current);
-
-              routingControl.on('routesfound', (e) => {
-                console.log("Tuyến đường được tìm thấy (từ địa chỉ):", e.routes[0].summary);
-              }).on('routingerror', (e) => {
-                console.error("Lỗi định tuyến (từ địa chỉ):", e.error);
-                notification.error({
-                  message: "Lỗi định tuyến",
-                  description: "Không thể vẽ tuyến đường. Vui lòng thử lại.",
-                });
-              });
-
-              setRoute(routingControl);
+                description: "Vui lòng chọn phường/xã từ danh sách hoặc nhập địa chỉ cụ thể hơn",
+              })
             }
           } else {
-            console.warn("Không tìm thấy quận/huyện khớp (từ địa chỉ):", districtName);
+            console.warn("Không tìm thấy quận/huyện khớp (từ địa chỉ):", districtName)
             notification.error({
               message: "Không tìm thấy quận/huyện",
-              description: "Vui lòng chọn quận/huyện từ danh sách",
-            });
+              description: "Vui lòng nhập địa chỉ bao gồm quận/huyện hoặc chọn từ danh sách",
+            })
             setFormData((prev) => ({
               ...prev,
               districtId: "",
               wardCode: "",
-            }));
+            }))
           }
+        } else {
+          console.warn("Không tìm thấy địa chỉ từ Nominatim:", address)
+          notification.error({
+            message: "Không tìm thấy địa chỉ",
+            description: "Vui lòng nhập địa chỉ cụ thể hơn (bao gồm quận/huyện, TP.HCM)",
+          })
+          setFormData((prev) => ({
+            ...prev,
+            districtId: "",
+            wardCode: "",
+          }))
         }
       } catch (error) {
-        console.error("Lỗi khi tìm địa chỉ:", error);
+        console.error("Lỗi khi tìm địa chỉ:", error)
+        notification.error({
+          message: "Lỗi tìm kiếm địa chỉ",
+          description: "Không thể xử lý địa chỉ. Vui lòng thử lại hoặc chọn từ danh sách.",
+        })
         setFormData((prev) => ({
           ...prev,
           districtId: "",
           wardCode: "",
-        }));
+        }))
       }
     }
-  };
+  }
 
   useEffect(() => {
-    if (formData.districtId && !isNaN(parseInt(formData.districtId))) {
-      console.log("useEffect: Gọi fetchWards và fetchAvailableServices với districtId:", formData.districtId);
-      fetchWards(formData.districtId);
-      fetchAvailableServices();
+    if (formData.districtId && !isNaN(Number.parseInt(formData.districtId))) {
+      console.log("useEffect: Gọi fetchWards và fetchAvailableServices với districtId:", formData.districtId)
+      fetchWards(formData.districtId)
+      fetchAvailableServices()
     } else {
-      setWards([]); // Xóa danh sách wards nếu districtId không hợp lệ
-      setAvailableServices([]); // Xóa danh sách dịch vụ
-      setShippingFee(0); // Đặt lại phí vận chuyển
+      setWards([])
+      setAvailableServices([])
+      setShippingFee(0)
     }
-  }, [formData.districtId]);
+  }, [formData.districtId])
 
   useEffect(() => {
     if (formData.districtId && formData.wardCode && availableServices.length > 0) {
-      console.log("useEffect: Gọi calculateShippingFee");
-      calculateShippingFee();
+      console.log("useEffect: Gọi calculateShippingFee")
+      calculateShippingFee()
+    } else {
+      setShippingFee(0)
     }
-  }, [formData.districtId, formData.wardCode, availableServices]);
+  }, [formData.districtId, formData.wardCode, availableServices])
 
   useEffect(() => {
     socket.on("connect", () => {
-      console.log("Kết nối với server qua WebSocket");
-    });
+      console.log("Kết nối với server qua WebSocket")
+    })
 
     socket.on("billCreated", (response) => {
-      console.log("Phản hồi từ server:", response);
+      console.log("Phản hồi từ server:", response)
       if (response.status === "success" && response.data?._id) {
-        clearCart();
-        navigate(`/success?orderId=${response.data._id}`);
+        clearCart()
+        navigate(`/success?orderId=${response.data._id}`)
       } else {
-        alert("Lỗi khi tạo hóa đơn");
+        alert("Lỗi khi tạo hóa đơn")
       }
-    });
+    })
 
     return () => {
-      socket.off("connect");
-      socket.off("billCreated");
-    };
-  }, [navigate, clearCart]);
+      socket.off("connect")
+      socket.off("billCreated")
+    }
+  }, [navigate, clearCart])
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const finalTotal = totalPrice1 + shippingFee - (discount || 0) - (pointsUsed || 0);
+    e.preventDefault()
+    const finalTotal = totalPrice1 + shippingFee - (discount || 0) - (pointsUsed || 0)
     const billData = {
       fullName: formData.fullName,
-      address_shipment: `${formData.address}, ${wards.find(w => w.WardCode === formData.wardCode)?.WardName || ''}, ${districts.find(d => d.DistrictID === parseInt(formData.districtId))?.DistrictName || ''}`,
+      address_shipment: `${formData.address}, ${wards.find((w) => w.WardCode === formData.wardCode)?.WardName || ""}, ${districts.find((d) => d.DistrictID === Number.parseInt(formData.districtId))?.DistrictName || ""}`,
       phone_shipment: formData.phone,
       ship: shippingFee,
       total_price: finalTotal,
@@ -599,44 +672,41 @@ const Checkout = () => {
         })),
       })),
       note: formData.note || "",
-    };
+    }
     if (userProfile?._id) {
-      billData.account = userProfile._id;
+      billData.account = userProfile._id
     }
 
     if (paymentMethod === "cod") {
-      socket.emit("createBill", billData);
+      socket.emit("createBill", billData)
     } else if (paymentMethod === "online") {
       try {
-        localStorage.setItem("pendingBillData", JSON.stringify(billData));
-        const response = await axios.post(
-          "http://localhost:8080/create-payment-link",
-          {
-            amount: finalTotal,
-            returnUrl: "http://localhost:3000/success",
-            cancelUrl: "http://localhost:3000/checkout",
-          }
-        );
+        localStorage.setItem("pendingBillData", JSON.stringify(billData))
+        const response = await axios.post("http://localhost:8080/create-payment-link", {
+          amount: finalTotal,
+          returnUrl: "http://localhost:3000/success",
+          cancelUrl: "http://localhost:3000/checkout",
+        })
 
         if (response.data && response.data.paymentLink) {
-          window.location.href = response.data.paymentLink;
+          window.location.href = response.data.paymentLink
         } else {
-          alert("Không thể tạo liên kết thanh toán.");
+          alert("Không thể tạo liên kết thanh toán.")
         }
       } catch (error) {
-        console.error("Lỗi khi tạo liên kết thanh toán:", error);
-        alert("Đã xảy ra lỗi khi tạo liên kết thanh toán.");
+        console.error("Lỗi khi tạo liên kết thanh toán:", error)
+        alert("Đã xảy ra lỗi khi tạo liên kết thanh toán.")
       }
     }
-  };
+  }
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
     setFormData({
       ...formData,
       [name]: value,
-    });
-  };
+    })
+  }
 
   useEffect(() => {
     if (userProfile) {
@@ -647,63 +717,60 @@ const Checkout = () => {
         note: "",
         districtId: "",
         wardCode: "",
-      });
+      })
     }
-  }, [userProfile]);
+  }, [userProfile])
 
   const totalPrice1 = cart.reduce((acc, item) => {
-    const totalAddPrice = item.options.reduce(
-      (optionAcc, opt) => optionAcc + (opt.addPrice || 0),
-      0
-    );
-    return acc + (item.price + totalAddPrice) * item.quantity;
-  }, 0);
+    const totalAddPrice = item.options.reduce((optionAcc, opt) => optionAcc + (opt.addPrice || 0), 0)
+    return acc + (item.price + totalAddPrice) * item.quantity
+  }, 0)
 
-  const finalTotal = totalPrice1 + shippingFee - (discount || 0) - (pointsUsed || 0);
+  const finalTotal = totalPrice1 + shippingFee - (discount || 0) - (pointsUsed || 0)
 
   const getOptionName = async (optionalId) => {
     if (!optionals || optionals.length === 0) {
-      return "Không tìm thấy tên tùy chọn";
+      return "Không tìm thấy tên tùy chọn"
     }
-    const option = optionals.find((opt) => opt._id === optionalId);
+    const option = optionals.find((opt) => opt._id === optionalId)
 
     dispatch(getChoicesByOptionalId({ optionalId, jwt }))
       .then((response) => {
         setChoices((prevChoices) => ({
           ...prevChoices,
           [optionalId]: response,
-        }));
+        }))
       })
       .catch((error) => {
-        console.error("Lỗi khi lấy lựa chọn:", error);
-      });
+        console.error("Lỗi khi lấy lựa chọn:", error)
+      })
 
-    return option ? option.name : "";
-  };
+    return option ? option.name : ""
+  }
 
   const getChoiceName = (optionalId, choiceId) => {
-    const choiceList = choices[optionalId];
+    const choiceList = choices[optionalId]
     if (!choiceList || choiceList.length === 0) {
-      return "";
+      return ""
     }
-    const choice = choiceList.find((ch) => ch._id === choiceId);
-    return choice ? choice.name : "Không có tên lựa chọn";
-  };
+    const choice = choiceList.find((ch) => ch._id === choiceId)
+    return choice ? choice.name : "Không có tên lựa chọn"
+  }
 
   useEffect(() => {
     const fetchOptionNames = async () => {
-      const names = {};
+      const names = {}
       for (const item of cart) {
         for (const opt of item.options) {
-          names[opt.optionId] = await getOptionName(opt.optionId);
+          names[opt.optionId] = await getOptionName(opt.optionId)
         }
       }
-    };
+    }
 
     if (cart.length > 0) {
-      fetchOptionNames();
+      fetchOptionNames()
     }
-  }, [cart, optionals]);
+  }, [cart, optionals])
 
   return (
     <div className="container mx-auto p-8 mt-24 mb-12 flex flex-col">
@@ -807,34 +874,17 @@ const Checkout = () => {
               style={{ marginBottom: "16px" }}
             />
             <div className="mb-6">
-              <label className="text-lg font-semibold mb-2 block">
-                Phương thức thanh toán
-              </label>
+              <label className="text-lg font-semibold mb-2 block">Phương thức thanh toán</label>
               <RadioGroup
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
                 sx={{ display: "flex", flexDirection: "column", gap: 1 }}
               >
-                <FormControlLabel
-                  value="cod"
-                  control={<Radio />}
-                  label="Thanh toán khi nhận hàng"
-                  sx={{ margin: 0 }}
-                />
-                <FormControlLabel
-                  value="online"
-                  control={<Radio />}
-                  label="Thanh toán online"
-                  sx={{ margin: 0 }}
-                />
+                <FormControlLabel value="cod" control={<Radio />} label="Thanh toán khi nhận hàng" sx={{ margin: 0 }} />
+                <FormControlLabel value="online" control={<Radio />} label="Thanh toán online" sx={{ margin: 0 }} />
               </RadioGroup>
             </div>
-            <Button
-              fullWidth
-              variant="contained"
-              type="submit"
-              style={{ color: "#fff", backgroundColor: "#ff7d01" }}
-            >
+            <Button fullWidth variant="contained" type="submit" style={{ color: "#fff", backgroundColor: "#ff7d01" }}>
               Thanh toán {finalTotal ? finalTotal.toLocaleString() : "0"} đ
             </Button>
           </form>
@@ -844,10 +894,6 @@ const Checkout = () => {
               center={[STORE_LOCATION.lat, STORE_LOCATION.lng]}
               zoom={14}
               style={{ height: "400px", width: "100%" }}
-              whenCreated={(map) => {
-                console.log("Map initialized");
-                mapRef.current = map;
-              }}
             >
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -861,6 +907,7 @@ const Checkout = () => {
                   <Popup>Giao hàng</Popup>
                 </Marker>
               )}
+              {selectedLocation && <RoutingMachine destination={selectedLocation} />}
               <MapClickHandler />
             </MapContainer>
           </div>
@@ -870,34 +917,19 @@ const Checkout = () => {
             <h2 className="text-xl font-bold mb-4">{totalQuantity} MÓN</h2>
             {cart.length > 0 ? (
               cart.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between border rounded-lg p-4 gap-4 mb-4"
-                >
-                  <img
-                    src={item.picture}
-                    alt={item.name}
-                    className="w-16 h-16 rounded-md"
-                  />
+                <div key={item.id} className="flex items-center justify-between border rounded-lg p-4 gap-4 mb-4">
+                  <img src={item.picture || "/placeholder.svg"} alt={item.name} className="w-16 h-16 rounded-md" />
                   <div className="flex-grow">
                     <h2 className="text-lg font-semibold">{item.name}</h2>
-                    <button
-                      onClick={() => handleRemove(item.id)}
-                      className="text-sm text-blue-500 hover:underline"
-                    >
+                    <button onClick={() => handleRemove(item.id)} className="text-sm text-blue-500 hover:underline">
                       x {item.quantity}
                     </button>
                     {item.options && item.options.length > 0 && (
                       <div className="text-sm text-gray-500">
                         {item.options.map((option) => (
-                          <div
-                            key={option.optionId}
-                            className="flex justify-between"
-                          >
+                          <div key={option.optionId} className="flex justify-between">
                             {getChoiceName(option.optionId, option.choiceId) || ""}
-                            {option.addPrice
-                              ? ` (+${option.addPrice.toLocaleString()} đ)`
-                              : ""}
+                            {option.addPrice ? ` (+${option.addPrice.toLocaleString()} đ)` : ""}
                           </div>
                         ))}
                       </div>
@@ -907,12 +939,8 @@ const Checkout = () => {
                     {(
                       item.price * item.quantity +
                       item.options.reduce(
-                        (acc, option) =>
-                          acc +
-                          (option.addPrice
-                            ? option.addPrice * item.quantity
-                            : 0),
-                        0
+                        (acc, option) => acc + (option.addPrice ? option.addPrice * item.quantity : 0),
+                        0,
                       )
                     ).toLocaleString()}{" "}
                     đ
@@ -954,7 +982,7 @@ const Checkout = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Checkout;
+export default Checkout
