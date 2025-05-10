@@ -36,19 +36,20 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 })
 
-// Component to handle routing
-const RoutingMachine = ({ destination }) => {
+// Component để xử lý tính toán tuyến đường và phí giao hàng
+const RoutingMachine = ({ destination, setShippingFee }) => {
   const map = useMap()
   const routingControlRef = useRef(null)
   const STORE_LOCATION = {
     lat: 10.850317,
     lng: 106.772936,
   }
+  const SHIPPING_RATE_PER_KM = 3000 // 3,000 VND/km
 
   useEffect(() => {
     if (!destination) return
 
-    // Clean up previous routing control if it exists
+    // Xóa tuyến đường cũ nếu có
     if (routingControlRef.current) {
       map.removeControl(routingControlRef.current)
     }
@@ -65,14 +66,29 @@ const RoutingMachine = ({ destination }) => {
           serviceUrl: "https://router.project-osrm.org/route/v1",
           profile: "driving",
         }),
-        createMarker: () => null, // Don't create markers, we'll handle them separately
+        createMarker: () => null, // Không tạo marker, chúng ta sẽ tự xử lý
       }).addTo(map)
 
       routingControl.on("routesfound", (e) => {
         const routes = e.routes
         const summary = routes[0].summary
+        const distanceInKm = summary.totalDistance / 1000 // Chuyển đổi từ mét sang km
+        const roundedDistance = Math.ceil(distanceInKm) // Làm tròn lên
+        const fee = roundedDistance * SHIPPING_RATE_PER_KM // Tính phí giao hàng
+
         console.log("Tuyến đường được tìm thấy:", summary)
-        // You could update the shipping fee based on the distance here
+        console.log("Khoảng cách:", roundedDistance, "km")
+        console.log("Phí giao hàng:", fee, "VND")
+
+        // Cập nhật phí giao hàng
+        setShippingFee(fee)
+
+        // Hiển thị thông báo
+        notification.success({
+          message: "Đã tính phí giao hàng",
+          description: `Khoảng cách: ${roundedDistance} km. Phí giao hàng: ${fee.toLocaleString()} VND (${SHIPPING_RATE_PER_KM.toLocaleString()} VND/km)`,
+          duration: 5,
+        })
       })
 
       routingControl.on("routingerror", (e) => {
@@ -97,7 +113,7 @@ const RoutingMachine = ({ destination }) => {
         map.removeControl(routingControlRef.current)
       }
     }
-  }, [map, destination])
+  }, [map, destination, setShippingFee])
 
   return null
 }
@@ -131,6 +147,7 @@ const Checkout = () => {
   const [shippingFee, setShippingFee] = useState(0)
   const [availableServices, setAvailableServices] = useState([])
   const [selectedLocation, setSelectedLocation] = useState(null)
+  const [isCalculatingFee, setIsCalculatingFee] = useState(false)
 
   const GHN_API_TOKEN = "2d698e94-2c17-11f0-a0cd-12f647571c0a"
   const GHN_SHOP_ID = "5767786"
@@ -248,67 +265,6 @@ const Checkout = () => {
     }
   }
 
-  // Tính phí vận chuyển bằng API GHN
-  const calculateShippingFee = async () => {
-    if (!formData.districtId || !formData.wardCode || availableServices.length === 0) {
-      console.warn("Không thể tính phí vận chuyển: Thiếu districtId, wardCode hoặc availableServices", {
-        districtId: formData.districtId,
-        wardCode: formData.wardCode,
-        availableServices,
-      })
-      return
-    }
-
-    try {
-      console.log("Gọi calculateShippingFee với:", {
-        districtId: formData.districtId,
-        wardCode: formData.wardCode,
-        serviceId: availableServices[0]?.service_id,
-      })
-      const totalWeight = cart.reduce((acc, item) => acc + (item.weight || 1000), 0)
-      const response = await axios.post(
-        `${GHN_API_BASE_URL}/shiip/public-api/v2/shipping-order/fee`,
-        {
-          from_district_id: STORE_LOCATION.districtId,
-          from_ward_code: STORE_LOCATION.wardCode,
-          to_district_id: Number.parseInt(formData.districtId),
-          to_ward_code: formData.wardCode,
-          service_id: availableServices[0]?.service_id || 53320,
-          weight: totalWeight,
-          length: 30,
-          width: 20,
-          height: 20,
-          insurance_value: totalPrice,
-          items: cart.map((item) => ({
-            name: item.name,
-            quantity: item.quantity,
-            weight: item.weight || 1000,
-          })),
-        },
-        {
-          headers: {
-            Token: GHN_API_TOKEN,
-            ShopId: GHN_SHOP_ID,
-            "Content-Type": "application/json",
-          },
-        },
-      )
-      if (response.data.code === 200) {
-        console.log("Phí vận chuyển:", response.data.data.total)
-        setShippingFee(response.data.data.total)
-      } else {
-        throw new Error(response.data.message || "Lỗi khi tính phí vận chuyển")
-      }
-    } catch (error) {
-      console.error("Lỗi khi tính phí vận chuyển:", error.response?.data || error.message)
-      setShippingFee(0)
-      notification.error({
-        message: "Không thể tính phí giao hàng",
-        description: error.response?.data?.message || "Vui lòng kiểm tra token API hoặc Shop ID",
-      })
-    }
-  }
-
   // Component để xử lý sự kiện nhấp chuột trên bản đồ
   const MapClickHandler = () => {
     const map = useMap()
@@ -320,6 +276,7 @@ const Checkout = () => {
         const lng = e.latlng.lng
         console.log("Map clicked:", { lat, lng })
         setSelectedLocation({ lat, lng })
+        setIsCalculatingFee(true)
 
         try {
           const response = await axios.get(
@@ -453,6 +410,8 @@ const Checkout = () => {
             districtId: "",
             wardCode: "",
           })
+        } finally {
+          setIsCalculatingFee(false)
         }
       })
 
@@ -615,18 +574,8 @@ const Checkout = () => {
     } else {
       setWards([])
       setAvailableServices([])
-      setShippingFee(0)
     }
   }, [formData.districtId])
-
-  useEffect(() => {
-    if (formData.districtId && formData.wardCode && availableServices.length > 0) {
-      console.log("useEffect: Gọi calculateShippingFee")
-      calculateShippingFee()
-    } else {
-      setShippingFee(0)
-    }
-  }, [formData.districtId, formData.wardCode, availableServices])
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -890,26 +839,39 @@ const Checkout = () => {
           </form>
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-2">Chọn vị trí giao hàng trên bản đồ</h3>
-            <MapContainer
-              center={[STORE_LOCATION.lat, STORE_LOCATION.lng]}
-              zoom={14}
-              style={{ height: "400px", width: "100%" }}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
-              <Marker position={[STORE_LOCATION.lat, STORE_LOCATION.lng]}>
-                <Popup>Cửa hàng</Popup>
-              </Marker>
-              {selectedLocation && (
-                <Marker position={[selectedLocation.lat, selectedLocation.lng]}>
-                  <Popup>Giao hàng</Popup>
-                </Marker>
+            <div className="relative">
+              {isCalculatingFee && (
+                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-10 rounded-lg">
+                  <div className="bg-white p-4 rounded-lg shadow-lg">
+                    <p className="text-center">Đang tính phí giao hàng...</p>
+                  </div>
+                </div>
               )}
-              {selectedLocation && <RoutingMachine destination={selectedLocation} />}
-              <MapClickHandler />
-            </MapContainer>
+              <MapContainer
+                center={[STORE_LOCATION.lat, STORE_LOCATION.lng]}
+                zoom={14}
+                style={{ height: "400px", width: "100%" }}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <Marker position={[STORE_LOCATION.lat, STORE_LOCATION.lng]}>
+                  <Popup>Cửa hàng</Popup>
+                </Marker>
+                {selectedLocation && (
+                  <Marker position={[selectedLocation.lat, selectedLocation.lng]}>
+                    <Popup>Giao hàng</Popup>
+                  </Marker>
+                )}
+                {selectedLocation && <RoutingMachine destination={selectedLocation} setShippingFee={setShippingFee} />}
+                <MapClickHandler />
+              </MapContainer>
+              <div className="mt-2 text-sm text-gray-600">
+                <p>* Phí giao hàng: 3,000 VND/km (làm tròn lên)</p>
+                <p>* Nhấp vào bản đồ để chọn vị trí giao hàng và tính phí tự động</p>
+              </div>
+            </div>
           </div>
         </div>
         <div className="w-1/2">
