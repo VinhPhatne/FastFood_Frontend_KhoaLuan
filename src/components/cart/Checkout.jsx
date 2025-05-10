@@ -265,6 +265,185 @@ const Checkout = () => {
     }
   }
 
+  // Hàm tạo mảng các tên quận/huyện có thể từ dữ liệu địa chỉ
+  const getDistrictNames = (addressComponents) => {
+    const possibleNames = []
+
+    // Thêm các giá trị có thể từ addressComponents
+    if (addressComponents.suburb) possibleNames.push(addressComponents.suburb)
+    if (addressComponents.city_district) possibleNames.push(addressComponents.city_district)
+    if (addressComponents.city) possibleNames.push(addressComponents.city)
+    if (addressComponents.county) possibleNames.push(addressComponents.county)
+    if (addressComponents.state_district) possibleNames.push(addressComponents.state_district)
+
+    // Thêm các biến thể có thể có
+    const districtMapping = {
+      "Thủ Đức": ["Thành phố Thủ Đức", "Thu Duc City", "Thủ Đức City"],
+      "Ho Chi Minh City": ["Thành phố Thủ Đức"],
+      "District 1": ["Quận 1"],
+      "Quận 1": ["District 1", "Bến Nghé"],
+      "Bến Nghé": ["Quận 1"],
+      "District 3": ["Quận 3"],
+      "Quận 3": ["District 3"],
+      "District 4": ["Quận 4"],
+      "Quận 4": ["District 4"],
+      "District 5": ["Quận 5"],
+      "Quận 5": ["District 5"],
+      "District 6": ["Quận 6"],
+      "Quận 6": ["District 6"],
+      "District 7": ["Quận 7"],
+      "Quận 7": ["District 7"],
+      "District 8": ["Quận 8"],
+      "Quận 8": ["District 8"],
+      "District 10": ["Quận 10"],
+      "Quận 10": ["District 10"],
+      "District 11": ["Quận 11"],
+      "Quận 11": ["District 11"],
+      "Bình Thạnh": ["Quận Bình Thạnh"],
+      "Quận Bình Thạnh": ["Bình Thạnh"],
+      "Tân Bình": ["Quận Tân Bình"],
+      "Quận Tân Bình": ["Tân Bình"],
+      "Tân Phú": ["Quận Tân Phú"],
+      "Quận Tân Phú": ["Tân Phú"],
+      "Phú Nhuận": ["Quận Phú Nhuận"],
+      "Quận Phú Nhuận": ["Phú Nhuận"],
+      "Gò Vấp": ["Quận Gò Vấp"],
+      "Quận Gò Vấp": ["Gò Vấp"],
+      "Bình Tân": ["Quận Bình Tân"],
+      "Quận Bình Tân": ["Bình Tân"],
+      "Củ Chi": ["Huyện Củ Chi"],
+      "Huyện Củ Chi": ["Củ Chi"],
+      "Hóc Môn": ["Huyện Hóc Môn"],
+      "Huyện Hóc Môn": ["Hóc Môn"],
+      "Bình Chánh": ["Huyện Bình Chánh"],
+      "Huyện Bình Chánh": ["Bình Chánh"],
+      "Nhà Bè": ["Huyện Nhà Bè"],
+      "Huyện Nhà Bè": ["Nhà Bè"],
+      "Cần Giờ": ["Huyện Cần Giờ"],
+      "Huyện Cần Giờ": ["Cần Giờ"],
+    }
+
+    // Thêm các biến thể vào mảng
+    for (const name of [...possibleNames]) {
+      if (districtMapping[name]) {
+        possibleNames.push(...districtMapping[name])
+      }
+    }
+
+    // Thêm các tiền tố phổ biến
+    const prefixes = ["Quận ", "Huyện ", "Thành phố "]
+    const basenames = [...possibleNames]
+
+    for (const name of basenames) {
+      // Thêm phiên bản không có tiền tố
+      for (const prefix of prefixes) {
+        if (name.startsWith(prefix)) {
+          possibleNames.push(name.substring(prefix.length))
+        } else {
+          // Thêm phiên bản có tiền tố
+          possibleNames.push(prefix + name)
+        }
+      }
+    }
+
+    // Loại bỏ các giá trị trùng lặp và rỗng
+    return [...new Set(possibleNames)].filter((name) => name && name.trim() !== "")
+  }
+
+  // Hàm tạo mảng các tên phường/xã có thể từ dữ liệu địa chỉ
+  const getWardNames = (addressComponents) => {
+    const possibleNames = []
+
+    // Thêm các giá trị có thể từ addressComponents
+    if (addressComponents.quarter) possibleNames.push(addressComponents.quarter)
+    if (addressComponents.village) possibleNames.push(addressComponents.village)
+    if (addressComponents.neighbourhood) possibleNames.push(addressComponents.neighbourhood)
+    if (addressComponents.suburb) possibleNames.push(addressComponents.suburb)
+
+    // Thêm các tiền tố phổ biến
+    const prefixes = ["Phường ", "Xã ", ""]
+    const basenames = [...possibleNames]
+
+    for (const name of basenames) {
+      if (!name) continue
+
+      // Thêm phiên bản không có tiền tố
+      for (const prefix of prefixes) {
+        if (name.startsWith(prefix) && prefix !== "") {
+          possibleNames.push(name.substring(prefix.length))
+        } else if (prefix !== "") {
+          // Thêm phiên bản có tiền tố
+          possibleNames.push(prefix + name)
+        }
+      }
+    }
+
+    // Loại bỏ các giá trị trùng lặp và rỗng
+    return [...new Set(possibleNames)].filter((name) => name && name.trim() !== "")
+  }
+
+  // Hàm tìm quận/huyện phù hợp từ mảng tên có thể
+  const findMatchingDistrict = (districtNames, districtsList) => {
+    if (!districtNames.length || !districtsList.length) return null
+
+    // Chuẩn hóa tên quận/huyện để so sánh
+    const normalizedDistrictNames = districtNames.map((name) =>
+      name
+        .toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, ""),
+    )
+
+    // Tìm quận/huyện phù hợp
+    for (const district of districtsList) {
+      const normalizedDistrictName = district.DistrictName.toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+
+      if (
+        normalizedDistrictNames.some(
+          (name) => normalizedDistrictName.includes(name) || name.includes(normalizedDistrictName),
+        )
+      ) {
+        return district
+      }
+    }
+
+    return null
+  }
+
+  // Hàm tìm phường/xã phù hợp từ mảng tên có thể
+  const findMatchingWard = (wardNames, wardsList) => {
+    if (!wardNames.length || !wardsList.length) return null
+
+    // Chuẩn hóa tên phường/xã để so sánh
+    const normalizedWardNames = wardNames.map((name) =>
+      name
+        .toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, ""),
+    )
+
+    // Tìm phường/xã phù hợp
+    for (const ward of wardsList) {
+      const normalizedWardName = ward.WardName.toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+
+      for (const name of normalizedWardNames) {
+        if (normalizedWardName.includes(name) || name.includes(normalizedWardName)) {
+          return ward
+        }
+      }
+    }
+
+    return null
+  }
+
   // Component để xử lý sự kiện nhấp chuột trên bản đồ
   const MapClickHandler = () => {
     const map = useMap()
@@ -288,78 +467,23 @@ const Checkout = () => {
             const address = response.data.display_name
             const addressComponents = response.data.address
 
-            let districtName =
-              addressComponents.suburb || addressComponents.city_district || addressComponents.city || ""
-            let wardName =
-              addressComponents.quarter || addressComponents.village || addressComponents.neighbourhood || ""
+            // Tạo mảng các tên quận/huyện và phường/xã có thể
+            const districtNames = getDistrictNames(addressComponents)
+            const wardNames = getWardNames(addressComponents)
 
-            console.log("Nominatim response:", { districtName, wardName, addressComponents })
+            console.log("Possible district names:", districtNames)
+            console.log("Possible ward names:", wardNames)
 
-            const districtMapping = {
-              "Thủ Đức": "Thành phố Thủ Đức",
-              "Thu Duc City": "Thành phố Thủ Đức",
-              "Thủ Đức City": "Thành phố Thủ Đức",
-              "Ho Chi Minh City": "Thành phố Thủ Đức",
-              "District 1": "Quận 1",
-              "Quận 1": "Quận 1",
-              "Bến Nghé": "Quận 1",
-              "District 3": "Quận 3",
-              "Quận 3": "Quận 3",
-              "District 4": "Quận 4",
-              "Quận 4": "Quận 4",
-              "District 5": "Quận 5",
-              "Quận 5": "Quận 5",
-              "District 6": "Quận 6",
-              "Quận 6": "Quận 6",
-              "District 7": "Quận 7",
-              "Quận 7": "Quận 7",
-              "District 8": "Quận 8",
-              "Quận 8": "Quận 8",
-              "District 10": "Quận 10",
-              "Quận 10": "Quận 10",
-              "District 11": "Quận 11",
-              "Quận 11": "Quận 11",
-              "Bình Thạnh": "Quận Bình Thạnh",
-              "Quận Bình Thạnh": "Quận Bình Thạnh",
-              "Tân Bình": "Quận Tân Bình",
-              "Quận Tân Bình": "Quận Tân Bình",
-              "Tân Phú": "Quận Tân Phú",
-              "Quận Tân Phú": "Quận Tân Phú",
-              "Phú Nhuận": "Quận Phú Nhuận",
-              "Quận Phú Nhuận": "Quận Phú Nhuận",
-              "Gò Vấp": "Quận Gò Vấp",
-              "Quận Gò Vấp": "Quận Gò Vấp",
-              "Bình Tân": "Quận Bình Tân",
-              "Quận Bình Tân": "Quận Bình Tân",
-              "Củ Chi": "Huyện Củ Chi",
-              "Huyện Củ Chi": "Huyện Củ Chi",
-              "Hóc Môn": "Huyện Hóc Môn",
-              "Huyện Hóc Môn": "Huyện Hóc Môn",
-              "Bình Chánh": "Huyện Bình Chánh",
-              "Huyện Bình Chánh": "Huyện Bình Chánh",
-              "Nhà Bè": "Huyện Nhà Bè",
-              "Huyện Nhà Bè": "Huyện Nhà Bè",
-              "Cần Giờ": "Huyện Cần Giờ",
-              "Huyện Cần Giờ": "Huyện Cần Giờ",
-            }
-            districtName = districtMapping[districtName] || districtName
+            // Tìm quận/huyện phù hợp
+            const matchedDistrict = findMatchingDistrict(districtNames, districts)
 
-            if (wardName && !wardName.toLowerCase().startsWith("phường")) {
-              wardName = `Phường ${wardName}`
-            }
-
-            console.log("After mapping:", { districtName, wardName })
-
-            const matchedDistrict = districts.find(
-              (d) => d.DistrictName.toLowerCase().trim() === districtName.toLowerCase().trim(),
-            )
             if (matchedDistrict) {
               console.log("Matched District:", matchedDistrict)
               const fetchedWards = await fetchWards(matchedDistrict.DistrictID)
               console.log("Fetched Wards:", fetchedWards)
 
-              const matchedWard = fetchedWards.find((w) => w.WardName.toLowerCase().includes(wardName.toLowerCase()))
-
+              // Tìm phường/xã phù hợp
+              const matchedWard = findMatchingWard(wardNames, fetchedWards)
               console.log("Matched Ward:", matchedWard)
 
               if (matchedWard) {
@@ -370,9 +494,9 @@ const Checkout = () => {
                   wardCode: matchedWard.WardCode,
                 })
               } else {
-                console.warn("Không tìm thấy phường/xã khớp:", wardName)
-                notification.error({
-                  message: "Không tìm thấy phường/xã",
+                console.warn("Không tìm thấy phường/xã khớp:", wardNames)
+                notification.warning({
+                  message: "Không tìm thấy phường/xã chính xác",
                   description: "Vui lòng chọn phường/xã từ danh sách hoặc nhập thủ công",
                 })
                 setFormData({
@@ -383,9 +507,9 @@ const Checkout = () => {
                 })
               }
             } else {
-              console.warn("Không tìm thấy quận/huyện khớp:", districtName)
-              notification.error({
-                message: "Không tìm thấy quận/huyện",
+              console.warn("Không tìm thấy quận/huyện khớp:", districtNames)
+              notification.warning({
+                message: "Không tìm thấy quận/huyện chính xác",
                 description: "Vui lòng chọn quận/huyện từ danh sách hoặc nhập thủ công",
               })
               setFormData({
@@ -439,75 +563,23 @@ const Checkout = () => {
           const { lat, lon, address: addressDetails } = response.data[0]
           setSelectedLocation({ lat: Number.parseFloat(lat), lng: Number.parseFloat(lon) })
 
-          let districtName = addressDetails.county || addressDetails.city_district || addressDetails.city || ""
-          let wardName = addressDetails.village || addressDetails.neighbourhood || addressDetails.suburb || ""
+          // Tạo mảng các tên quận/huyện và phường/xã có thể
+          const districtNames = getDistrictNames(addressDetails)
+          const wardNames = getWardNames(addressDetails)
 
-          console.log("Nominatim response (address):", { districtName, wardName, addressDetails })
+          console.log("Possible district names (from address):", districtNames)
+          console.log("Possible ward names (from address):", wardNames)
 
-          const districtMapping = {
-            "Thủ Đức": "Thành phố Thủ Đức",
-            "Thu Duc City": "Thành phố Thủ Đức",
-            "Thủ Đức City": "Thành phố Thủ Đức",
-            "Ho Chi Minh City": "Thành phố Thủ Đức",
-            "District 1": "Quận 1",
-            "Quận 1": "Quận 1",
-            "Bến Nghé": "Quận 1",
-            "District 3": "Quận 3",
-            "Quận 3": "Quận 3",
-            "District 4": "Quận 4",
-            "Quận 4": "Quận 4",
-            "District 5": "Quận 5",
-            "Quận 5": "Quận 5",
-            "District 6": "Quận 6",
-            "Quận 6": "Quận 6",
-            "District 7": "Quận 7",
-            "Quận 7": "Quận 7",
-            "District 8": "Quận 8",
-            "Quận 8": "Quận 8",
-            "District 10": "Quận 10",
-            "Quận 10": "Quận 10",
-            "District 11": "Quận 11",
-            "Quận 11": "Quận 11",
-            "Bình Thạnh": "Quận Bình Thạnh",
-            "Quận Bình Thạnh": "Quận Bình Thạnh",
-            "Tân Bình": "Quận Tân Bình",
-            "Quận Tân Bình": "Quận Tân Bình",
-            "Tân Phú": "Quận Tân Phú",
-            "Quận Tân Phú": "Quận Tân Phú",
-            "Phú Nhuận": "Quận Phú Nhuận",
-            "Quận Phú Nhuận": "Quận Phú Nhuận",
-            "Gò Vấp": "Quận Gò Vấp",
-            "Quận Gò Vấp": "Quận Gò Vấp",
-            "Bình Tân": "Quận Bình Tân",
-            "Quận Bình Tân": "Quận Bình Tân",
-            "Củ Chi": "Huyện Củ Chi",
-            "Huyện Củ Chi": "Huyện Củ Chi",
-            "Hóc Môn": "Huyện Hóc Môn",
-            "Huyện Hóc Môn": "Huyện Hóc Môn",
-            "Bình Chánh": "Huyện Bình Chánh",
-            "Huyện Bình Chánh": "Huyện Bình Chánh",
-            "Nhà Bè": "Huyện Nhà Bè",
-            "Huyện Nhà Bè": "Huyện Nhà Bè",
-            "Cần Giờ": "Huyện Cần Giờ",
-            "Huyện Cần Giờ": "Huyện Cần Giờ",
-          }
-          districtName = districtMapping[districtName] || districtName
+          // Tìm quận/huyện phù hợp
+          const matchedDistrict = findMatchingDistrict(districtNames, districts)
 
-          if (wardName && !wardName.toLowerCase().startsWith("phường")) {
-            wardName = `Phường ${wardName}`
-          }
-
-          console.log("After mapping (address):", { districtName, wardName })
-
-          const matchedDistrict = districts.find(
-            (d) => d.DistrictName.toLowerCase().trim() === districtName.toLowerCase().trim(),
-          )
           if (matchedDistrict) {
             console.log("Matched District (from address):", matchedDistrict)
             const fetchedWards = await fetchWards(matchedDistrict.DistrictID)
             console.log("Fetched Wards (from address):", fetchedWards)
-            const matchedWard = fetchedWards.find((w) => w.WardName.toLowerCase().includes(wardName.toLowerCase()))
 
+            // Tìm phường/xã phù hợp
+            const matchedWard = findMatchingWard(wardNames, fetchedWards)
             console.log("Matched Ward (from address):", matchedWard)
 
             if (matchedWard) {
@@ -522,15 +594,15 @@ const Checkout = () => {
                 districtId: matchedDistrict.DistrictID,
                 wardCode: "",
               }))
-              notification.error({
-                message: "Không tìm thấy phường/xã",
+              notification.warning({
+                message: "Không tìm thấy phường/xã chính xác",
                 description: "Vui lòng chọn phường/xã từ danh sách hoặc nhập địa chỉ cụ thể hơn",
               })
             }
           } else {
-            console.warn("Không tìm thấy quận/huyện khớp (từ địa chỉ):", districtName)
-            notification.error({
-              message: "Không tìm thấy quận/huyện",
+            console.warn("Không tìm thấy quận/huyện khớp (từ địa chỉ):", districtNames)
+            notification.warning({
+              message: "Không tìm thấy quận/huyện chính xác",
               description: "Vui lòng nhập địa chỉ bao gồm quận/huyện hoặc chọn từ danh sách",
             })
             setFormData((prev) => ({
