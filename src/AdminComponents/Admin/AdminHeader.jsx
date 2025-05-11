@@ -24,6 +24,7 @@ import { getUserProfile, logout } from "../../components/State/Authentication/Ac
 import { useCartContext } from "../../components/cart/CartContext";
 import socket from "../../components/config/socket";
 import styles from "./Header.module.scss";
+import sound from "../../assets/sounds/sound.mp3";
 
 const AdminHeader = () => {
   const navigate = useNavigate();
@@ -44,6 +45,14 @@ const AdminHeader = () => {
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
+  };
+
+  const onMessage = () => {
+    const audio = new Audio(sound);
+    audio.load();
+    audio.play().catch((error) => {
+      console.error("Error playing sound:", error);
+    });
   };
 
   const handleClose = () => {
@@ -103,9 +112,11 @@ const AdminHeader = () => {
   useEffect(() => {
     socket.on("connect", () => {
       console.log("Connected to server via WebSocket");
+      onMessage();
     });
 
     socket.on("order_notification", (newNotification) => {
+      onMessage();
       fetchNotifications();
       notification.success({
         message: "Thông báo mới",
@@ -114,6 +125,7 @@ const AdminHeader = () => {
     });
 
     socket.on("review_notification", (newReview) => {
+      onMessage();
       fetchReviews();
       notification.success({
         message: "Review mới",

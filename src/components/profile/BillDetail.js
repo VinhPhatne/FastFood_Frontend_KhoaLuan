@@ -13,6 +13,7 @@ import RestaurantIcon from '@mui/icons-material/Restaurant';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import StarIcon from '@mui/icons-material/Star';
+import sound from "../../assets/sounds/sound.mp3";
 
 const BillDetail = () => {
   const dispatch = useDispatch();
@@ -49,7 +50,13 @@ const BillDetail = () => {
     fetchData();
 
     socket.on("order_status_updated", (data) => {
+      
       if (data.billId === id) {
+            const audio = new Audio(sound);
+            audio.load();
+            audio.play().catch((error) => {
+              console.error("Error playing sound:", error);
+            });
         setBillData((prev) => ({
           ...prev,
           state: data.newState,

@@ -36,6 +36,7 @@ import { getBills, updateBillStatus } from "../../components/State/Bill/Action";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import socket from "../../components/config/socket"; 
 import { notification } from "antd";
+import sound from "../../assets/sounds/sound.mp3";
 
 const style = {
   position: "absolute",
@@ -88,7 +89,13 @@ const BillTable = () => {
     );
   };
 
-
+  const onMessage = () => {
+    const audio = new Audio(sound);
+    audio.load();
+    audio.play().catch((error) => {
+      console.error("Error playing sound:", error);
+    });
+  };
 
 
   useEffect(() => {
@@ -97,6 +104,7 @@ const BillTable = () => {
     });
   
     socket.on("billCreated", (response) => {
+      onMessage();
       console.log("Server response in BillTable:", response);
       handleSearch();
       notification.success({ message: "Có đơn hàng mới !!!" });
