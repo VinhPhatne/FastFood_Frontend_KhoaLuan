@@ -27,6 +27,7 @@ import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 import "leaflet-routing-machine"
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css"
+import "./index.scss"
 
 // Fix default marker icon issue with Leaflet
 delete L.Icon.Default.prototype._getIconUrl
@@ -66,7 +67,12 @@ const RoutingMachine = ({ destination, setShippingFee }) => {
           serviceUrl: "https://router.project-osrm.org/route/v1",
           profile: "driving",
         }),
-        createMarker: () => null, // Không tạo marker, chúng ta sẽ tự xử lý
+        createMarker: () => null,
+        show: false,
+        showPanel: false,
+        collapsible: true,
+        showAlternatives: false,
+        fitSelectedRoutes: true,
       }).addTo(map)
 
       routingControl.on("routesfound", (e) => {
@@ -99,6 +105,8 @@ const RoutingMachine = ({ destination, setShippingFee }) => {
         })
       })
 
+      routingControl.show()
+
       routingControlRef.current = routingControl
     } catch (error) {
       console.error("Lỗi khi vẽ tuyến đường:", error)
@@ -126,6 +134,7 @@ const Checkout = () => {
     address: "",
     phone: "",
     note: "",
+    provinceId: "",
     districtId: "",
     wardCode: "",
   })
@@ -142,12 +151,14 @@ const Checkout = () => {
     pointsUsed,
   } = state || JSON.parse(localStorage.getItem("checkoutData")) || {}
 
+  const [provinces, setProvinces] = useState([])
   const [districts, setDistricts] = useState([])
   const [wards, setWards] = useState([])
   const [shippingFee, setShippingFee] = useState(0)
   const [availableServices, setAvailableServices] = useState([])
   const [selectedLocation, setSelectedLocation] = useState(null)
   const [isCalculatingFee, setIsCalculatingFee] = useState(false)
+  const [isAddressChanging, setIsAddressChanging] = useState(false) // Thêm state để kiểm soát việc thay đổi địa chỉ
 
   const GHN_API_TOKEN = "2d698e94-2c17-11f0-a0cd-12f647571c0a"
   const GHN_SHOP_ID = "5767786"
@@ -183,19 +194,42 @@ const Checkout = () => {
         description: "Vui lòng cập nhật GHN_SHOP_ID hợp lệ trong mã nguồn",
       })
     } else {
-      fetchDistricts()
+      fetchProvinces()
     }
   }, [dispatch])
 
-  // Lấy danh sách quận/huyện từ GHN
-  const fetchDistricts = async () => {
+  // Lấy danh sách tỉnh/thành phố từ GHN
+  const fetchProvinces = async () => {
     try {
-      const response = await axios.get(`${GHN_API_BASE_URL}/shiip/public-api/master-data/district`, {
+      const response = await axios.get(`${GHN_API_BASE_URL}/shiip/public-api/master-data/province`, {
         headers: { Token: GHN_API_TOKEN, "Content-Type": "application/json" },
       })
       if (response.data.code === 200) {
+        setProvinces(response.data.data)
+        console.log("Provinces fetched:", response.data.data)
+      } else {
+        throw new Error(response.data.message || "Lỗi khi lấy danh sách tỉnh/thành phố")
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách tỉnh/thành phố:", error.response?.data || error.message)
+      notification.error({
+        message: "Không thể tải danh sách tỉnh/thành phố",
+        description: error.response?.data?.message || "Vui lòng kiểm tra token API hoặc kết nối mạng",
+      })
+    }
+  }
+
+  // Lấy danh sách quận/huyện từ GHN dựa trên tỉnh/thành phố đã chọn
+  const fetchDistricts = async (provinceId) => {
+    try {
+      const response = await axios.get(`${GHN_API_BASE_URL}/shiip/public-api/master-data/district`, {
+        headers: { Token: GHN_API_TOKEN, "Content-Type": "application/json" },
+        params: { province_id: Number.parseInt(provinceId) },
+      })
+      if (response.data.code === 200) {
         setDistricts(response.data.data)
-        console.log("Districts fetched:", response.data.data)
+        console.log("Districts fetched for ProvinceID:", provinceId, response.data.data)
+        return response.data.data
       } else {
         throw new Error(response.data.message || "Lỗi khi lấy danh sách quận/huyện")
       }
@@ -205,6 +239,7 @@ const Checkout = () => {
         message: "Không thể tải danh sách quận/huyện",
         description: error.response?.data?.message || "Vui lòng kiểm tra token API hoặc kết nối mạng",
       })
+      return []
     }
   }
 
@@ -263,6 +298,48 @@ const Checkout = () => {
         description: error.response?.data?.message || "Vui lòng kiểm tra token API hoặc Shop ID",
       })
     }
+  }
+
+  // Hàm tạo mảng các tên tỉnh/thành phố có thể từ dữ liệu địa chỉ
+  const getProvinceNames = (addressComponents) => {
+    const possibleNames = []
+
+    if (addressComponents.state) possibleNames.push(addressComponents.state)
+    if (addressComponents.region) possibleNames.push(addressComponents.region)
+    if (addressComponents.province) possibleNames.push(addressComponents.province)
+
+    const provinceMapping = {
+      "Ho Chi Minh": ["Hồ Chí Minh", "TP Hồ Chí Minh", "Thành phố Hồ Chí Minh", "TP.HCM", "TPHCM", "Saigon", "Sài Gòn"],
+      "Ha Noi": ["Hà Nội", "Hanoi", "TP Hà Nội", "Thành phố Hà Nội"],
+      "Da Nang": ["Đà Nẵng", "TP Đà Nẵng", "Thành phố Đà Nẵng"],
+    }
+
+    for (const name of [...possibleNames]) {
+      if (provinceMapping[name]) {
+        possibleNames.push(...provinceMapping[name])
+      }
+    }
+
+    const prefixes = ["Tỉnh ", "Thành phố ", "TP "]
+    const basenames = [...possibleNames]
+
+    for (const name of basenames) {
+      if (!name) continue
+
+      for (const prefix of prefixes) {
+        if (name.startsWith(prefix) && prefix !== "") {
+          possibleNames.push(name.substring(prefix.length))
+        } else if (prefix !== "") {
+          possibleNames.push(prefix + name)
+        }
+      }
+    }
+
+    if (!possibleNames.includes("Hồ Chí Minh")) {
+      possibleNames.push("Hồ Chí Minh", "TP Hồ Chí Minh", "Thành phố Hồ Chí Minh", "TP.HCM", "TPHCM")
+    }
+
+    return [...new Set(possibleNames)].filter((name) => name && name.trim() !== "")
   }
 
   // Hàm tạo mảng các tên quận/huyện có thể từ dữ liệu địa chỉ
@@ -335,11 +412,13 @@ const Checkout = () => {
     const basenames = [...possibleNames]
 
     for (const name of basenames) {
+      if (!name) continue
+
       // Thêm phiên bản không có tiền tố
       for (const prefix of prefixes) {
-        if (name.startsWith(prefix)) {
+        if (name.startsWith(prefix) && prefix !== "") {
           possibleNames.push(name.substring(prefix.length))
-        } else {
+        } else if (prefix !== "") {
           // Thêm phiên bản có tiền tố
           possibleNames.push(prefix + name)
         }
@@ -380,6 +459,39 @@ const Checkout = () => {
 
     // Loại bỏ các giá trị trùng lặp và rỗng
     return [...new Set(possibleNames)].filter((name) => name && name.trim() !== "")
+  }
+
+  // Hàm tìm tỉnh/thành phố phù hợp từ mảng tên có thể
+  const findMatchingProvince = (provinceNames, provincesList) => {
+    if (!provinceNames.length || !provincesList.length) return null
+
+    // Chuẩn hóa tên tỉnh/thành phố để so sánh
+    const normalizedProvinceNames = provinceNames.map((name) =>
+      name
+        .toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, ""),
+    )
+
+    // Tìm tỉnh/thành phố phù hợp
+    for (const province of provincesList) {
+      const normalizedProvinceName = province.ProvinceName.toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+
+      if (
+        normalizedProvinceNames.some(
+          (name) => normalizedProvinceName.includes(name) || name.includes(normalizedProvinceName),
+        )
+      ) {
+        return province
+      }
+    }
+
+    // Mặc định trả về Hồ Chí Minh nếu không tìm thấy
+    return provincesList.find((p) => p.ProvinceName.includes("Hồ Chí Minh"))
   }
 
   // Hàm tìm quận/huyện phù hợp từ mảng tên có thể
@@ -467,54 +579,81 @@ const Checkout = () => {
             const address = response.data.display_name
             const addressComponents = response.data.address
 
-            // Tạo mảng các tên quận/huyện và phường/xã có thể
+            // Tạo mảng các tên tỉnh/thành phố, quận/huyện và phường/xã có thể
+            const provinceNames = getProvinceNames(addressComponents)
             const districtNames = getDistrictNames(addressComponents)
             const wardNames = getWardNames(addressComponents)
 
+            console.log("Possible province names:", provinceNames)
             console.log("Possible district names:", districtNames)
             console.log("Possible ward names:", wardNames)
 
-            // Tìm quận/huyện phù hợp
-            const matchedDistrict = findMatchingDistrict(districtNames, districts)
+            // Tìm tỉnh/thành phố phù hợp
+            const matchedProvince = findMatchingProvince(provinceNames, provinces)
 
-            if (matchedDistrict) {
-              console.log("Matched District:", matchedDistrict)
-              const fetchedWards = await fetchWards(matchedDistrict.DistrictID)
-              console.log("Fetched Wards:", fetchedWards)
+            if (matchedProvince) {
+              console.log("Matched Province:", matchedProvince)
+              const fetchedDistricts = await fetchDistricts(matchedProvince.ProvinceID)
+              console.log("Fetched Districts:", fetchedDistricts)
 
-              // Tìm phường/xã phù hợp
-              const matchedWard = findMatchingWard(wardNames, fetchedWards)
-              console.log("Matched Ward:", matchedWard)
+              // Tìm quận/huyện phù hợp
+              const matchedDistrict = findMatchingDistrict(districtNames, fetchedDistricts)
 
-              if (matchedWard) {
-                setFormData({
-                  ...formData,
-                  address,
-                  districtId: matchedDistrict.DistrictID,
-                  wardCode: matchedWard.WardCode,
-                })
+              if (matchedDistrict) {
+                console.log("Matched District:", matchedDistrict)
+                const fetchedWards = await fetchWards(matchedDistrict.DistrictID)
+                console.log("Fetched Wards:", fetchedWards)
+
+                // Tìm phường/xã phù hợp
+                const matchedWard = findMatchingWard(wardNames, fetchedWards)
+                console.log("Matched Ward:", matchedWard)
+
+                if (matchedWard) {
+                  setFormData({
+                    ...formData,
+                    address,
+                    provinceId: matchedProvince.ProvinceID,
+                    districtId: matchedDistrict.DistrictID,
+                    wardCode: matchedWard.WardCode,
+                  })
+                } else {
+                  console.warn("Không tìm thấy phường/xã khớp:", wardNames)
+                  notification.warning({
+                    message: "Không tìm thấy phường/xã chính xác",
+                    description: "Vui lòng chọn phường/xã từ danh sách hoặc nhập thủ công",
+                  })
+                  setFormData({
+                    ...formData,
+                    address,
+                    provinceId: matchedProvince.ProvinceID,
+                    districtId: matchedDistrict.DistrictID,
+                    wardCode: "",
+                  })
+                }
               } else {
-                console.warn("Không tìm thấy phường/xã khớp:", wardNames)
+                console.warn("Không tìm thấy quận/huyện khớp:", districtNames)
                 notification.warning({
-                  message: "Không tìm thấy phường/xã chính xác",
-                  description: "Vui lòng chọn phường/xã từ danh sách hoặc nhập thủ công",
+                  message: "Không tìm thấy quận/huyện chính xác",
+                  description: "Vui lòng chọn quận/huyện từ danh sách hoặc nhập thủ công",
                 })
                 setFormData({
                   ...formData,
                   address,
-                  districtId: matchedDistrict.DistrictID,
+                  provinceId: matchedProvince.ProvinceID,
+                  districtId: "",
                   wardCode: "",
                 })
               }
             } else {
-              console.warn("Không tìm thấy quận/huyện khớp:", districtNames)
+              console.warn("Không tìm thấy tỉnh/thành phố khớp:", provinceNames)
               notification.warning({
-                message: "Không tìm thấy quận/huyện chính xác",
-                description: "Vui lòng chọn quận/huyện từ danh sách hoặc nhập thủ công",
+                message: "Không tìm thấy tỉnh/thành phố chính xác",
+                description: "Vui lòng chọn tỉnh/thành phố từ danh sách hoặc nhập thủ công",
               })
               setFormData({
                 ...formData,
                 address,
+                provinceId: "",
                 districtId: "",
                 wardCode: "",
               })
@@ -545,33 +684,62 @@ const Checkout = () => {
     return null
   }
 
-  // Xử lý khi nhập địa chỉ thủ công
+  // Xử lý khi nhập địa chỉ chi tiết
   const handleAddressChange = async (e) => {
     const address = e.target.value
-    setFormData({ ...formData, address, districtId: "", wardCode: "" })
 
-    if (address.length > 5) {
-      try {
-        const response = await axios.get(
-          `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(
-            address + ", Ho Chi Minh City, Vietnam",
-          )}&countrycodes=VN&addressdetails=1&bounded=1&viewbox=106.4,10.3,107.0,11.2`,
-        )
-        console.log("Nominatim full response (address):", response.data)
+    // Chỉ cập nhật trường address, giữ nguyên các trường khác
+    setFormData((prev) => ({
+      ...prev,
+      address,
+    }))
+  }
 
-        if (response.data && response.data.length > 0) {
-          const { lat, lon, address: addressDetails } = response.data[0]
-          setSelectedLocation({ lat: Number.parseFloat(lat), lng: Number.parseFloat(lon) })
+  // Xử lý khi blur khỏi ô địa chỉ chi tiết
+  const handleAddressBlur = async (e) => {
+    const address = e.target.value
 
-          // Tạo mảng các tên quận/huyện và phường/xã có thể
-          const districtNames = getDistrictNames(addressDetails)
-          const wardNames = getWardNames(addressDetails)
+    // Nếu địa chỉ quá ngắn thì không tìm kiếm
+    if (address.length <= 5) {
+      return
+    }
 
-          console.log("Possible district names (from address):", districtNames)
-          console.log("Possible ward names (from address):", wardNames)
+    setIsAddressChanging(true)
+
+    try {
+      const response = await axios.get(
+        `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(
+          address + ", Ho Chi Minh City, Vietnam",
+        )}&countrycodes=VN&addressdetails=1&bounded=1&viewbox=106.4,10.3,107.0,11.2`,
+      )
+      console.log("Nominatim full response (address):", response.data)
+
+      if (response.data && response.data.length > 0) {
+        const { lat, lon, address: addressDetails } = response.data[0]
+        const newLocation = { lat: Number.parseFloat(lat), lng: Number.parseFloat(lon) }
+
+        // Cập nhật vị trí đã chọn để vẽ đường đi
+        setSelectedLocation(newLocation)
+
+        // Tạo mảng các tên tỉnh/thành phố, quận/huyện và phường/xã có thể
+        const provinceNames = getProvinceNames(addressDetails)
+        const districtNames = getDistrictNames(addressDetails)
+        const wardNames = getWardNames(addressDetails)
+
+        console.log("Possible province names (from address):", provinceNames)
+        console.log("Possible district names (from address):", districtNames)
+        console.log("Possible ward names (from address):", wardNames)
+
+        // Tìm tỉnh/thành phố phù hợp
+        const matchedProvince = findMatchingProvince(provinceNames, provinces)
+
+        if (matchedProvince) {
+          console.log("Matched Province (from address):", matchedProvince)
+          const fetchedDistricts = await fetchDistricts(matchedProvince.ProvinceID)
+          console.log("Fetched Districts (from address):", fetchedDistricts)
 
           // Tìm quận/huyện phù hợp
-          const matchedDistrict = findMatchingDistrict(districtNames, districts)
+          const matchedDistrict = findMatchingDistrict(districtNames, fetchedDistricts)
 
           if (matchedDistrict) {
             console.log("Matched District (from address):", matchedDistrict)
@@ -585,58 +753,93 @@ const Checkout = () => {
             if (matchedWard) {
               setFormData((prev) => ({
                 ...prev,
+                provinceId: matchedProvince.ProvinceID,
                 districtId: matchedDistrict.DistrictID,
                 wardCode: matchedWard.WardCode,
               }))
             } else {
               setFormData((prev) => ({
                 ...prev,
+                provinceId: matchedProvince.ProvinceID,
                 districtId: matchedDistrict.DistrictID,
                 wardCode: "",
               }))
               notification.warning({
                 message: "Không tìm thấy phường/xã chính xác",
-                description: "Vui lòng chọn phường/xã từ danh sách hoặc nhập địa chỉ cụ thể hơn",
+                description: "Vui lòng chọn phường/xã từ danh sách",
               })
             }
           } else {
-            console.warn("Không tìm thấy quận/huyện khớp (từ địa chỉ):", districtNames)
-            notification.warning({
-              message: "Không tìm thấy quận/huyện chính xác",
-              description: "Vui lòng nhập địa chỉ bao gồm quận/huyện hoặc chọn từ danh sách",
-            })
             setFormData((prev) => ({
               ...prev,
+              provinceId: matchedProvince.ProvinceID,
               districtId: "",
               wardCode: "",
             }))
+            notification.warning({
+              message: "Không tìm thấy quận/huyện chính xác",
+              description: "Vui lòng chọn quận/huyện từ danh sách",
+            })
           }
         } else {
-          console.warn("Không tìm thấy địa chỉ từ Nominatim:", address)
-          notification.error({
-            message: "Không tìm thấy địa chỉ",
-            description: "Vui lòng nhập địa chỉ cụ thể hơn (bao gồm quận/huyện, TP.HCM)",
+          // Không cập nhật gì nếu không tìm thấy tỉnh/thành phố
+          notification.warning({
+            message: "Không tìm thấy tỉnh/thành phố",
+            description: "Vui lòng chọn tỉnh/thành phố từ danh sách",
           })
-          setFormData((prev) => ({
-            ...prev,
-            districtId: "",
-            wardCode: "",
-          }))
         }
-      } catch (error) {
-        console.error("Lỗi khi tìm địa chỉ:", error)
-        notification.error({
-          message: "Lỗi tìm kiếm địa chỉ",
-          description: "Không thể xử lý địa chỉ. Vui lòng thử lại hoặc chọn từ danh sách.",
-        })
-        setFormData((prev) => ({
-          ...prev,
-          districtId: "",
-          wardCode: "",
-        }))
       }
+    } catch (error) {
+      console.error("Lỗi khi tìm địa chỉ:", error)
+      notification.error({
+        message: "Lỗi tìm kiếm địa chỉ",
+        description: "Không thể xử lý địa chỉ. Vui lòng thử lại hoặc chọn từ danh sách.",
+      })
+    } finally {
+      setIsAddressChanging(false)
     }
   }
+
+  // Xử lý khi thay đổi tỉnh/thành phố
+  const handleProvinceChange = async (e) => {
+    const provinceId = e.target.value
+    setFormData({
+      ...formData,
+      provinceId,
+      districtId: "",
+      wardCode: "",
+    })
+
+    if (provinceId) {
+      await fetchDistricts(provinceId)
+    } else {
+      setDistricts([])
+      setWards([])
+    }
+  }
+
+  const handleDistrictChange = async (e) => {
+    const districtId = e.target.value
+    setFormData({
+      ...formData,
+      districtId,
+      wardCode: "",
+    })
+
+    if (districtId) {
+      await fetchWards(districtId)
+      fetchAvailableServices()
+    } else {
+      setWards([])
+    }
+  }
+
+  useEffect(() => {
+    if (formData.provinceId && !isNaN(Number.parseInt(formData.provinceId))) {
+      console.log("useEffect: Gọi fetchDistricts với provinceId:", formData.provinceId)
+      fetchDistricts(formData.provinceId)
+    }
+  }, [formData.provinceId])
 
   useEffect(() => {
     if (formData.districtId && !isNaN(Number.parseInt(formData.districtId))) {
@@ -673,9 +876,16 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     const finalTotal = totalPrice1 + shippingFee - (discount || 0) - (pointsUsed || 0)
+
+    const provinceName =
+      provinces.find((p) => p.ProvinceID === Number.parseInt(formData.provinceId))?.ProvinceName || ""
+    const districtName =
+      districts.find((d) => d.DistrictID === Number.parseInt(formData.districtId))?.DistrictName || ""
+    const wardName = wards.find((w) => w.WardCode === formData.wardCode)?.WardName || ""
+
     const billData = {
       fullName: formData.fullName,
-      address_shipment: `${formData.address}, ${wards.find((w) => w.WardCode === formData.wardCode)?.WardName || ""}, ${districts.find((d) => d.DistrictID === Number.parseInt(formData.districtId))?.DistrictName || ""}`,
+      address_shipment: `${formData.address}, ${wardName}, ${districtName}, ${provinceName}`,
       phone_shipment: formData.phone,
       ship: shippingFee,
       total_price: finalTotal,
@@ -736,6 +946,7 @@ const Checkout = () => {
         address: userProfile.address || "",
         phone: userProfile.phonenumber || "",
         note: "",
+        provinceId: "",
         districtId: "",
         wardCode: "",
       })
@@ -839,6 +1050,24 @@ const Checkout = () => {
               value={formData.phone}
               style={{ marginBottom: "16px" }}
             />
+            {/* Thêm dropdown tỉnh/thành phố */}
+            <FormControl fullWidth style={{ marginBottom: "16px" }}>
+              <InputLabel id="province-label">Tỉnh/Thành phố</InputLabel>
+              <Select
+                labelId="province-label"
+                id="provinceId"
+                name="provinceId"
+                value={formData.provinceId}
+                label="Tỉnh/Thành phố"
+                onChange={handleProvinceChange}
+              >
+                {provinces.map((province) => (
+                  <MenuItem key={province.ProvinceID} value={province.ProvinceID}>
+                    {province.ProvinceName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <FormControl fullWidth style={{ marginBottom: "16px" }}>
               <InputLabel id="district-label">Quận/Huyện</InputLabel>
               <Select
@@ -847,7 +1076,8 @@ const Checkout = () => {
                 name="districtId"
                 value={formData.districtId}
                 label="Quận/Huyện"
-                onChange={handleInputChange}
+                onChange={handleDistrictChange}
+                disabled={!formData.provinceId}
               >
                 {districts.map((district) => (
                   <MenuItem key={district.DistrictID} value={district.DistrictID}>
@@ -865,6 +1095,7 @@ const Checkout = () => {
                 value={formData.wardCode}
                 label="Phường/Xã"
                 onChange={handleInputChange}
+                disabled={!formData.districtId}
               >
                 {wards.map((ward) => (
                   <MenuItem key={ward.WardCode} value={ward.WardCode}>
@@ -882,7 +1113,9 @@ const Checkout = () => {
               variant="outlined"
               value={formData.address}
               onChange={handleAddressChange}
+              onBlur={handleAddressBlur}
               style={{ marginBottom: "16px" }}
+              helperText="Nhập số nhà, tên đường, khu vực"
             />
             <TextField
               fullWidth
@@ -905,7 +1138,19 @@ const Checkout = () => {
                 <FormControlLabel value="online" control={<Radio />} label="Thanh toán online" sx={{ margin: 0 }} />
               </RadioGroup>
             </div>
-            <Button fullWidth variant="contained" type="submit" style={{ color: "#fff", backgroundColor: "#ff7d01" }}>
+            <Button
+              fullWidth
+              variant="contained"
+              type="submit"
+              style={{ color: "#fff", backgroundColor: "#ff7d01" }}
+              disabled={
+                !formData.provinceId ||
+                !formData.districtId ||
+                !formData.wardCode ||
+                !formData.address ||
+                isAddressChanging
+              }
+            >
               Thanh toán {finalTotal ? finalTotal.toLocaleString() : "0"} đ
             </Button>
           </form>
