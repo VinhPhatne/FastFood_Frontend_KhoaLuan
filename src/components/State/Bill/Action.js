@@ -132,10 +132,10 @@ export const getBillById =
     }
   };
 
-export const getRevenue = (year) => async (dispatch) => {
+export const getRevenue = (year, productId = "") => async (dispatch) => {
   try {
     const response = await axios.get(`${API_URL}/v1/bill/getrevenue`, {
-      params: { year },
+      params: { year, productId: productId || undefined },
     });
     const transformedData = response.data.data.map((item) => ({
       name: new Date(2024, item.month - 1).toLocaleString("default", {
@@ -151,9 +151,14 @@ export const getRevenue = (year) => async (dispatch) => {
   }
 };
 
-export const getProductSale = () => async (dispatch) => {
+export const getProductSale = (startDate = "", endDate = "") => async (dispatch) => {
   try {
-    const response = await axios.get(`${API_URL}/v1/bill/get-product-sale`);
+    const response = await axios.get(`${API_URL}/v1/bill/get-product-sale`, {
+      params: {
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+      },
+    });
     dispatch({
       type: GET_PRODUCT_SALE_SUCCESS,
       payload: response.data.data.productSale,

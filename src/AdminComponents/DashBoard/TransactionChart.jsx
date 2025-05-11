@@ -10,7 +10,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { getRevenue } from "../../components/State/Bill/Action";
+import { getListBills, getRevenue } from "../../components/State/Bill/Action";
 import { getExpense } from "../../components/State/Import/Action";
 
 export default function TransactionChart() {
@@ -18,14 +18,20 @@ export default function TransactionChart() {
   const { data, error } = useSelector((state) => state.billReducer);
   const { dataIngredient } = useSelector((state) => state.ingredientReducer);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-
+  const { products } = useSelector((state) => state.productReducer);
+  const [selectedProduct, setSelectedProduct] = useState("");
   useEffect(() => {
-    dispatch(getRevenue(selectedYear));
+    dispatch(getRevenue(selectedYear, selectedProduct));
     dispatch(getExpense(selectedYear));
-  }, [dispatch, selectedYear]);
+    dispatch(getListBills());
+  }, [dispatch, selectedYear, selectedProduct]);
 
   const handleYearChange = (e) => {
     setSelectedYear(e.target.value);
+  };
+
+    const handleProductChange = (e) => {
+    setSelectedProduct(e.target.value);
   };
 
   if (error) {
@@ -61,13 +67,30 @@ export default function TransactionChart() {
     <div className="h-[22rem] bg-white p-4 rounded-sm border border-gray-200 flex flex-col flex-1">
       <div className="flex items-center justify-between mb-3">
         <strong className="text-gray-700 text-xl font-medium">Biểu đồ doanh thu</strong>
+        <div className='flex items-center gap-4'>
         <select
-          className="border border-gray-300 rounded-sm p-1 text-sm"
+          className="border border-gray-300 rounded-md p-2 bg-white text-gray-700"
           value={selectedYear}
           onChange={handleYearChange}
         >
           {generateYearOptions()}
         </select>
+
+              <div className="flex justify-end">
+                <select
+                  value={selectedProduct}
+                  onChange={handleProductChange}
+                  className="border border-gray-300 rounded-md p-2 bg-white text-gray-700"
+                >
+                  <option value="">Chọn sản phẩm</option>
+                  {products?.map((product) => (
+                    <option key={product._id} value={product._id}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              </div>
       </div>
       <div className="mt-3 w-full flex-1 text-xs">
         <ResponsiveContainer width="100%" height="100%">
