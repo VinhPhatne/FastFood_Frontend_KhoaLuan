@@ -71,7 +71,7 @@ const AdminHeader = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/v1/order-notify/list", {
+      const response = await axios.get("https://fastfood-online-backend.onrender.com/v1/order-notify/list", {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
@@ -87,7 +87,7 @@ const AdminHeader = () => {
 
   const fetchReviews = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/v1/review/list", {
+      const response = await axios.get("https://fastfood-online-backend.onrender.com/v1/review/list", {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
@@ -195,7 +195,7 @@ const AdminHeader = () => {
   const handleReadNotification = async (id) => {
     try {
       await axios.patch(
-        `http://localhost:8080/v1/order-notify/update-isRead/${id}`,
+        `https://fastfood-online-backend.onrender.com/v1/order-notify/update-isRead/${id}`,
         {},
         {
           headers: {
@@ -223,7 +223,7 @@ const AdminHeader = () => {
 
     try {
       await axios.patch(
-        "http://localhost:8080/v1/order-notify/update-all-isRead",
+        "https://fastfood-online-backend.onrender.com/v1/order-notify/update-all-isRead",
         {},
         {
           headers: {
@@ -251,7 +251,7 @@ const AdminHeader = () => {
     if (notifications.length === 0) return;
 
     try {
-      await axios.delete("http://localhost:8080/v1/order-notify/delete-all", {
+      await axios.delete("https://fastfood-online-backend.onrender.com/v1/order-notify/delete-all", {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
@@ -272,7 +272,7 @@ const AdminHeader = () => {
   const handleReadReview = async (id) => {
     try {
       await axios.patch(
-        `http://localhost:8080/v1/review/update-isRead/${id}`,
+        `https://fastfood-online-backend.onrender.com/v1/review/update-isRead/${id}`,
         {},
         {
           headers: {
@@ -300,7 +300,7 @@ const AdminHeader = () => {
 
     try {
       await axios.patch(
-        "http://localhost:8080/v1/review/mark-all-read",
+        "https://fastfood-online-backend.onrender.com/v1/review/mark-all-read",
         {},
         {
           headers: {
@@ -328,7 +328,7 @@ const AdminHeader = () => {
     if (reviews.length === 0) return;
 
     try {
-      await axios.delete("http://localhost:8080/v1/review/delete-all", {
+      await axios.delete("https://fastfood-online-backend.onrender.com/v1/review/delete-all", {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },

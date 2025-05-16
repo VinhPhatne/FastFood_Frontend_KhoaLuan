@@ -41,7 +41,7 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/v1/review/product/${id}`);
+        const response = await axios.get(`https://fastfood-online-backend.onrender.com/v1/review/product/${id}`);
         setReviews(response.data);
       } catch (error) {
         console.error('Error fetching reviews:', error);
