@@ -913,7 +913,7 @@ const Checkout = () => {
     } else if (paymentMethod === "online") {
       try {
         localStorage.setItem("pendingBillData", JSON.stringify(billData))
-        const response = await axios.post("http://localhost:8080/create-payment-link", {
+        const response = await axios.post("https://fastfood-online-backend.onrender.com/create-payment-link", {
           amount: finalTotal,
           returnUrl: "http://localhost:3000/success",
           cancelUrl: "http://localhost:3000/checkout",

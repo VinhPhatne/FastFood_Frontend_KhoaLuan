@@ -60,7 +60,7 @@ const Header = () => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/v1/order-notify/list", {
+        const response = await axios.get("https://fastfood-online-backend.onrender.com/v1/order-notify/list", {
           headers: {
             Authorization: `Bearer ${jwt}`,
           },
@@ -76,7 +76,7 @@ const Header = () => {
 
     const fetchReviews = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/v1/review/list", {
+        const response = await axios.get("https://fastfood-online-backend.onrender.com/v1/review/list", {
           headers: {
             Authorization: `Bearer ${jwt}`,
           },
@@ -201,48 +201,9 @@ const Header = () => {
       </Menu.Item>
     </Menu>
   );
-
-  const notificationMenu = (
-    <Menu>
-      {notifications.length > 0 ? (
-        notifications.map((notif) => (
-          <Menu.Item key={notif._id}>
-            {notif.message || "Thông báo mới"}
-          </Menu.Item>
-        ))
-      ) : (
-        <Menu.Item>Không có thông báo</Menu.Item>
-      )}
-    </Menu>
-  );
-
-  const reviewMenu = (
-    <Menu>
-      {reviews.length > 0 ? (
-        reviews.map((review) => (
-          <Menu.Item key={review._id}>
-            {review.message || "Review mới"}
-          </Menu.Item>
-        ))
-      ) : (
-        <Menu.Item>Không có review</Menu.Item>
-      )}
-    </Menu>
-  );
-
   const [ isNotiOpen, setIsNotiOpen ] = useState(false);
   const notiContentRef = useRef(null);
   const bellRef = useRef(null);
-
-  const handleNotiClick = (e) => {
-    e.stopPropagation();
-    setIsNotiOpen(!isNotiOpen);
-    if (!isNotiOpen) {
-        //fetchNotifications();
-        //dispatch(actions.resetNoti());
-        // handleReadAll();
-    }
-};
 
 useEffect(() => {
   const handleClickOutside = (event) => {
@@ -262,61 +223,6 @@ useEffect(() => {
       document.removeEventListener('mousedown', handleClickOutside);
   };
 }, [ isNotiOpen ]);
-
-const handleReadAll = async (e) => {
-  e.stopPropagation();
-  if (notifications.length === 0) return;
-
-  try {
-    // Giả sử bạn có API để đánh dấu tất cả thông báo là đã đọc
-    await axios.post(
-      "http://localhost:8080/v1/order-notify/read-all",
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      }
-    );
-    setNotifications((prev) =>
-      prev.map((notif) => ({ ...notif, isRead: true }))
-    );
-    setNotificationCount(0);
-    notification.success({
-      message: "Đã đánh dấu tất cả thông báo là đã đọc",
-    });
-  } catch (error) {
-    console.error("Error marking all notifications as read:", error);
-    notification.error({
-      message: "Lỗi khi đánh dấu đã đọc",
-    });
-  }
-};
-
-const handleDeleteAll = async (e) => {
-  e.stopPropagation();
-  if (notifications.length === 0) return;
-
-  try {
-    // Giả sử bạn có API để xóa tất cả thông báo
-    await axios.delete("http://localhost:8080/v1/order-notify/delete-all", {
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
-    });
-    setNotifications([]);
-    setNotificationCount(0);
-    notification.success({
-      message: "Đã xóa tất cả thông báo",
-    });
-  } catch (error) {
-    console.error("Error deleting all notifications:", error);
-    notification.error({
-      message: "Lỗi khi xóa thông báo",
-    });
-  }
-};
-
 
   return (
     <div className={styles.header}>

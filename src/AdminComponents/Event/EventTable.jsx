@@ -160,7 +160,7 @@ const EventTable = () => {
         products: selectedProductArray,
       };
       const response = await fetch(
-        `http://localhost:8080/v1/event/${eventId}`,
+        `https://fastfood-online-backend.onrender.com/v1/event/${eventId}`,
         {
           method: "PUT",
           headers: {
