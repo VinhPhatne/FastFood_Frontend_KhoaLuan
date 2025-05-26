@@ -175,7 +175,7 @@ const Card = () => {
                         className={styles.addToCartButton}
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleAddToCart(item);
+                          navigate(`/detail/${item._id}`)
                         }}
                       >
                         Thêm vào giỏ hàng
@@ -262,7 +262,7 @@ const Card = () => {
                               className={styles.addToCartButton}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleAddToCart(item);
+                                navigate(`/detail/${item._id}`)
                               }}
                             >
                               Thêm vào giỏ hàng

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, InputNumber, notification, Radio, Rate } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Button, InputNumber, notification, Radio, Rate, Spin } from 'antd';
+import { PlusOutlined, LoadingOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import useCart from '../../hook/useCart';
 import { getProducts } from '../State/Product/Action';
@@ -22,6 +22,7 @@ const ProductDetail = () => {
   const [selectedChoices, setSelectedChoices] = useState({});
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [relatedProductsLoading, setRelatedProductsLoading] = useState(true); // New state for RelatedProducts loading
 
   useEffect(() => {
     dispatch(getProducts({ jwt }));
@@ -32,6 +33,13 @@ const ProductDetail = () => {
       const foundProduct = products.find((p) => p._id === id);
       if (foundProduct) {
         setProduct(foundProduct);
+        const initialChoices = {};
+        foundProduct.options.forEach((option) => {
+          if (option.choices.length > 0) {
+            initialChoices[option._id] = option.choices[0]._id;
+          }
+        });
+        setSelectedChoices(initialChoices);
       } else {
         navigate('/');
       }
@@ -50,6 +58,18 @@ const ProductDetail = () => {
       }
     };
     fetchReviews();
+
+    const fetchRelatedProducts = async () => {
+      setRelatedProductsLoading(true);
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate 1-second delay
+      } catch (error) {
+        console.error('Error fetching related products:', error);
+      } finally {
+        setRelatedProductsLoading(false);
+      }
+    };
+    fetchRelatedProducts();
   }, [id]);
 
   const handleChoiceSelect = (optionId, choiceId) => {
@@ -165,7 +185,9 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      <RelatedProducts productId={id} />
+      <Spin spinning={relatedProductsLoading} indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />}>
+        <RelatedProducts productId={id} />
+      </Spin>
 
       <div className="reviews-section">
         <h2>Đánh giá sản phẩm</h2>
