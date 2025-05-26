@@ -1,4 +1,4 @@
-import { GET_CHAT_HISTORY_FAILURE, GET_CHAT_HISTORY_SUCCESS, RECEIVE_CHAT_MESSAGE, SEND_MESSAGE_FAILURE, SEND_MESSAGE_SUCCESS } from './ActionType';
+import { GET_CHAT_HISTORY_FAILURE, GET_CHAT_HISTORY_SUCCESS, RECEIVE_CHAT_MESSAGE, RESET_CHATBOT_STATE, SEND_MESSAGE_FAILURE, SEND_MESSAGE_SUCCESS } from './ActionType';
 
 
 const initialState = {
@@ -25,6 +25,8 @@ const chatbotReducer = (state = initialState, action) => {
         ...state,
         messages: [...state.messages, action.payload.userMessage, action.payload.botMessage],
       };
+    case RESET_CHATBOT_STATE:
+      return initialState;
     default:
       return state;
   }

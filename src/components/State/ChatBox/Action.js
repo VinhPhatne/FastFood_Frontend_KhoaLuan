@@ -1,12 +1,22 @@
 import axios from 'axios';
 import { API_URL } from '../../config/api';
-import { GET_CHAT_HISTORY_FAILURE, GET_CHAT_HISTORY_SUCCESS, RECEIVE_CHAT_MESSAGE, SEND_MESSAGE_FAILURE, SEND_MESSAGE_SUCCESS } from './ActionType';
+import { GET_CHAT_HISTORY_FAILURE, GET_CHAT_HISTORY_SUCCESS, RECEIVE_CHAT_MESSAGE, RESET_CHATBOT_STATE, SEND_MESSAGE_FAILURE, SEND_MESSAGE_SUCCESS } from './ActionType';
 
-export const sendMessage = (message) => async (dispatch) => {
+export const sendMessage = ({ message, sessionId }) => async (dispatch) => {
   try {
-    const response = await axios.post(`${API_URL}/v1/chatbot/message`, { message }, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` },
-    });
+    const headers = {};
+    const jwt = localStorage.getItem('jwt');
+    if (jwt) {
+      headers.Authorization = `Bearer ${jwt}`;
+    }
+    const response = await axios.post(
+      `${API_URL}/v1/chatbot/message`,
+      { message, sessionId },
+      { headers }
+    );
+    if (!jwt && response.headers['x-session-id']) {
+      localStorage.setItem('chatSessionId', response.headers['x-session-id']);
+    }
     dispatch({
       type: SEND_MESSAGE_SUCCESS,
       payload: response.data.data,
@@ -19,10 +29,16 @@ export const sendMessage = (message) => async (dispatch) => {
   }
 };
 
-export const getChatHistory = () => async (dispatch) => {
+export const getChatHistory = (sessionId) => async (dispatch) => {
   try {
+    const headers = {};
+    const jwt = localStorage.getItem('jwt');
+    if (jwt) {
+      headers.Authorization = `Bearer ${jwt}`;
+    }
     const response = await axios.get(`${API_URL}/v1/chatbot/history`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` },
+      headers,
+      params: sessionId ? { sessionId } : {},
     });
     dispatch({
       type: GET_CHAT_HISTORY_SUCCESS,
@@ -39,4 +55,8 @@ export const getChatHistory = () => async (dispatch) => {
 export const receiveChatMessage = (message) => ({
   type: RECEIVE_CHAT_MESSAGE,
   payload: message,
+});
+
+export const resetChatbotState = () => ({
+  type: RESET_CHATBOT_STATE,
 });
