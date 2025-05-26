@@ -23,6 +23,7 @@ import {
 } from "./ActionType";
 import { API_URL, api } from "../../config/api";
 import { notification } from "antd";
+import { resetChatbotState } from '../ChatBox/Action';
 
 export const registerUser = (reqData) => async (dispatch) => {
   dispatch({ type: REGISTER_REQUEST });
@@ -76,6 +77,18 @@ export const loginUser = (reqData) => async (dispatch) => {
 
     const role = data.accountLogin.account.role;
     const userId = data.accountLogin.account._id;
+
+    const sessionId = localStorage.getItem('chatSessionId');
+    if (sessionId) {
+      await axios.post(
+        `${API_URL}/v1/chatbot/sync-guest-messages`,
+        { sessionId },
+        { headers: { Authorization: `Bearer ${data.accountLogin.access_token}` } }
+      );
+      localStorage.removeItem('chatSessionId');
+      localStorage.removeItem('guestChatHistory');
+    }
+
     // Lưu role vào localStorage
     localStorage.setItem("role", role);
     localStorage.setItem('userId', userId);
@@ -143,7 +156,11 @@ export const logout = () => async (dispatch) => {
   try {
     localStorage.removeItem("jwt");
     localStorage.removeItem("role");
+    localStorage.removeItem('userId');
+    localStorage.removeItem('guestChatHistory');
+    localStorage.removeItem('chatSessionId');
     dispatch({ type: LOGOUT });
+    dispatch(resetChatbotState());
   } catch (error) {}
 };
 

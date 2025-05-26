@@ -6,9 +6,8 @@ import io from 'socket.io-client';
 import { getChatHistory, receiveChatMessage, sendMessage } from '../State/ChatBox/Action';
 import { API_URL } from '../config/api';
 import { createChatBotMessage } from 'react-chatbot-kit';
-
-// Thêm icon X từ react-icons
 import { IoClose } from 'react-icons/io5';
+import { v4 as uuidv4 } from 'uuid';
 
 const socket = io(API_URL);
 
@@ -135,23 +134,24 @@ const ChatbotComponent = () => {
   const user = useSelector((state) => state.auth.user);
   const [isOpen, setIsOpen] = useState(false);
   const [chatbotMessages, setChatbotMessages] = useState(config.initialMessages);
-  const [messageKey, setMessageKey] = useState(0); // Key để buộc render lại
-
+  const [messageKey, setMessageKey] = useState(0);
+  const [sessionId, setSessionId] = useState(localStorage.getItem('chatSessionId') || uuidv4());
+  const jwt = localStorage.getItem('jwt');
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
-    dispatch(getChatHistory());
-  }, [dispatch]);
+    if (!userId && !localStorage.getItem('chatSessionId')) {
+      localStorage.setItem('chatSessionId', sessionId);
+    }
+    dispatch(getChatHistory(userId ? undefined : sessionId));
+  }, [dispatch, userId, sessionId, jwt]);
 
   useEffect(() => {
-    if (!userId) {
-      console.log('User not logged in yet');
-      return;
-    }
+    const effectiveId = userId || sessionId;
 
     const handleConnect = () => {
-      socket.emit('join', userId);
-      console.log('Socket joined with user ID:', userId);
+      socket.emit('join', effectiveId);
+      console.log('Socket joined with ID:', effectiveId);
     };
 
     const handleChatMessage = (message) => {
@@ -172,22 +172,19 @@ const ChatbotComponent = () => {
       socket.off('chat_message', handleChatMessage);
       socket.off('connect_error', handleConnectError);
     };
-  }, [dispatch, userId]);
+  }, [dispatch, userId, sessionId]);
 
-  // Đồng bộ Redux messages với react-chatbot-kit
+  // Sync messages
   useEffect(() => {
     console.log('Redux messages updated:', messages);
-    // Loại bỏ tin nhắn trùng lặp từ messages dựa trên _id
     const uniqueMessagesMap = new Map();
     messages?.forEach((msg) => {
       uniqueMessagesMap.set(msg._id, msg);
     });
     let uniqueMessagesArray = Array.from(uniqueMessagesMap.values());
 
-    // Sắp xếp tin nhắn theo timestamp
     uniqueMessagesArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-    // Chuyển đổi messages thành định dạng react-chatbot-kit
     const newMessages = uniqueMessagesArray.map((msg) => ({
       id: msg._id,
       message: msg.message,
@@ -198,13 +195,10 @@ const ChatbotComponent = () => {
     }));
 
     setChatbotMessages((prev) => {
-      // Loại bỏ tin nhắn "Đang xử lý..."
       const filteredPrev = prev.filter((msg) => !msg.loading);
-      // Loại bỏ tin nhắn trùng lặp dựa trên id
       const uniqueMessages = newMessages.filter(
         (newMsg) => !filteredPrev.some((prevMsg) => prevMsg.id === newMsg.id)
       );
-      // Thêm các tin nhắn mới
       const updatedMessages = [
         ...filteredPrev,
         ...uniqueMessages.map((msg) =>
@@ -216,19 +210,38 @@ const ChatbotComponent = () => {
           })
         ),
       ];
-      // Sắp xếp lại toàn bộ danh sách theo timestamp
       updatedMessages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-      console.log('Updated chatbotMessages:', updatedMessages);
-      // Buộc render lại bằng cách thay đổi key
       setMessageKey((prev) => prev + 1);
       return updatedMessages;
     });
-  }, [messages]);
+
+    if (!userId) {
+      localStorage.setItem('guestChatHistory', JSON.stringify(newMessages));
+    } else {
+      localStorage.removeItem('guestChatHistory');
+    }
+  }, [messages, userId]);
+
+  useEffect(() => {
+    if (!jwt) setChatbotMessages(config.initialMessages);
+  }, [jwt]);
+
+  useEffect(() => {
+    if (!user && !userId && !jwt) {
+      console.log('Resetting chatbot on logout');
+      setChatbotMessages(config.initialMessages); 
+      setMessageKey((prev) => prev + 1);
+      localStorage.removeItem('guestChatHistory');
+      localStorage.removeItem('chatSessionId');
+      setSessionId(uuidv4());
+      socket.emit('leave', userId || sessionId);
+      console.log('Chatbot messages reset to:', config.initialMessages);
+    }
+  }, [user, userId, jwt, sessionId]);
 
   const handleMessage = async (message) => {
-    // Gửi tin nhắn qua Redux
-    dispatch(sendMessage(message));
-    // Thêm tin nhắn người dùng trực tiếp vào chatbotMessages
+    const effectiveId = userId || sessionId;
+    dispatch(sendMessage({ message, sessionId: userId ? undefined : sessionId }));
     const timestamp = new Date().toISOString();
     setChatbotMessages((prev) => {
       const newMessage = createChatBotMessage(message, {
@@ -237,7 +250,6 @@ const ChatbotComponent = () => {
         timestamp,
       });
       const updatedMessages = [...prev, newMessage];
-      // Sắp xếp lại theo timestamp
       updatedMessages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
       return updatedMessages;
     });
@@ -245,36 +257,21 @@ const ChatbotComponent = () => {
 
   const actions = { handleMessage };
 
-  // Sử dụng useMemo để đảm bảo tham chiếu của messageHistory thay đổi
-  const messageHistory = useMemo(() => chatbotMessages, [chatbotMessages]);
-
-  if (!userId) {
-    return (
-      <div className="fixed bottom-4 right-4 z-50">
-        <button
-          className="bg-[#ff7d01] text-white p-3 rounded-full shadow-lg"
-          onClick={() => alert('Vui lòng đăng nhập để sử dụng chatbot')}
-        >
-          Chat
-        </button>
-      </div>
-    );
-  }
-
-  if (error) {
-    console.error('Chatbot error:', error);
-    return <div className="text-red-500 text-center">Lỗi: {error}</div>;
-  }
+  const messageHistory = useMemo(() => {
+    return chatbotMessages;
+  }, [chatbotMessages, jwt]);
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
       <style>{chatboxStyles}</style>
-      {!isOpen && <button
-        className="bg-[#ff7d01] text-white p-3 rounded-full shadow-lg"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        Chat
-      </button>}
+      {!isOpen && (
+        <button
+          className="bg-[#ff7d01] text-white p-3 rounded-full shadow-lg"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          Chat
+        </button>
+      )}
       {isOpen && (
         <div className="mt-2">
           <Chatbot

@@ -126,6 +126,52 @@ const RoutingMachine = ({ destination, setShippingFee }) => {
   return null
 }
 
+const MapFocusHandler = ({ wardCode, wards, districts, provinces, provinceId, districtId, mapRef }) => {
+  const map = useMap()
+
+  useEffect(() => {
+    const focusMapOnWard = async () => {
+      if (wardCode && wards.length > 0 && districts.length > 0 && provinces.length > 0) {
+        const matchedWard = wards.find((ward) => ward.WardCode === wardCode)
+        if (matchedWard) {
+          const wardName = matchedWard.WardName
+          const districtName = districts.find((d) => d.DistrictID === districtId)?.DistrictName || ""
+          const provinceName = provinces.find((p) => p.ProvinceID === provinceId)?.ProvinceName || ""
+
+          try {
+            const query = `${wardName}, ${districtName}, ${provinceName}, Vietnam`
+            const response = await axios.get(
+              `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(query)}&countrycodes=VN&addressdetails=1&bounded=1&viewbox=106.4,10.3,107.0,11.2`
+            )
+            if (response.data && response.data.length > 0) {
+              const { lat, lon } = response.data[0]
+              map.setView([parseFloat(lat), parseFloat(lon)], 16) // Zoom level 16 để tập trung vào khu vực phường/xã
+            } else {
+              notification.warning({
+                message: "Không tìm thấy tọa độ phường/xã",
+                description: "Vui lòng nhấp vào bản đồ để chọn vị trí chính xác.",
+              })
+              map.setView([10.850317, 106.772936], 14) // Default to store location
+            }
+          } catch (error) {
+            console.error("Lỗi khi lấy tọa độ phường/xã:", error)
+            notification.error({
+              message: "Lỗi tìm kiếm tọa độ",
+              description: "Không thể lấy tọa độ phường/xã. Vui lòng thử lại.",
+            })
+            map.setView([10.850317, 106.772936], 14) // Default to store location
+          }
+        }
+      }
+    }
+
+    focusMapOnWard()
+  }, [wardCode, wards, districts, provinces, provinceId, districtId, map])
+
+  return null
+}
+
+
 const Checkout = () => {
   const jwt = localStorage.getItem("jwt")
   const { cart, totalQuantity, totalPrice, handleRemove } = useCart(jwt)
@@ -158,7 +204,7 @@ const Checkout = () => {
   const [availableServices, setAvailableServices] = useState([])
   const [selectedLocation, setSelectedLocation] = useState(null)
   const [isCalculatingFee, setIsCalculatingFee] = useState(false)
-  const [isAddressChanging, setIsAddressChanging] = useState(false) // Thêm state để kiểm soát việc thay đổi địa chỉ
+  const mapRef = useRef(null)
 
   const GHN_API_TOKEN = "2d698e94-2c17-11f0-a0cd-12f647571c0a"
   const GHN_SHOP_ID = "5767786"
@@ -555,9 +601,7 @@ const Checkout = () => {
 
     return null
   }
-
-  // Component để xử lý sự kiện nhấp chuột trên bản đồ
-  const MapClickHandler = () => {
+  const MapClickHandler = ({ setFormData, formData, provinces, districts, wards, setSelectedLocation, setIsCalculatingFee }) => {
     const map = useMap()
 
     useEffect(() => {
@@ -620,42 +664,42 @@ const Checkout = () => {
                   console.warn("Không tìm thấy phường/xã khớp:", wardNames)
                   notification.warning({
                     message: "Không tìm thấy phường/xã chính xác",
-                    description: "Vui lòng chọn phường/xã từ danh sách hoặc nhập thủ công",
+                    description: "Địa chỉ được chọn không khớp với phường/xã hiện tại. Vui lòng kiểm tra lại.",
                   })
                   setFormData({
                     ...formData,
                     address,
                     provinceId: matchedProvince.ProvinceID,
                     districtId: matchedDistrict.DistrictID,
-                    wardCode: "",
+                    wardCode: formData.wardCode, // Giữ lại wardCode đã chọn trước đó
                   })
                 }
               } else {
                 console.warn("Không tìm thấy quận/huyện khớp:", districtNames)
                 notification.warning({
                   message: "Không tìm thấy quận/huyện chính xác",
-                  description: "Vui lòng chọn quận/huyện từ danh sách hoặc nhập thủ công",
+                  description: "Địa chỉ được chọn không khớp với quận/huyện hiện tại. Vui lòng kiểm tra lại.",
                 })
                 setFormData({
                   ...formData,
                   address,
                   provinceId: matchedProvince.ProvinceID,
-                  districtId: "",
-                  wardCode: "",
+                  districtId: formData.districtId,
+                  wardCode: formData.wardCode,
                 })
               }
             } else {
               console.warn("Không tìm thấy tỉnh/thành phố khớp:", provinceNames)
               notification.warning({
                 message: "Không tìm thấy tỉnh/thành phố chính xác",
-                description: "Vui lòng chọn tỉnh/thành phố từ danh sách hoặc nhập thủ công",
+                description: "Địa chỉ được chọn không khớp với tỉnh/thành phố hiện tại. Vui lòng kiểm tra lại.",
               })
               setFormData({
                 ...formData,
                 address,
-                provinceId: "",
-                districtId: "",
-                wardCode: "",
+                provinceId: formData.provinceId,
+                districtId: formData.districtId,
+                wardCode: formData.wardCode,
               })
             }
             console.log("Updated formData:", formData)
@@ -670,8 +714,8 @@ const Checkout = () => {
           })
           setFormData({
             ...formData,
-            districtId: "",
-            wardCode: "",
+            districtId: formData.districtId,
+            wardCode: formData.wardCode,
           })
         } finally {
           setIsCalculatingFee(false)
@@ -679,127 +723,10 @@ const Checkout = () => {
       })
 
       return () => map.off("click")
-    }, [map])
+    }, [map, formData, provinces, districts, wards, setFormData, setSelectedLocation, setIsCalculatingFee])
 
     return null
   }
-
-  // Xử lý khi nhập địa chỉ chi tiết
-  const handleAddressChange = async (e) => {
-    const address = e.target.value
-
-    // Chỉ cập nhật trường address, giữ nguyên các trường khác
-    setFormData((prev) => ({
-      ...prev,
-      address,
-    }))
-  }
-
-  // Xử lý khi blur khỏi ô địa chỉ chi tiết
-  const handleAddressBlur = async (e) => {
-    const address = e.target.value
-
-    // Nếu địa chỉ quá ngắn thì không tìm kiếm
-    if (address.length <= 5) {
-      return
-    }
-
-    setIsAddressChanging(true)
-
-    try {
-      const response = await axios.get(
-        `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(
-          address + ", Ho Chi Minh City, Vietnam",
-        )}&countrycodes=VN&addressdetails=1&bounded=1&viewbox=106.4,10.3,107.0,11.2`,
-      )
-      console.log("Nominatim full response (address):", response.data)
-
-      if (response.data && response.data.length > 0) {
-        const { lat, lon, address: addressDetails } = response.data[0]
-        const newLocation = { lat: Number.parseFloat(lat), lng: Number.parseFloat(lon) }
-
-        // Cập nhật vị trí đã chọn để vẽ đường đi
-        setSelectedLocation(newLocation)
-
-        // Tạo mảng các tên tỉnh/thành phố, quận/huyện và phường/xã có thể
-        const provinceNames = getProvinceNames(addressDetails)
-        const districtNames = getDistrictNames(addressDetails)
-        const wardNames = getWardNames(addressDetails)
-
-        console.log("Possible province names (from address):", provinceNames)
-        console.log("Possible district names (from address):", districtNames)
-        console.log("Possible ward names (from address):", wardNames)
-
-        // Tìm tỉnh/thành phố phù hợp
-        const matchedProvince = findMatchingProvince(provinceNames, provinces)
-
-        if (matchedProvince) {
-          console.log("Matched Province (from address):", matchedProvince)
-          const fetchedDistricts = await fetchDistricts(matchedProvince.ProvinceID)
-          console.log("Fetched Districts (from address):", fetchedDistricts)
-
-          // Tìm quận/huyện phù hợp
-          const matchedDistrict = findMatchingDistrict(districtNames, fetchedDistricts)
-
-          if (matchedDistrict) {
-            console.log("Matched District (from address):", matchedDistrict)
-            const fetchedWards = await fetchWards(matchedDistrict.DistrictID)
-            console.log("Fetched Wards (from address):", fetchedWards)
-
-            // Tìm phường/xã phù hợp
-            const matchedWard = findMatchingWard(wardNames, fetchedWards)
-            console.log("Matched Ward (from address):", matchedWard)
-
-            if (matchedWard) {
-              setFormData((prev) => ({
-                ...prev,
-                provinceId: matchedProvince.ProvinceID,
-                districtId: matchedDistrict.DistrictID,
-                wardCode: matchedWard.WardCode,
-              }))
-            } else {
-              setFormData((prev) => ({
-                ...prev,
-                provinceId: matchedProvince.ProvinceID,
-                districtId: matchedDistrict.DistrictID,
-                wardCode: "",
-              }))
-              notification.warning({
-                message: "Không tìm thấy phường/xã chính xác",
-                description: "Vui lòng chọn phường/xã từ danh sách",
-              })
-            }
-          } else {
-            setFormData((prev) => ({
-              ...prev,
-              provinceId: matchedProvince.ProvinceID,
-              districtId: "",
-              wardCode: "",
-            }))
-            notification.warning({
-              message: "Không tìm thấy quận/huyện chính xác",
-              description: "Vui lòng chọn quận/huyện từ danh sách",
-            })
-          }
-        } else {
-          // Không cập nhật gì nếu không tìm thấy tỉnh/thành phố
-          notification.warning({
-            message: "Không tìm thấy tỉnh/thành phố",
-            description: "Vui lòng chọn tỉnh/thành phố từ danh sách",
-          })
-        }
-      }
-    } catch (error) {
-      console.error("Lỗi khi tìm địa chỉ:", error)
-      notification.error({
-        message: "Lỗi tìm kiếm địa chỉ",
-        description: "Không thể xử lý địa chỉ. Vui lòng thử lại hoặc chọn từ danh sách.",
-      })
-    } finally {
-      setIsAddressChanging(false)
-    }
-  }
-
   // Xử lý khi thay đổi tỉnh/thành phố
   const handleProvinceChange = async (e) => {
     const provinceId = e.target.value
@@ -808,6 +735,7 @@ const Checkout = () => {
       provinceId,
       districtId: "",
       wardCode: "",
+      address: "", // Reset address khi thay đổi tỉnh
     })
 
     if (provinceId) {
@@ -824,6 +752,7 @@ const Checkout = () => {
       ...formData,
       districtId,
       wardCode: "",
+      address: "", // Reset address khi thay đổi quận/huyện
     })
 
     if (districtId) {
@@ -832,6 +761,15 @@ const Checkout = () => {
     } else {
       setWards([])
     }
+  }
+
+  const handleWardChange = (e) => {
+    const wardCode = e.target.value
+    setFormData({
+      ...formData,
+      wardCode,
+      address: "",
+    })
   }
 
   useEffect(() => {
@@ -943,7 +881,7 @@ const Checkout = () => {
     if (userProfile) {
       setFormData({
         fullName: userProfile.fullname || "",
-        address: userProfile.address || "",
+        address: "",
         phone: userProfile.phonenumber || "",
         note: "",
         provinceId: "",
@@ -1094,7 +1032,7 @@ const Checkout = () => {
                 name="wardCode"
                 value={formData.wardCode}
                 label="Phường/Xã"
-                onChange={handleInputChange}
+                onChange={handleWardChange}
                 disabled={!formData.districtId}
               >
                 {wards.map((ward) => (
@@ -1112,10 +1050,11 @@ const Checkout = () => {
               label="Địa chỉ chi tiết"
               variant="outlined"
               value={formData.address}
-              onChange={handleAddressChange}
-              onBlur={handleAddressBlur}
               style={{ marginBottom: "16px" }}
-              helperText="Nhập số nhà, tên đường, khu vực"
+              helperText="Nhấp vào bản đồ để chọn địa chỉ chính xác"
+              InputProps={{
+                readOnly: true, // Làm cho trường địa chỉ chỉ đọc
+              }}
             />
             <TextField
               fullWidth
@@ -1147,8 +1086,7 @@ const Checkout = () => {
                 !formData.provinceId ||
                 !formData.districtId ||
                 !formData.wardCode ||
-                !formData.address ||
-                isAddressChanging
+                !formData.address
               }
             >
               Thanh toán {finalTotal ? finalTotal.toLocaleString() : "0"} đ
@@ -1165,6 +1103,7 @@ const Checkout = () => {
                 </div>
               )}
               <MapContainer
+                ref={mapRef}
                 center={[STORE_LOCATION.lat, STORE_LOCATION.lng]}
                 zoom={14}
                 style={{ height: "400px", width: "100%" }}
@@ -1182,7 +1121,24 @@ const Checkout = () => {
                   </Marker>
                 )}
                 {selectedLocation && <RoutingMachine destination={selectedLocation} setShippingFee={setShippingFee} />}
-                <MapClickHandler />
+                <MapClickHandler
+                  setFormData={setFormData}
+                  formData={formData}
+                  provinces={provinces}
+                  districts={districts}
+                  wards={wards}
+                  setSelectedLocation={setSelectedLocation}
+                  setIsCalculatingFee={setIsCalculatingFee}
+                />
+                <MapFocusHandler
+                  wardCode={formData.wardCode}
+                  wards={wards}
+                  districts={districts}
+                  provinces={provinces}
+                  provinceId={formData.provinceId}
+                  districtId={formData.districtId}
+                  mapRef={mapRef}
+                />
               </MapContainer>
               <div className="mt-2 text-sm text-gray-600">
                 <p>* Phí giao hàng: 3,000 VND/km (làm tròn lên)</p>
