@@ -853,8 +853,8 @@ const Checkout = () => {
         localStorage.setItem("pendingBillData", JSON.stringify(billData))
         const response = await axios.post("https://fastfood-online-backend.onrender.com/create-payment-link", {
           amount: finalTotal,
-          returnUrl: "http://localhost:3000/success",
-          cancelUrl: "http://localhost:3000/checkout",
+          returnUrl: "https://fast-food-zeta-five.vercel.app/success",
+          cancelUrl: "https://fast-food-zeta-five.vercel.app/checkout",
         })
 
         if (response.data && response.data.paymentLink) {
