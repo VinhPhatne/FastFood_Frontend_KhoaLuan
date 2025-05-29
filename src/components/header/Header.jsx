@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from "react";
 import { FaCartShopping } from "react-icons/fa6";
 import { Button } from "@mantine/core";
@@ -35,10 +34,13 @@ import classNames from 'classnames';
 const Header = () => {
   const [activeTab, setActiveTab] = useState("Trang chủ");
   const [isSearchActive, setIsSearchActive] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [modalState, setModalState] = useState({
+    login: false,
+    register: false,
+    forgotPassword: false,
+    otp: false,
+  });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeForm, setActiveForm] = useState("login");
   const { cart } = useCart();
   const { clearCart } = useCartContext();
   const [totalQuantity, setTotalQuantity] = useState(0);
@@ -66,11 +68,11 @@ const Header = () => {
           },
         });
         const data = Array.isArray(response.data) ? response.data : [];
-          setNotifications(data);
-          setNotificationCount(data.filter((n) => !n.isRead).length);
-        } catch (error) {
-          console.error("Error fetching notifications:", error);
-          setNotifications([])
+        setNotifications(data);
+        setNotificationCount(data.filter((n) => !n.isRead).length);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+        setNotifications([]);
       }
     };
 
@@ -144,8 +146,12 @@ const Header = () => {
   };
 
   const handleLoginClick = () => {
-    setIsModalVisible(true);
-    setIsRegisterMode(false);
+    setModalState({
+      login: true,
+      register: false,
+      forgotPassword: false,
+      otp: false,
+    });
   };
 
   const handleCartClick = () => {
@@ -153,7 +159,12 @@ const Header = () => {
   };
 
   const handleCancel = () => {
-    setIsModalVisible(false);
+    setModalState({
+      login: false,
+      register: false,
+      forgotPassword: false,
+      otp: false,
+    });
   };
 
   const handleLogout = () => {
@@ -166,8 +177,41 @@ const Header = () => {
     });
   };
 
-  const handleSwitchToRegister = () => setActiveForm("register");
-  const handleSwitchToLogin = () => setActiveForm("login");
+  const handleSwitchToRegister = () => {
+    setModalState({
+      login: false,
+      register: true,
+      forgotPassword: false,
+      otp: false,
+    });
+  };
+
+  const handleSwitchToLogin = () => {
+    setModalState({
+      login: true,
+      register: false,
+      forgotPassword: false,
+      otp: false,
+    });
+  };
+
+  const handleSwitchToForgotPassword = () => {
+    setModalState({
+      login: false,
+      register: false,
+      forgotPassword: true,
+      otp: false,
+    });
+  };
+
+  const handleSwitchToOtp = () => {
+    setModalState({
+      login: false,
+      register: false,
+      forgotPassword: false,
+      otp: true,
+    });
+  };
 
   const menuItems = [
     { label: "Menu", path: "/" },
@@ -201,28 +245,29 @@ const Header = () => {
       </Menu.Item>
     </Menu>
   );
-  const [ isNotiOpen, setIsNotiOpen ] = useState(false);
+
+  const [isNotiOpen, setIsNotiOpen] = useState(false);
   const notiContentRef = useRef(null);
   const bellRef = useRef(null);
 
-useEffect(() => {
-  const handleClickOutside = (event) => {
+  useEffect(() => {
+    const handleClickOutside = (event) => {
       if (
-          bellRef.current &&
-          !bellRef.current.contains(event.target) &&
-          notiContentRef.current &&
-          !notiContentRef.current.contains(event.target) &&
-          isNotiOpen
+        bellRef.current &&
+        !bellRef.current.contains(event.target) &&
+        notiContentRef.current &&
+        !notiContentRef.current.contains(event.target) &&
+        isNotiOpen
       ) {
-          setIsNotiOpen(false);
+        setIsNotiOpen(false);
       }
-  };
+    };
 
-  document.addEventListener('mousedown', handleClickOutside);
-  return () => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-  };
-}, [ isNotiOpen ]);
+    };
+  }, [isNotiOpen]);
 
   return (
     <div className={styles.header}>
@@ -285,19 +330,20 @@ useEffect(() => {
         )}
       </div>
 
-      {activeForm === "login" ? (
-        <LoginForm
-          isModalVisible={isModalVisible}
-          handleCancel={handleCancel}
-          switchToRegister={handleSwitchToRegister}
-        />
-      ) : (
-        <RegisterForm
-          isModalVisible={isModalVisible}
-          handleCancel={handleCancel}
-          switchToLogin={handleSwitchToLogin}
-        />
-      )}
+      <LoginForm
+        isLoginVisible={modalState.login}
+        isForgotPasswordVisible={modalState.forgotPassword}
+        isOtpVisible={modalState.otp}
+        handleCancel={handleCancel}
+        switchToRegister={handleSwitchToRegister}
+        switchToForgotPassword={handleSwitchToForgotPassword}
+        switchToOtp={handleSwitchToOtp}
+      />
+      <RegisterForm
+        isModalVisible={modalState.register}
+        handleCancel={handleCancel}
+        switchToLogin={handleSwitchToLogin}
+      />
     </div>
   );
 };

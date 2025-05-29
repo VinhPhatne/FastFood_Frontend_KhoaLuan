@@ -424,6 +424,7 @@ const AdminHeader = () => {
                 <div className={styles.dataNotify}>
                   {notifications.length > 0 ? (
                     notifications.map((item) => {
+                      const id = item?.billId?._id;
                       const isRead = item.isRead || false;
                       const title = item.title || "Thông báo";
                       const content = item.message || "Không có nội dung";
@@ -433,7 +434,6 @@ const AdminHeader = () => {
                             timeStyle: "short",
                           })
                         : "Vừa xong";
-
                       return (
                         <div
                           className={classNames(styles.itemNoti, {
@@ -443,6 +443,9 @@ const AdminHeader = () => {
                           onClick={() => {
                             if (!isRead) {
                               handleReadNotification(item._id);
+                            }
+                             if (id) {
+                              navigate(`/admin/bill/${id}`);
                             }
                           }}
                         >
