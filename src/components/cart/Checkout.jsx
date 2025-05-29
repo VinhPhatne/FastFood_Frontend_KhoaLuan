@@ -82,10 +82,6 @@ const RoutingMachine = ({ destination, setShippingFee }) => {
         const roundedDistance = Math.ceil(distanceInKm) // Làm tròn lên
         const fee = roundedDistance * SHIPPING_RATE_PER_KM // Tính phí giao hàng
 
-        console.log("Tuyến đường được tìm thấy:", summary)
-        console.log("Khoảng cách:", roundedDistance, "km")
-        console.log("Phí giao hàng:", fee, "VND")
-
         // Cập nhật phí giao hàng
         setShippingFee(fee)
 
@@ -98,7 +94,6 @@ const RoutingMachine = ({ destination, setShippingFee }) => {
       })
 
       routingControl.on("routingerror", (e) => {
-        console.error("Lỗi định tuyến:", e.error)
         notification.error({
           message: "Lỗi định tuyến",
           description: `Không thể vẽ tuyến đường: ${e.error.message || "Lỗi không xác định"}`,
@@ -109,7 +104,6 @@ const RoutingMachine = ({ destination, setShippingFee }) => {
 
       routingControlRef.current = routingControl
     } catch (error) {
-      console.error("Lỗi khi vẽ tuyến đường:", error)
       notification.error({
         message: "Lỗi bản đồ",
         description: "Không thể vẽ tuyến đường. Vui lòng thử lại.",
@@ -154,7 +148,6 @@ const MapFocusHandler = ({ wardCode, wards, districts, provinces, provinceId, di
               map.setView([10.850317, 106.772936], 14) // Default to store location
             }
           } catch (error) {
-            console.error("Lỗi khi lấy tọa độ phường/xã:", error)
             notification.error({
               message: "Lỗi tìm kiếm tọa độ",
               description: "Không thể lấy tọa độ phường/xã. Vui lòng thử lại.",
@@ -252,12 +245,10 @@ const Checkout = () => {
       })
       if (response.data.code === 200) {
         setProvinces(response.data.data)
-        console.log("Provinces fetched:", response.data.data)
       } else {
         throw new Error(response.data.message || "Lỗi khi lấy danh sách tỉnh/thành phố")
       }
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách tỉnh/thành phố:", error.response?.data || error.message)
       notification.error({
         message: "Không thể tải danh sách tỉnh/thành phố",
         description: error.response?.data?.message || "Vui lòng kiểm tra token API hoặc kết nối mạng",
@@ -274,13 +265,11 @@ const Checkout = () => {
       })
       if (response.data.code === 200) {
         setDistricts(response.data.data)
-        console.log("Districts fetched for ProvinceID:", provinceId, response.data.data)
         return response.data.data
       } else {
         throw new Error(response.data.message || "Lỗi khi lấy danh sách quận/huyện")
       }
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách quận/huyện:", error.response?.data || error.message)
       notification.error({
         message: "Không thể tải danh sách quận/huyện",
         description: error.response?.data?.message || "Vui lòng kiểm tra token API hoặc kết nối mạng",
@@ -298,13 +287,11 @@ const Checkout = () => {
       })
       if (response.data.code === 200) {
         setWards(response.data.data)
-        console.log("Wards fetched for DistrictID:", districtId, response.data.data)
         return response.data.data
       } else {
         throw new Error(response.data.message || "Lỗi khi lấy danh sách phường/xã")
       }
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách phường/xã:", error.response?.data || error.message)
       notification.error({
         message: "Không thể tải danh sách phường/xã",
         description: error.response?.data?.message || "Vui lòng kiểm tra token API",
@@ -789,6 +776,7 @@ const Checkout = () => {
       setAvailableServices([])
     }
   }, [formData.districtId])
+  const { search } = useLocation()
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -798,18 +786,47 @@ const Checkout = () => {
     socket.on("billCreated", (response) => {
       console.log("Phản hồi từ server:", response)
       if (response.status === "success" && response.data?._id) {
-        clearCart()
-        navigate(`/success?orderId=${response.data._id}`)
+        const isOnlinePayment = localStorage.getItem("isOnlinePayment") === "true"
+        if (!isOnlinePayment) {
+          clearCart()
+          localStorage.removeItem("pendingBillData")
+          localStorage.removeItem("isOnlinePayment")
+          navigate(`/success?orderId=${response.data._id}`)
+        } else {
+          localStorage.setItem("pendingOrderId", response.data._id)
+        }
       } else {
-        alert("Lỗi khi tạo hóa đơn")
+        notification.error({
+          message: "Lỗi khi tạo hóa đơn",
+          description: "Không thể tạo đơn hàng. Vui lòng thử lại.",
+        })
       }
     })
+
+    const queryParams = new URLSearchParams(search)
+    const status = queryParams.get("status")
+    if (status) {
+      const orderId = localStorage.getItem("pendingOrderId")
+      if (status === "SUCCESS" && orderId) {
+        clearCart()
+        localStorage.removeItem("pendingOrderId")
+        localStorage.removeItem("pendingBillData")
+        localStorage.removeItem("isOnlinePayment")
+        navigate(`/success?orderId=${orderId}`)
+      } else {
+        notification.error({
+          message: "Thanh toán thất bại",
+          description: "Thanh toán không thành công hoặc đã bị hủy.",
+        })
+        navigate("/checkout")
+      }
+    }
 
     return () => {
       socket.off("connect")
       socket.off("billCreated")
     }
-  }, [navigate, clearCart])
+  }, [search, navigate, clearCart])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -847,24 +864,50 @@ const Checkout = () => {
     }
 
     if (paymentMethod === "cod") {
+      localStorage.setItem("isOnlinePayment", "false")
       socket.emit("createBill", billData)
     } else if (paymentMethod === "online") {
       try {
+        localStorage.setItem("isOnlinePayment", "true")
         localStorage.setItem("pendingBillData", JSON.stringify(billData))
-        const response = await axios.post("https://fastfood-online-backend.onrender.com/create-payment-link", {
-          amount: finalTotal,
-          returnUrl: "https://fast-food-zeta-five.vercel.app/success",
-          cancelUrl: "https://fast-food-zeta-five.vercel.app/checkout",
-        })
+        // const billResponse = await new Promise((resolve, reject) => {
+        //   socket.emit("createBill", billData)
+        //   socket.once("billCreated", (response) => {
+        //     if (response.status === "success" && response.data?._id) {
+        //       resolve(response)
+        //     } else {
+        //       reject(new Error("Lỗi khi tạo đơn hàng"))
+        //     }
+        //   })
+        //   // Timeout để tránh chờ vô hạn
+        //   setTimeout(() => reject(new Error("Timeout chờ phản hồi từ server")), 10000)
+        // })
 
-        if (response.data && response.data.paymentLink) {
-          window.location.href = response.data.paymentLink
+        //localStorage.setItem("pendingOrderId", billResponse.data._id)
+        const pendingOrderId = localStorage.getItem("pendingOrderId");
+
+        const paymentResponse = await axios.post(
+          "https://fastfood-online-backend.onrender.com/create-payment-link",
+          {
+            amount: finalTotal,
+            returnUrl: `https://fast-food-zeta-five.vercel.app/success?orderId=${pendingOrderId}`,
+            cancelUrl: "https://fast-food-zeta-five.vercel.app/checkout",
+            orderCode: pendingOrderId,
+          },
+          { headers: { Authorization: `Bearer ${jwt}` } }
+        )
+
+        if (paymentResponse.data && paymentResponse.data.paymentLink) {
+          window.location.href = paymentResponse.data.paymentLink
         } else {
-          alert("Không thể tạo liên kết thanh toán.")
+          throw new Error("Không thể tạo liên kết thanh toán")
         }
       } catch (error) {
-        console.error("Lỗi khi tạo liên kết thanh toán:", error)
-        alert("Đã xảy ra lỗi khi tạo liên kết thanh toán.")
+        console.error("Lỗi khi tạo đơn hàng hoặc liên kết thanh toán:", error)
+        notification.error({
+          message: "Lỗi thanh toán",
+          description: "Không thể tạo đơn hàng hoặc liên kết thanh toán. Vui lòng thử lại.",
+        })
       }
     }
   }
