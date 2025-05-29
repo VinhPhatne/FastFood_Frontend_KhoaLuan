@@ -17,22 +17,20 @@ import { API_URL } from "../config/api";
 import { LOGIN_SUCCESS } from "../State/Authentication/ActionType";
 
 const LoginForm = ({
-  isModalVisible,
+  isLoginVisible,
+  isForgotPasswordVisible,
+  isOtpVisible,
   handleCancel,
-  handleLoginSuccess,
   switchToRegister,
+  switchToForgotPassword,
+  switchToOtp,
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [isForgotModalVisible, setIsForgotModalVisible] = useState(false);
-  const [isOtpModalVisible, setIsOtpModalVisible] = useState(false);
   const [resetInfo, setResetInfo] = useState({});
   const [form] = Form.useForm();
-
-  const closeModal = () => {
-    form.resetFields();
-    handleCancel();
-  };
+  const [forgotForm] = Form.useForm();
+  const [otpForm] = Form.useForm();
 
   const onFinish = async (values) => {
     try {
@@ -43,7 +41,7 @@ const LoginForm = ({
         })
       );
       if (resultAction.type === LOGIN_SUCCESS) {
-        closeModal();
+        handleCancel();
       }
     } catch (error) {
       const message =
@@ -53,11 +51,6 @@ const LoginForm = ({
     }
   };
 
-  const openForgotPasswordModal = () => {
-    closeModal();
-    setIsForgotModalVisible(true);
-  };
-
   const handleForgotPassword = async (values) => {
     try {
       await axios.post(`${API_URL}/v1/account/reset-password`, {
@@ -65,8 +58,8 @@ const LoginForm = ({
         phonenumber: values.phonenumber,
       });
       setResetInfo(values);
-      setIsForgotModalVisible(false);
-      setIsOtpModalVisible(true);
+      switchToOtp();
+      forgotForm.resetFields();
     } catch (error) {
       const message = error.response?.data?.message || "Có lỗi xảy ra";
       notification.error({ message });
@@ -87,7 +80,8 @@ const LoginForm = ({
         message: "Thành công",
         description: "Mật khẩu của bạn đã được thay đổi!",
       });
-      setIsOtpModalVisible(false);
+      handleCancel();
+      otpForm.resetFields();
     } catch (error) {
       const message = error.response?.data?.message || "Xác thực OTP thất bại!";
       notification.error({ message });
@@ -98,8 +92,8 @@ const LoginForm = ({
     <>
       <Modal
         title={<div className={styles["modal-title"]}>Đăng nhập</div>}
-        visible={isModalVisible}
-        onCancel={closeModal}
+        visible={isLoginVisible}
+        onCancel={handleCancel}
         footer={null}
       >
         <Form
@@ -157,7 +151,7 @@ const LoginForm = ({
         </Form>
 
         <div className={styles["link-container"]}>
-          <a href="#" className={styles.link} onClick={openForgotPasswordModal}>
+          <a href="#" className={styles.link} onClick={switchToForgotPassword}>
             Quên mật khẩu
           </a>
           <a href="#" className={styles.link} onClick={switchToRegister}>
@@ -185,14 +179,17 @@ const LoginForm = ({
         </div>
       </Modal>
 
-      {/* Modal Quên mật khẩu */}
       <Modal
         title={<div className={styles["modal-title"]}>Quên mật khẩu</div>}
-        visible={isForgotModalVisible}
-        onCancel={() => setIsForgotModalVisible(false)}
+        visible={isForgotPasswordVisible}
+        onCancel={handleCancel}
         footer={null}
       >
-        <Form onFinish={handleForgotPassword} layout="vertical">
+        <Form
+          form={forgotForm}
+          onFinish={handleForgotPassword}
+          layout="vertical"
+        >
           <Form.Item
             name="email"
             label="Email"
@@ -238,14 +235,13 @@ const LoginForm = ({
         </Form>
       </Modal>
 
-      {/* Modal Xác nhận OTP */}
       <Modal
         title={<div className={styles["modal-title"]}>Xác nhận OTP</div>}
-        visible={isOtpModalVisible}
-        onCancel={() => setIsOtpModalVisible(false)}
+        visible={isOtpVisible}
+        onCancel={handleCancel}
         footer={null}
       >
-        <Form onFinish={handleVerifyOtp} layout="vertical">
+        <Form form={otpForm} onFinish={handleVerifyOtp} layout="vertical">
           <Form.Item
             name="otp"
             label="Mã OTP"

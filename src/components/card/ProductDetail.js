@@ -22,11 +22,32 @@ const ProductDetail = () => {
   const [selectedChoices, setSelectedChoices] = useState({});
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [relatedProductsLoading, setRelatedProductsLoading] = useState(true); // New state for RelatedProducts loading
+  const [visibleReviews, setVisibleReviews] = useState(5);
 
   useEffect(() => {
-    dispatch(getProducts({ jwt }));
-  }, [dispatch, jwt]);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        await Promise.all([
+          dispatch(getProducts({ jwt })),
+          axios.get(`https://fastfood-online-backend.onrender.com/v1/review/product/${id}`).then((response) => {
+            setReviews(response.data);
+          }),
+        ]);
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        notification.error({
+          message: 'Lỗi khi tải dữ liệu sản phẩm!',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [dispatch, jwt, id]);
 
   useEffect(() => {
     if (products.length) {
@@ -45,32 +66,6 @@ const ProductDetail = () => {
       }
     }
   }, [products, id, navigate]);
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const response = await axios.get(`https://fastfood-online-backend.onrender.com/v1/review/product/${id}`);
-        setReviews(response.data);
-      } catch (error) {
-        console.error('Error fetching reviews:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchReviews();
-
-    const fetchRelatedProducts = async () => {
-      setRelatedProductsLoading(true);
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate 1-second delay
-      } catch (error) {
-        console.error('Error fetching related products:', error);
-      } finally {
-        setRelatedProductsLoading(false);
-      }
-    };
-    fetchRelatedProducts();
-  }, [id]);
 
   const handleChoiceSelect = (optionId, choiceId) => {
     setSelectedChoices((prevChoices) => ({
@@ -107,7 +102,21 @@ const ProductDetail = () => {
     });
   };
 
-  if (!product || loading) return <div>Loading...</div>;
+  const handleLoadMoreReviews = () => {
+    setVisibleReviews((prev) => prev + 5);
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return <div>Sản phẩm không tồn tại.</div>;
+  }
 
   const averageRating =
     reviews.length > 0
@@ -185,27 +194,36 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      <Spin spinning={relatedProductsLoading} indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />}>
-        <RelatedProducts productId={id} />
-      </Spin>
+      <RelatedProducts productId={id} />
 
       <div className="reviews-section">
         <h2>Đánh giá sản phẩm</h2>
         {reviews.length > 0 ? (
-          <div className="reviews-list">
-            {reviews.map((review) => (
-              <div key={review._id} className="review-item">
-                <div className="review-header">
-                  <span className="reviewer-name">{review.fullName}</span>
-                  <Rate disabled value={review.rating} />
+          <>
+            <div className="reviews-list">
+              {reviews.slice(0, visibleReviews).map((review) => (
+                <div key={review._id} className="review-item">
+                  <div className="review-header">
+                    <span className="reviewer-name">{review.fullName}</span>
+                    <Rate disabled value={review.rating} />
+                  </div>
+                  <p className="review-comment">{review.comment}</p>
+                  <span className="review-date">
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
-                <p className="review-comment">{review.comment}</p>
-                <span className="review-date">
-                  {new Date(review.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            {visibleReviews < reviews.length && (
+              <Button
+                type="link"
+                className="load-more-button"
+                onClick={handleLoadMoreReviews}
+              >
+                Xem thêm
+              </Button>
+            )}
+          </>
         ) : (
           <p>Chưa có đánh giá nào cho sản phẩm này.</p>
         )}
