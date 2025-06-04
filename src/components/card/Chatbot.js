@@ -140,16 +140,40 @@ const ChatbotComponent = () => {
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
-    if (!userId && !localStorage.getItem('chatSessionId')) {
-      localStorage.setItem('chatSessionId', sessionId);
+    if (!user && !userId && !jwt) {
+      console.log('Resetting chatbot on logout');
+      setChatbotMessages(config.initialMessages);
+      setMessageKey((prev) => prev + 1);
+      localStorage.removeItem('guestChatHistory');
+      localStorage.removeItem('chatSessionId');
+      socket.disconnect();
+      console.log('Chatbot messages reset to:', config.initialMessages);
     }
-    dispatch(getChatHistory(userId ? undefined : sessionId));
-  }, [dispatch, userId, sessionId, jwt]);
+  }, [user, userId, jwt]);
 
   useEffect(() => {
-    const effectiveId = userId || sessionId;
+    if (isOpen) {
+      if (!userId && !localStorage.getItem('chatSessionId')) {
+        const newSessionId = uuidv4();
+        setSessionId(newSessionId);
+        localStorage.setItem('chatSessionId', newSessionId);
+        dispatch(getChatHistory(newSessionId));
+      } else if (userId) {
+        dispatch(getChatHistory(undefined));
+      }
+      socket.connect();
+      const effectiveId = userId || sessionId;
+      socket.emit('join', effectiveId);
+      console.log('Socket joined with ID:', effectiveId);
+    }
+    return () => {
+      socket.disconnect();
+    };
+  }, [dispatch, userId, sessionId, isOpen]);
 
+  useEffect(() => {
     const handleConnect = () => {
+      const effectiveId = userId || sessionId;
       socket.emit('join', effectiveId);
       console.log('Socket joined with ID:', effectiveId);
     };
@@ -225,19 +249,6 @@ const ChatbotComponent = () => {
   useEffect(() => {
     if (!jwt) setChatbotMessages(config.initialMessages);
   }, [jwt]);
-
-  useEffect(() => {
-    if (!user && !userId && !jwt) {
-      console.log('Resetting chatbot on logout');
-      setChatbotMessages(config.initialMessages); 
-      setMessageKey((prev) => prev + 1);
-      localStorage.removeItem('guestChatHistory');
-      localStorage.removeItem('chatSessionId');
-      setSessionId(uuidv4());
-      socket.emit('leave', userId || sessionId);
-      console.log('Chatbot messages reset to:', config.initialMessages);
-    }
-  }, [user, userId, jwt, sessionId]);
 
   const handleMessage = async (message) => {
     const effectiveId = userId || sessionId;
