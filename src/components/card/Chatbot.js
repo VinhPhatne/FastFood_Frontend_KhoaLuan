@@ -47,8 +47,6 @@ const chatboxStyles = `
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    border-top-left-radius: 12px !important;
-    border-top-right-radius: 12px !important;
   }
 
   .react-chatbot-kit-chat-message-container {
