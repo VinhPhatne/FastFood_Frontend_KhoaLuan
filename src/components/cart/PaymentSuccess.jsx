@@ -54,14 +54,10 @@ const PaymentSuccess = () => {
     };
 
     fetchBillData();
-
-    const pendingBillData = JSON.parse(localStorage.getItem("pendingBillData"));
-    if (pendingBillData) {
-      socket.emit("createBill", pendingBillData);
-      localStorage.removeItem("pendingBillData");
-      clearCart();
-    }
-
+    clearCart();
+    localStorage.removeItem("pendingBillData");
+    localStorage.removeItem("isOnlinePayment");
+    
     socket.on("order_status_updated", (data) => {
       const audio = new Audio(sound);
           audio.load();
@@ -79,11 +75,12 @@ const PaymentSuccess = () => {
         });
       }
     });
+    localStorage.removeItem("pendingOrderId");
 
     return () => {
       socket.off("order_status_updated");
     };
-  }, [dispatch, orderId, jwt, clearCart]);
+  }, [dispatch, orderId, jwt]);
 
   const timelineSteps = [
     { label: "Đơn Hàng Đã Đặt", icon: <AssignmentTurnedInIcon />, state: 1 },

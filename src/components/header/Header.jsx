@@ -100,36 +100,6 @@ const Header = () => {
   }, [dispatch, jwt]);
 
   useEffect(() => {
-    socket.on("connect", () => {
-      console.log("Connected to server via WebSocket");
-    });
-
-    socket.on("order_notification", (newNotification) => {
-      setNotifications((prev) => [newNotification, ...prev]);
-      setNotificationCount((prev) => prev + 1);
-      notification.success({
-        message: "Thông báo mới",
-        description: newNotification.message || "Bạn có thông báo mới!",
-      });
-    });
-
-    socket.on("review_notification", (newReview) => {
-      setReviews((prev) => [newReview, ...prev]);
-      setReviewCount((prev) => prev + 1);
-      notification.success({
-        message: "Review mới",
-        description: newReview.message || "Bạn có review mới!",
-      });
-    });
-
-    return () => {
-      socket.off("connect");
-      socket.off("order_notification");
-      socket.off("review_notification");
-    };
-  }, []);
-
-  useEffect(() => {
     if (jwt) {
       setIsLoggedIn(true);
     } else {
