@@ -69,7 +69,7 @@ const Cart = () => {
 
   const shippingFee = totalPrice > 0 ? 10000 : 0;
   const finalTotal = Math.max(
-    totalPrice + shippingFee - discount - pointsUsed,
+    totalPrice - discount - pointsUsed,
     0
   );
 
@@ -311,10 +311,10 @@ const Cart = () => {
                   <span>Tổng đơn hàng</span>
                   <span>{totalPrice.toLocaleString()} đ</span>
                 </div>
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                   <span>Phí giao hàng</span>
                   <span>{shippingFee.toLocaleString()} đ</span>
-                </div>
+                </div> */}
                 {discount > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Giảm giá</span>

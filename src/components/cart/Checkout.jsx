@@ -80,7 +80,12 @@ const RoutingMachine = ({ destination, setShippingFee }) => {
         const summary = routes[0].summary
         const distanceInKm = summary.totalDistance / 1000 // Chuyển đổi từ mét sang km
         const roundedDistance = Math.ceil(distanceInKm) // Làm tròn lên
-        const fee = roundedDistance * SHIPPING_RATE_PER_KM // Tính phí giao hàng
+        //const fee = roundedDistance * SHIPPING_RATE_PER_KM // Tính phí giao hàng
+        const fee = isNaN(distanceInKm) || !distanceInKm
+          ? 0
+          : distanceInKm <= 2
+          ? 15000
+          : 15000 + Math.ceil(distanceInKm - 2) * 4000;
 
         // Cập nhật phí giao hàng
         setShippingFee(fee)
@@ -88,7 +93,7 @@ const RoutingMachine = ({ destination, setShippingFee }) => {
         // Hiển thị thông báo
         notification.success({
           message: "Đã tính phí giao hàng",
-          description: `Khoảng cách: ${roundedDistance} km. Phí giao hàng: ${fee.toLocaleString()} VND (${SHIPPING_RATE_PER_KM.toLocaleString()} VND/km)`,
+          description: `Khoảng cách: ${roundedDistance} km. Phí giao hàng: ${fee.toLocaleString()} VND`,
           duration: 5,
         })
       })
@@ -1124,7 +1129,23 @@ const Checkout = () => {
               fullWidth
               variant="contained"
               type="submit"
-              style={{ color: "#fff", backgroundColor: "#ff7d01" }}
+              style={{
+                color: "#fff",
+                backgroundColor: 
+                  !formData.provinceId ||
+                  !formData.districtId ||
+                  !formData.wardCode ||
+                  !formData.address
+                    ? "#ccc" // màu xám khi disabled
+                    : "#ff7d01", // màu cam khi enabled
+                cursor:
+                  !formData.provinceId ||
+                  !formData.districtId ||
+                  !formData.wardCode ||
+                  !formData.address
+                    ? "not-allowed"
+                    : "pointer",
+              }}
               disabled={
                 !formData.provinceId ||
                 !formData.districtId ||
@@ -1184,7 +1205,6 @@ const Checkout = () => {
                 />
               </MapContainer>
               <div className="mt-2 text-sm text-gray-600">
-                <p>* Phí giao hàng: 3,000 VND/km (làm tròn lên)</p>
                 <p>* Nhấp vào bản đồ để chọn vị trí giao hàng và tính phí tự động</p>
               </div>
             </div>

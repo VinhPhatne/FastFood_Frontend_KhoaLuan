@@ -108,11 +108,11 @@ const LoginForm = ({
         >
           <Form.Item
             name="email"
-            label="Số điện thoại / Email"
+            label="Số điện thoại"
             rules={[
               {
                 required: true,
-                message: "Vui lòng nhập Số điện thoại / Email!",
+                message: "Vui lòng nhập Số điện thoại",
               },
               {
                 pattern: /^0\d{9}$/,
@@ -122,7 +122,7 @@ const LoginForm = ({
             className={styles["form-item"]}
           >
             <Input
-              placeholder="Nhập Số điện thoại / Email"
+              placeholder="Nhập Số điện thoại"
               style={{ height: "50px" }}
             />
           </Form.Item>
