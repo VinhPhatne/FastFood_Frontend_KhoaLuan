@@ -39,7 +39,7 @@ const PaymentSuccess = () => {
 
         if (response.data?.voucher) {
           const voucherResponse = await dispatch(
-            getVoucherById({ id: response.data.voucher, jwt })
+            getVoucherById({ id: response.data.voucher._id, jwt })
           );
           if (voucherResponse) {
             setVoucherDiscount(voucherResponse.data?.discount);
