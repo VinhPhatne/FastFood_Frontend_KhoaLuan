@@ -628,21 +628,16 @@ const Checkout = () => {
             const matchedProvince = findMatchingProvince(provinceNames, provinces)
 
             if (matchedProvince) {
-              console.log("Matched Province:", matchedProvince)
               const fetchedDistricts = await fetchDistricts(matchedProvince.ProvinceID)
-              console.log("Fetched Districts:", fetchedDistricts)
 
               // Tìm quận/huyện phù hợp
               const matchedDistrict = findMatchingDistrict(districtNames, fetchedDistricts)
 
               if (matchedDistrict) {
-                console.log("Matched District:", matchedDistrict)
                 const fetchedWards = await fetchWards(matchedDistrict.DistrictID)
-                console.log("Fetched Wards:", fetchedWards)
 
                 // Tìm phường/xã phù hợp
                 const matchedWard = findMatchingWard(wardNames, fetchedWards)
-                console.log("Matched Ward:", matchedWard)
 
                 if (matchedWard) {
                   setFormData({
@@ -783,6 +778,8 @@ const Checkout = () => {
   }, [formData.districtId])
   const { search } = useLocation()
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     socket.on("connect", () => {
       console.log("Kết nối với server qua WebSocket")
@@ -834,14 +831,17 @@ const Checkout = () => {
   }, [search, navigate, clearCart])
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    const finalTotal = totalPrice1 + shippingFee - (discount || 0) - (pointsUsed || 0)
+    e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const finalTotal = totalPrice1 + shippingFee - (discount || 0) - (pointsUsed || 0);
 
     const provinceName =
-      provinces.find((p) => p.ProvinceID === Number.parseInt(formData.provinceId))?.ProvinceName || ""
+      provinces.find((p) => p.ProvinceID === Number.parseInt(formData.provinceId))?.ProvinceName || "";
     const districtName =
-      districts.find((d) => d.DistrictID === Number.parseInt(formData.districtId))?.DistrictName || ""
-    const wardName = wards.find((w) => w.WardCode === formData.wardCode)?.WardName || ""
+      districts.find((d) => d.DistrictID === Number.parseInt(formData.districtId))?.DistrictName || "";
+    const wardName = wards.find((w) => w.WardCode === formData.wardCode)?.WardName || "";
 
     const billData = {
       fullName: formData.fullName,
@@ -863,33 +863,35 @@ const Checkout = () => {
         })),
       })),
       note: formData.note || "",
-    }
+    };
     if (userProfile?._id) {
-      billData.account = userProfile._id
+      billData.account = userProfile._id;
     }
 
     if (paymentMethod === "cod") {
-      localStorage.setItem("isOnlinePayment", "false")
-      socket.emit("createBill", billData)
+      localStorage.setItem("isOnlinePayment", "false");
+      socket.emit("createBill", billData);
+      setIsSubmitting(false); // Reset trạng thái sau khi gửi
     } else if (paymentMethod === "online") {
       try {
-        localStorage.setItem("isOnlinePayment", "true")
-        localStorage.setItem("pendingBillData", JSON.stringify(billData))
-        // const billResponse = await new Promise((resolve, reject) => {
-        //   socket.emit("createBill", billData)
-        //   socket.once("billCreated", (response) => {
-        //     if (response.status === "success" && response.data?._id) {
-        //       resolve(response)
-        //     } else {
-        //       reject(new Error("Lỗi khi tạo đơn hàng"))
-        //     }
-        //   })
-        //   // Timeout để tránh chờ vô hạn
-        //   setTimeout(() => reject(new Error("Timeout chờ phản hồi từ server")), 10000)
-        // })
+        localStorage.setItem("isOnlinePayment", "true");
+        localStorage.setItem("pendingBillData", JSON.stringify(billData));
 
-        //localStorage.setItem("pendingOrderId", billResponse.data._id)
-        const pendingOrderId = localStorage.getItem("pendingOrderId");
+        // Create bill and wait for response
+        const billResponse = await new Promise((resolve, reject) => {
+          socket.emit("createBill", billData);
+          socket.once("billCreated", (response) => {
+            if (response.status === "success" && response.data?._id) {
+              resolve(response);
+            } else {
+              reject(new Error("Lỗi khi tạo đơn hàng"));
+            }
+          });
+          setTimeout(() => reject(new Error("Timeout chờ phản hồi từ server")), 10000);
+        });
+
+        const pendingOrderId = billResponse.data._id;
+        localStorage.setItem("pendingOrderId", pendingOrderId);
 
         const paymentResponse = await axios.post(
           "https://fastfood-online-backend.onrender.com/create-payment-link",
@@ -900,22 +902,24 @@ const Checkout = () => {
             orderCode: pendingOrderId,
           },
           { headers: { Authorization: `Bearer ${jwt}` } }
-        )
+        );
 
         if (paymentResponse.data && paymentResponse.data.paymentLink) {
-          window.location.href = paymentResponse.data.paymentLink
+          window.location.href = paymentResponse.data.paymentLink;
         } else {
-          throw new Error("Không thể tạo liên kết thanh toán")
+          throw new Error("Không thể tạo liên kết thanh toán");
         }
       } catch (error) {
-        console.error("Lỗi khi tạo đơn hàng hoặc liên kết thanh toán:", error)
+        console.error("Lỗi khi tạo đơn hàng hoặc liên kết thanh toán:", error);
         notification.error({
           message: "Lỗi thanh toán",
           description: "Không thể tạo đơn hàng hoặc liên kết thanh toán. Vui lòng thử lại.",
-        })
+        });
+      } finally {
+        setIsSubmitting(false);
       }
     }
-  }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
