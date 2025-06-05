@@ -41,6 +41,9 @@ const ManagerRoute = () => {
         message: "Truy cập bị từ chối",
         description: "Bạn không có quyền truy cập trang này.",
       });
+      if (role == "1") {
+        return <Navigate to="/admin" replace />;
+      }
       return <Navigate to="/" replace />;
     }
   }

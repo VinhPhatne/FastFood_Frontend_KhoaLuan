@@ -8,16 +8,13 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import {
   updateUser,
-  updateUserProfile,
 } from "../../components/State/User/Action";
 import { notification } from "antd";
 
 const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (account) {
@@ -83,6 +80,7 @@ const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
         <form className="space-y-5" onSubmit={handleSubmit}>
           <TextField
             fullWidth
+            required
             id="fullname"
             name="fullname"
             label="Họ tên"
@@ -92,6 +90,7 @@ const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
+            required
             id="phonenumber"
             name="phonenumber"
             label="Số điện thoại"
@@ -101,6 +100,7 @@ const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
+            required
             id="password"
             name="password"
             label="Mật khẩu"
@@ -111,6 +111,7 @@ const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
+            required
             id="address"
             name="address"
             label="Địa chỉ"
@@ -120,6 +121,7 @@ const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
+            required
             id="email"
             name="email"
             label="Email"

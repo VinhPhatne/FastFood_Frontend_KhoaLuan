@@ -52,7 +52,7 @@ export const categoryReducer = (state = initialState, action) => {
       return {
         ...state,
         categories: Array.isArray(state.categories)
-          ? state.categories.filter((item) => item.id !== action.payload)
+          ? state.categories?.filter((item) => item.id !== action.payload)
           : [], 
       };
 

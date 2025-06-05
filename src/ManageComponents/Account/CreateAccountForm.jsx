@@ -8,13 +8,11 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { createUser } from "../../components/State/User/Action";
 import { notification } from "antd";
 
 const CreateAccountForm = ({ onClose, onSuccess }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     fullname: "",
@@ -32,6 +30,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
       phonenumber: formData.phonenumber,
       password: formData.password,
       email: formData.email,
+      role: formData.role,
     };
     try {
       await dispatch(
@@ -52,7 +51,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: name === "role" ? parseInt(value, 10) : value,
     });
   };
 
@@ -65,6 +64,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
         <form className="space-y-5" onSubmit={handleSubmit}>
           <TextField
             fullWidth
+            required
             id="fullname"
             name="fullname"
             label="Họ tên"
@@ -74,6 +74,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
+            required
             id="phonenumber"
             name="phonenumber"
             label="Số điện thoại"
@@ -83,6 +84,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
+            required
             id="password"
             name="password"
             label="Mật khẩu"
@@ -102,6 +104,7 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
           />
           <TextField
             fullWidth
+            required
             id="email"
             name="email"
             label="Email"

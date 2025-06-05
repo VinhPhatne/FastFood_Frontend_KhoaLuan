@@ -23,6 +23,7 @@ const initialState = {
   selectedBill: null,
   data: [],
   productSales: [],
+  isLoading: false,
 };
 
 export const billReducer = (state = initialState, action) => {
@@ -33,12 +34,14 @@ export const billReducer = (state = initialState, action) => {
         ...state,
         bills: action.payload,
         error: null,
+        isLoading: false,
       };
     case GET_BILLS_FAILURE:
     case GET_LIST_BILLS_FAILURE:
       return {
         ...state,
         error: action.payload,
+        isLoading: true,
       };
     case CREATE_BILL_SUCCESS:
       return {

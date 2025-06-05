@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
-
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import Home from "../components/Home";
 import Header from "../components/header/Header";
 import Profile from "../components/profile/Profile";
@@ -19,12 +18,13 @@ import {
 } from "../components/State/Authentication/Action";
 import { useDispatch, useSelector } from "react-redux";
 import ProductDetail from '../components/card/ProductDetail';
+import PageNotFound from './PageNotFound';
 
 const CustomerRoute = () => {
-
   const dispatch = useDispatch();
   const jwt = localStorage.getItem("jwt");
   const storedRole = localStorage.getItem("role") || "2";
+  const location = useLocation();
 
   const { role } = useSelector((state) => ({
     role: state.auth.role,
@@ -41,10 +41,22 @@ const CustomerRoute = () => {
     dispatch(setUserRole(storedRole));
   }, [dispatch, jwt, storedRole]);
 
+  const isNotFound = ![
+    '/',
+    '/profile',
+    '/cart',
+    '/checkout',
+    '/success',
+    '/about',
+    '/promotion',
+    '/otp',
+    '/detail/:id',
+  ].some((path) => location.pathname === path || location.pathname.startsWith(path.replace(':id', '')));
+
   return (
     <CartProvider>
       <div>
-        <Header />
+        {!isNotFound && <Header />}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/profile/*" element={<Profile />} />
@@ -55,8 +67,9 @@ const CustomerRoute = () => {
           <Route path="/promotion" element={<Promotion />} />
           <Route path="/otp" element={<OTP />} />
           <Route path="/detail/:id" element={<ProductDetail />} />
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
-        <Footer />
+        {!isNotFound && <Footer />}
       </div>
     </CartProvider>
   );

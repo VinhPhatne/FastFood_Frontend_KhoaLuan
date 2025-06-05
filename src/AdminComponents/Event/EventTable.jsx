@@ -16,6 +16,7 @@ import {
   InputAdornment,
   Checkbox,
 } from "@mui/material";
+import { Spin } from "antd"; // Import Spin from antd
 import CreateIcon from "@mui/icons-material/Create";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -56,6 +57,7 @@ const EventTable = () => {
   const { categories } = useSelector(
     (state) => state.categoryReducer.categories
   );
+  const [isLoading, setIsLoading] = useState(false); // Local loading state
 
   const jwt = localStorage.getItem("jwt");
 
@@ -73,7 +75,22 @@ const EventTable = () => {
   const [deleteId, setDeleteId] = useState(null);
 
   const fetchEvents = async () => {
-    await dispatch(getEvents({ jwt }));
+    setIsLoading(true); // Start loading
+    try {
+      await dispatch(getEvents({ jwt }));
+    } finally {
+      setIsLoading(false); // Stop loading
+    }
+  };
+
+  const fetchProductsAndCategories = async () => {
+    setIsLoading(true); // Start loading
+    try {
+      const response = await dispatch(getCategories({ jwt }));
+      setProducts(response || []);
+    } finally {
+      setIsLoading(false); // Stop loading
+    }
   };
 
   useEffect(() => {
@@ -91,13 +108,18 @@ const EventTable = () => {
   const handleClearSearch = () => setSearchTerm("");
 
   const handleOpenFormModal = async (id) => {
-    const response = await dispatch(getEventById({ id, jwt }));
-    if (response) {
-      setSelectedEvent(response);
-    } else {
-      console.error("Response không hợp lệ:", response);
+    setIsLoading(true); // Start loading
+    try {
+      const response = await dispatch(getEventById({ id, jwt }));
+      if (response) {
+        setSelectedEvent(response);
+      } else {
+        console.error("Response không hợp lệ:", response);
+      }
+      setOpenEditModal(true);
+    } finally {
+      setIsLoading(false); // Stop loading
     }
-    setOpenEditModal(true);
   };
 
   const handleCloseFormModal = () => {
@@ -111,29 +133,34 @@ const EventTable = () => {
   };
 
   const handleDelete = async () => {
-    await dispatch(deleteEvent({ id: deleteId, jwt }));
-    setOpenDeleteModal(false);
-    fetchEvents();
+    setIsLoading(true); // Start loading
+    try {
+      await dispatch(deleteEvent({ id: deleteId, jwt }));
+      setOpenDeleteModal(false);
+      await fetchEvents();
+    } finally {
+      setIsLoading(false); // Stop loading
+    }
   };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const fetchProductsAndCategories = async () => {
-    const response = await dispatch(getCategories({ jwt }));
-    setProducts(response || []);
-  };
-
   const handleOpenProductModal = async (eventId) => {
-    setCurrentEventId(eventId);
-    const eventResponse = await dispatch(getEventById({ id: eventId, jwt }));
-    if (eventResponse) setSelectedEvent(eventResponse);
+    setIsLoading(true); // Start loading
+    try {
+      setCurrentEventId(eventId);
+      const eventResponse = await dispatch(getEventById({ id: eventId, jwt }));
+      if (eventResponse) setSelectedEvent(eventResponse);
 
-    if (eventResponse?.data?.products) {
-      setSelectedProducts(new Set(eventResponse.data.products));
+      if (eventResponse?.data?.products) {
+        setSelectedProducts(new Set(eventResponse.data.products));
+      }
+      await fetchProductsAndCategories();
+      setOpenProductModal(true);
+    } finally {
+      setIsLoading(false); // Stop loading
     }
-    await fetchProductsAndCategories();
-    setOpenProductModal(true);
   };
 
   const handleCloseProductModal = () => {
@@ -154,6 +181,7 @@ const EventTable = () => {
   };
 
   const updateEventProducts = async (eventId, selectedProductArray) => {
+    setIsLoading(true); // Start loading
     try {
       const payload = {
         eventId: eventId,
@@ -180,6 +208,8 @@ const EventTable = () => {
     } catch (error) {
       console.error("Error updating event products:", error);
       return null;
+    } finally {
+      setIsLoading(false); // Stop loading
     }
   };
 
@@ -203,256 +233,266 @@ const EventTable = () => {
   };
 
   const handleBlockUnblock = async (item) => {
+    setIsLoading(true); // Start loading
     try {
       if (item.isActive) {
-        const response = await dispatch(blockEvent({ id: item._id, jwt }));
+        await dispatch(blockEvent({ id: item._id, jwt }));
         notification.success({ message: "Sự kiện đã bị khóa thành công!" });
       } else {
-        const response = await dispatch(unblockEvent({ id: item._id, jwt }));
+        await dispatch(unblockEvent({ id: item._id, jwt }));
         notification.success({
           message: "Sự kiện đã được mở khóa thành công!",
         });
       }
-      fetchEvents();
+      await fetchEvents();
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Đã có lỗi xảy ra!";
       console.error(error);
       notification.error({ message: errorMessage });
+    } finally {
+      setIsLoading(false); // Stop loading
     }
   };
 
   return (
-    <Box sx={{ width: "95%", margin: "0px auto", marginTop: "100px" }}>
-      {/* Search and Create Button Section */}
+    <Spin spinning={isLoading} size="large">
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "20px",
+          width: "95%",
+          margin: "0px auto",
+          marginTop: "100px",
+          minHeight: "100vh", // Ensure full height for centered loading
         }}
       >
-        <TextField
-          label="Tìm kiếm"
-          variant="outlined"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+        {/* Search and Create Button Section */}
+        <Box
           sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "20px",
-              height: "50px",
-            },
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
           }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setSearchTerm(searchTerm)}>
-                  <SearchIcon />
-                </IconButton>
-                <IconButton onClick={handleClearSearch}>
-                  <ClearIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => handleOpen()}
         >
-          Thêm mới
-        </Button>
-      </Box>
+          <TextField
+            label="Tìm kiếm"
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "20px",
+                height: "50px",
+              },
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setSearchTerm(searchTerm)}>
+                    <SearchIcon />
+                  </IconButton>
+                  <IconButton onClick={handleClearSearch}>
+                    <ClearIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleOpen()}
+          >
+            Thêm mới
+          </Button>
+        </Box>
 
-      {/* Table Section */}
-      <Card sx={{ boxShadow: "0 3px 5px rgba(0,0,0,0.1)" }}>
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="Event Table">
-            <TableHead sx={{ backgroundColor: "#fdba74" }}>
-              <TableRow>
-                <TableCell align="left">#</TableCell>
-                <TableCell align="left">Tên sự kiện</TableCell>
-                <TableCell align="center">Giảm giá</TableCell>
-                <TableCell align="right">Ngày hết hạn</TableCell>
-                <TableCell align="center">Hoạt động</TableCell>
-                <TableCell align="center">Hành động</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredEvents.length > 0 ? (
-                filteredEvents.map((item, index) => (
-                  <TableRow
-                    key={item._id}
-                    sx={{ "&:hover": { backgroundColor: "#FFF3E0" } }}
-                  >
-                    <TableCell component="th" scope="row">
-                      {index + 1}
-                    </TableCell>
-                    <TableCell align="left">{item.name}</TableCell>
-                    <TableCell align="center">
-                      {item.discountPercent} %
-                    </TableCell>
-                    <TableCell align="right">
-                      {item.expDate
-                        ? format(new Date(item.expDate), "dd/MM/yyyy")
-                        : "N/A"}
-                    </TableCell>
-                    <TableCell align="center">
-                      {item.isActive ? "Hoạt động" : "Khóa"}
-                    </TableCell>
-                    <TableCell align="center">
-                      <IconButton onClick={() => handleBlockUnblock(item)}>
-                        {item.isActive ? (
-                          <LockIcon style={{ color: "#D32F2F" }} />
-                        ) : (
-                          <LockOpenIcon style={{ color: "#43A047" }} />
-                        )}
-                      </IconButton>
-                      <IconButton
-                        color="error"
-                        onClick={() => {
-                          
-                          handleOpenFormModal(item._id);
-                        }}
-                      >
-                        <CreateIcon />
-                      </IconButton>
-                      <IconButton
-                        color="error"
-                        onClick={() => {
-                          
-                          handleOpenDeleteModal(item._id);
-                        }}
-                      >
-                        <Delete />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => handleOpenProductModal(item._id)}
-                      >
-                        <AddBoxIcon />
-                      </IconButton>
+        {/* Table Section */}
+        <Card sx={{ boxShadow: "0 3px 5px rgba(0,0,0,0.1)" }}>
+          <TableContainer component={Paper}>
+            <Table sx={{ minWidth: 650 }} aria-label="Event Table">
+              <TableHead sx={{ backgroundColor: "#fdba74" }}>
+                <TableRow>
+                  <TableCell align="left">#</TableCell>
+                  <TableCell align="left">Tên sự kiện</TableCell>
+                  <TableCell align="center">Giảm giá</TableCell>
+                  <TableCell align="right">Ngày hết hạn</TableCell>
+                  <TableCell align="center">Hoạt động</TableCell>
+                  <TableCell align="center">Hành động</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredEvents.length > 0 ? (
+                  filteredEvents.map((item, index) => (
+                    <TableRow
+                      key={item._id}
+                      sx={{ "&:hover": { backgroundColor: "#FFF3E0" } }}
+                    >
+                      <TableCell component="th" scope="row">
+                        {index + 1}
+                      </TableCell>
+                      <TableCell align="left">{item.name}</TableCell>
+                      <TableCell align="center">
+                        {item.discountPercent} %
+                      </TableCell>
+                      <TableCell align="right">
+                        {item.expDate
+                          ? format(new Date(item.expDate), "dd/MM/yyyy")
+                          : "N/A"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {item.isActive ? "Hoạt động" : "Khóa"}
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton onClick={() => handleBlockUnblock(item)}>
+                          {item.isActive ? (
+                            <LockIcon style={{ color: "#D32F2F" }} />
+                          ) : (
+                            <LockOpenIcon style={{ color: "#43A047" }} />
+                          )}
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          onClick={() => {
+                            handleOpenFormModal(item._id);
+                          }}
+                        >
+                          <CreateIcon />
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          onClick={() => {
+                            handleOpenDeleteModal(item._id);
+                          }}
+                        >
+                          <Delete />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => handleOpenProductModal(item._id)}
+                        >
+                          <AddBoxIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <Typography>No events available</Typography>
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} align="center">
-                    <Typography>No events available</Typography>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
 
-      {/* Modal quản lý sản phẩm */}
-      <Modal open={openProductModal} onClose={handleCloseProductModal}>
-        <Box sx={{ ...style, width: 800 }}>
-          <Typography variant="h6" mb={2}>
-            Chọn sản phẩm cho sự kiện
-          </Typography>
-          <Box
-            sx={{
-              maxHeight: 500,
-              overflowY: "auto",
-              paddingRight: 2,
-            }}
-          >
-            {Array.isArray(categories) &&
-              categories.length > 0 &&
-              categories.map((category) => (
-                <Box key={category._id} mb={3}>
-                  <Typography variant="subtitle1" gutterBottom>
-                    {category.name}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(4, 1fr)",
-                      gap: 2,
-                    }}
-                  >
-                    {filterProductsForEvent(category).map((product) => (
-                      <Box
-                        key={product._id}
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          border: "1px solid #ddd",
-                          borderRadius: 2,
-                          padding: 2,
-                        }}
-                      >
-                        <img
-                          src={product.picture}
-                          alt={product.name}
-                          style={{
-                            width: "100%",
-                            height: 100,
-                            objectFit: "cover",
+        {/* Modal quản lý sản phẩm */}
+        <Modal open={openProductModal} onClose={handleCloseProductModal}>
+          <Box sx={{ ...style, width: 800 }}>
+            <Typography variant="h6" mb={2}>
+              Chọn sản phẩm cho sự kiện
+            </Typography>
+            <Box
+              sx={{
+                maxHeight: 500,
+                overflowY: "auto",
+                paddingRight: 2,
+              }}
+            >
+              {Array.isArray(categories) &&
+                categories.length > 0 &&
+                categories.map((category) => (
+                  <Box key={category._id} mb={3}>
+                    <Typography variant="subtitle1" gutterBottom>
+                      {category.name}
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(4, 1fr)",
+                        gap: 2,
+                      }}
+                    >
+                      {filterProductsForEvent(category).map((product) => (
+                        <Box
+                          key={product._id}
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            border: "1px solid #ddd",
+                            borderRadius: 2,
+                            padding: 2,
                           }}
-                        />
-                        <Typography variant="body1" mt={1}>
-                          {product.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Giá: {product.currentPrice.toLocaleString()} VND
-                        </Typography>
-                        <Checkbox
-                          checked={selectedProducts.has(product._id)}
-                          onChange={() => {
-                            handleToggleProduct(product._id);
-                          }}
-                        />
-                      </Box>
-                    ))}
+                        >
+                          <img
+                            src={product.picture}
+                            alt={product.name}
+                            style={{
+                              width: "100%",
+                              height: 100,
+                              objectFit: "cover",
+                            }}
+                          />
+                          <Typography variant="body1" mt={1}>
+                            {product.name}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Giá: {product.currentPrice.toLocaleString()} VND
+                          </Typography>
+                          <Checkbox
+                            checked={selectedProducts.has(product._id)}
+                            onChange={() => {
+                              handleToggleProduct(product._id);
+                            }}
+                          />
+                        </Box>
+                      ))}
+                    </Box>
                   </Box>
-                </Box>
-              ))}
+                ))}
+            </Box>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+              <Button onClick={handleCloseProductModal}>Hủy</Button>
+              <Button variant="contained" onClick={handleSaveProducts}>
+                Lưu
+              </Button>
+            </Box>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-            <Button onClick={handleCloseProductModal}>Hủy</Button>
-            <Button variant="contained" onClick={handleSaveProducts}>
-              Lưu
-            </Button>
+        </Modal>
+
+        {/* Modal Section */}
+        <Modal open={openEditModal} onClose={handleCloseFormModal}>
+          <Box sx={style}>
+            <UpdateEventForm
+              event={selectedEvent}
+              onSuccess={fetchEvents}
+              onClose={handleCloseFormModal}
+            />
           </Box>
-        </Box>
-      </Modal>
+        </Modal>
 
-      {/* Modal Section */}
-      <Modal open={openEditModal} onClose={handleCloseFormModal}>
-        <Box sx={style}>
-          <UpdateEventForm
-            event={selectedEvent}
-            onSuccess={fetchEvents}
-            onClose={handleCloseFormModal}
-          />
-        </Box>
-      </Modal>
-
-      <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
-        <Box sx={style}>
-          <Typography variant="h6">Xác nhận xóa</Typography>
-          <Typography>Bạn có chắc chắn muốn xóa sự kiện này không?</Typography>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-            <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
-            <Button onClick={handleDelete}>Xóa</Button>
+        <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
+          <Box sx={style}>
+            <Typography variant="h6">Xác nhận xóa</Typography>
+            <Typography>Bạn có chắc chắn muốn xóa sự kiện này không?</Typography>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+              <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
+              <Button onClick={handleDelete}>Xóa</Button>
+            </Box>
           </Box>
-        </Box>
-      </Modal>
+        </Modal>
 
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <Box sx={style}>
-          <CreateEventForm
-            onSuccess={fetchEvents}
-            onClose={() => setOpen(false)}
-          />
-        </Box>
-      </Modal>
-    </Box>
+        <Modal open={open} onClose={() => setOpen(false)}>
+          <Box sx={style}>
+            <CreateEventForm
+              onSuccess={fetchEvents}
+              onClose={() => setOpen(false)}
+            />
+          </Box>
+        </Modal>
+      </Box>
+    </Spin>
   );
 };
 
