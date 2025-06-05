@@ -21,19 +21,13 @@ import {
   Modal,
   Typography,
 } from "@mui/material";
+import { Spin } from "antd";
 import SearchIcon from "@mui/icons-material/Search";
 import React, { useEffect, useState } from "react";
-import CreateIcon from "@mui/icons-material/Create";
-import { useFormik } from "formik";
 import ClearIcon from "@mui/icons-material/Clear";
 import { Delete, Edit } from "@mui/icons-material";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getProducts,
-  getProductsListPage,
-} from "../../components/State/Product/Action";
-import { getCategories } from "../../components/State/Category/Action";
 import {
   deleteUser,
   getUserById,
@@ -69,7 +63,6 @@ const AccountTable = () => {
 
   const [open, setOpen] = useState(false);
   const [openEditModal, setOpenEditModal] = useState(false);
-  const [filteredEvents, setFilteredEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
@@ -164,217 +157,232 @@ const AccountTable = () => {
   };
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
 
   return (
-    <Box
-      sx={{
-        width: "95%",
-        // display: 'flex',
-        justifyContent: "center",
-        alignItems: "center",
-        margin: "0px auto",
-        marginTop: "100px",
-      }}
-    >
+    <Spin spinning={isLoading} size="large">
       <Box
         sx={{
-          display: "flex",
-          // justifyContent: "space-between",
+          width: "95%",
+          justifyContent: "center",
           alignItems: "center",
-          marginBottom: "20px",
+          margin: "0px auto",
+          marginTop: "100px",
+          minHeight: "100vh",
         }}
       >
-        <TextField
-          label="Tìm kiếm"
-          variant="outlined"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "20px",
-              height: "50px",
-            },
-          }}
-          // InputProps={{
-          //   endAdornment: (
-          //     <InputAdornment position="end">
-          //       <IconButton onClick={handleSearch}>
-          //         <SearchIcon />
-          //       </IconButton>
-          //       <IconButton onClick={() => handleClearSearch()} edge="end">
-          //         <ClearIcon />
-          //       </IconButton>
-          //     </InputAdornment>
-          //   ),
-          // }}
-        />
-
-        <FormControl sx={{ minWidth: 150, marginLeft: 2 }}>
-          <InputLabel>Role</InputLabel>
-          <Select value={selectedRole} onChange={handleRoleChange} label="Role">
-            <MenuItem value="">All Roles</MenuItem>
-            <MenuItem value="1">Admin</MenuItem>
-            <MenuItem value="3">User</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl sx={{ minWidth: 150, marginLeft: 2 }}>
-          <InputLabel>Trạng thái tài khoản</InputLabel>
-          <Select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            label="Status"
-          >
-            <MenuItem value="">Tất cả</MenuItem>
-            <MenuItem value="true">Hoạt động</MenuItem>
-            <MenuItem value="false">Bị Block</MenuItem>
-          </Select>
-        </FormControl>
-
-        <InputAdornment position="end">
-          <IconButton onClick={handleSearch}>
-            <SearchIcon />
-          </IconButton>
-          <IconButton onClick={() => handleClearSearch()} edge="end">
-            <ClearIcon />
-          </IconButton>
-        </InputAdornment>
-
-    
-     
-      </Box>
-      <Card sx={{ boxShadow: "0 3px 5px rgba(0,0,0,0.1)" }}>
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead
-              sx={{
-                backgroundColor: "#fdba74",
-              }}
-            >
-              <TableRow>
-                <TableCell align="left" sx={{ color: "#000" }}>
-                  Avatar
-                </TableCell>
-                <TableCell align="left" sx={{ color: "#000" }}>
-                  Họ và tên
-                </TableCell>
-                <TableCell align="right" sx={{ color: "#000" }}>
-                  Số điện thoại
-                </TableCell>
-                <TableCell align="right" sx={{ color: "#000" }}>
-                  Địa chỉ
-                </TableCell>
-                <TableCell align="right" sx={{ color: "#000" }}>
-                  Email
-                </TableCell>
-                <TableCell align="center" sx={{ color: "#000" }}>
-                  Trạng thái
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={5} align="center">
-                    Loading...
-                  </TableCell>
-                </TableRow>
-              ) : Array.isArray(accounts.accounts) &&
-                accounts.accounts.length > 0 ? (
-                accounts.accounts.map((user) => (
-                  <TableRow
-                    key={user._id}
-                    onClick={() =>
-                      navigate(`/manager/bill?accountId=${user._id}`)
-                    }
-                    sx={{
-                      "&:last-child td, &:last-child th": { border: 0 },
-                      "&:hover": { backgroundColor: "#FFF3E0" },
-                      cursor: "pointer",
-                    }}
-                  >
-                    <TableCell component="th" scope="row">
-                      <Avatar src={user.avatar} alt={user.fullname} />
-                    </TableCell>
-                    <TableCell align="left">{user.fullname}</TableCell>
-                    <TableCell align="right">{user.phonenumber}</TableCell>
-                    <TableCell align="right">{user.address}</TableCell>
-                    <TableCell align="right">{user.email}</TableCell>
-                    
-                    <TableCell align="center">
-                      <Typography
-                        sx={{
-                          color: user.state === true ? "green" : "red",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {user.state === true ? "Hoạt động" : "Khóa"}
-                      </Typography>
-                    </TableCell>
-                    
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} align="center">
-                    No accounts available
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Card>
-
-      {/* Modal Section */}
-      <Modal open={openEditModal} onClose={handleCloseFormModal}>
-        <Box sx={style}>
-          <UpdateAccountForm
-            onSuccess={fetchAccounts}
-            account={selectedEvent}
-            onClose={handleCloseFormModal}
-          />
-        </Box>
-      </Modal>
-
-      <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
-        <Box sx={style}>
-          <Typography variant="h6">Xác nhận xóa</Typography>
-          <Typography>Bạn có chắc chắn muốn xóa sự kiện này không?</Typography>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-            <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
-            <Button onClick={handleDelete}>Xóa</Button>
-          </Box>
-        </Box>
-      </Modal>
-
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <Box sx={style}>
-          <CreateAccountForm
-            onSuccess={fetchAccounts}
-            onClose={() => setOpen(false)}
-          />
-        </Box>
-      </Modal>
-
-      {Array.isArray(accounts.accounts) && (
         <Box
           sx={{
             display: "flex",
-            justifyContent: "center",
-            marginTop: "20px",
+            alignItems: "center",
+            marginBottom: "20px",
           }}
         >
-          <Pagination
-            count={accounts.pagination?.totalPages || 1}
-            page={currentPage}
-            onChange={handlePageChange}
-            color="primary"
+          <TextField
+            label="Tìm kiếm"
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "20px",
+                height: "50px",
+              },
+            }}
           />
+
+          <FormControl sx={{ minWidth: 150, marginLeft: 2 }}>
+            <InputLabel>Role</InputLabel>
+            <Select value={selectedRole} onChange={handleRoleChange} label="Role">
+              <MenuItem value="">All Roles</MenuItem>
+              <MenuItem value="1">Admin</MenuItem>
+              <MenuItem value="3">User</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 150, marginLeft: 2 }}>
+            <InputLabel>Trạng thái tài khoản</InputLabel>
+            <Select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              label="Status"
+            >
+              <MenuItem value="">Tất cả</MenuItem>
+              <MenuItem value="true">Hoạt động</MenuItem>
+              <MenuItem value="false">Bị Block</MenuItem>
+            </Select>
+          </FormControl>
+
+          <InputAdornment position="end">
+            <IconButton onClick={handleSearch}>
+              <SearchIcon />
+            </IconButton>
+            <IconButton onClick={() => handleClearSearch()} edge="end">
+              <ClearIcon />
+            </IconButton>
+          </InputAdornment>
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => handleOpen()}
+            sx={{
+              ml: "auto",
+              height: "40px",
+              borderRadius: "20px",
+            }}
+          >
+            Thêm mới
+          </Button>
         </Box>
-      )}
-    </Box>
+        <Card sx={{ boxShadow: "0 3px 5px rgba(0,0,0,0.1)" }}>
+          <TableContainer component={Paper}>
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              <TableHead
+                sx={{
+                  backgroundColor: "#fdba74",
+                }}
+              >
+                <TableRow>
+                  <TableCell align="left" sx={{ color: "#000" }}>
+                    Avatar
+                  </TableCell>
+                  <TableCell align="left" sx={{ color: "#000" }}>
+                    Họ và tên
+                  </TableCell>
+                  <TableCell align="right" sx={{ color: "#000" }}>
+                    Số điện thoại
+                  </TableCell>
+                  <TableCell align="right" sx={{ color: "#000" }}>
+                    Địa chỉ
+                  </TableCell>
+                  <TableCell align="right" sx={{ color: "#000" }}>
+                    Email
+                  </TableCell>
+                  <TableCell align="center" sx={{ color: "#000" }}>
+                    Trạng thái
+                  </TableCell>
+                  <TableCell align="right" sx={{ color: "#000" }}>
+                    Hành động
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {Array.isArray(accounts.accounts) &&
+                accounts.accounts.length > 0 ? (
+                  accounts.accounts.map((user) => (
+                    <TableRow
+                      key={user._id}
+                      onClick={() =>
+                        navigate(`/admin/bill?accountId=${user._id}`)
+                      }
+                      sx={{
+                        "&:last-child td, &:last-child th": { border: 0 },
+                        "&:hover": { backgroundColor: "#FFF3E0" },
+                        cursor: "pointer",
+                      }}
+                    >
+                      <TableCell component="th" scope="row">
+                        <Avatar src={user.avatar} alt={user.fullname} />
+                      </TableCell>
+                      <TableCell align="left">{user.fullname}</TableCell>
+                      <TableCell align="right">{user.phonenumber}</TableCell>
+                      <TableCell align="right">{user.address}</TableCell>
+                      <TableCell align="right">{user.email}</TableCell>
+                      <TableCell align="center">
+                        <Typography
+                          sx={{
+                            color: user.state === true ? "green" : "red",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {user.state === true ? "Hoạt động" : "Khóa"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <IconButton
+                          color="primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenFormModal(user._id);
+                          }}
+                        >
+                          <Edit />
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenDeleteModal(user._id);
+                          }}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">
+                      No accounts available
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
+
+        {/* Modal Section */}
+        <Modal open={openEditModal} onClose={handleCloseFormModal}>
+          <Box sx={style}>
+            <UpdateAccountForm
+              onSuccess={fetchAccounts}
+              account={selectedEvent}
+              onClose={handleCloseFormModal}
+            />
+          </Box>
+        </Modal>
+
+        <Modal open={openDeleteModal} onClose={() => setOpenDeleteModal(false)}>
+          <Box sx={style}>
+            <Typography variant="h6">Xác nhận khóa</Typography>
+            <Typography>Bạn có chắc chắn muốn khóa tài khoản này không?</Typography>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+              <Button onClick={() => setOpenDeleteModal(false)}>Hủy</Button>
+              <Button variant="contained" color="primary" onClick={handleDelete}>
+                Xóa
+              </Button>
+            </Box>
+          </Box>
+        </Modal>
+
+        <Modal open={open} onClose={() => setOpen(false)}>
+          <Box sx={style}>
+            <CreateAccountForm
+              onSuccess={fetchAccounts}
+              onClose={() => setOpen(false)}
+            />
+          </Box>
+        </Modal>
+
+        {Array.isArray(accounts.accounts) && (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "20px",
+            }}
+          >
+            <Pagination
+              count={accounts.pagination?.totalPages || 1}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+            />
+          </Box>
+        )}
+      </Box>
+    </Spin>
   );
 };
 
