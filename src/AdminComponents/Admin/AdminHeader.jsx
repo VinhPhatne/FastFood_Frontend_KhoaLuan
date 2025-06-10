@@ -538,6 +538,7 @@ const AdminHeader = () => {
                     reviews.map((item) => {
                       const isRead = item.isRead || false;
                       const title = item.fullName || "Đánh giá";
+                      const productName = item?.product?.name || "Sản phẩm không xác định";
                       const content = item.comment || "Không có nội dung";
                       const createdAt = item.createdAt
                         ? new Date(item.createdAt).toLocaleString("vi-VN", {
@@ -565,6 +566,7 @@ const AdminHeader = () => {
                           </div>
                           <div className={styles.desc}>
                             <div className={styles.titleNoti}>{title}</div>
+                            <div className={styles.contentNoti}>Tên món ăn: {productName}</div>
                             <div className={styles.contentNoti}>{content}</div>
                             <div className={styles.date}>{createdAt}</div>
                           </div>

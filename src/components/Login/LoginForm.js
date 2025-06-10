@@ -10,11 +10,11 @@ import {
 import styles from "./LoginForm.module.scss";
 import { TbBrandGoogle } from "react-icons/tb";
 import { useDispatch } from "react-redux";
-import { loginUser } from "../State/Authentication/Action";
+import { loginUser, get2FAQrCode, verify2FA } from "../State/Authentication/Action";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { LockOutlined } from "@ant-design/icons";
+import axios from 'axios';
 import { API_URL } from "../config/api";
-import { LOGIN_SUCCESS } from "../State/Authentication/ActionType";
 
 const LoginForm = ({
   isLoginVisible,
@@ -31,6 +31,10 @@ const LoginForm = ({
   const [form] = Form.useForm();
   const [forgotForm] = Form.useForm();
   const [otpForm] = Form.useForm();
+  const [is2FAVisible, setIs2FAVisible] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [loadingVerify2FA, setLoadingVerify2FA] = useState(false);
 
   const onFinish = async (values) => {
     try {
@@ -38,10 +42,15 @@ const LoginForm = ({
         loginUser({
           userData: { phoneNumber: values.email, password: values.password },
           navigate,
+          setIs2FAVisible,
+          setQrCodeUrl,
+          setUserId,
         })
       );
-      if (resultAction.type === LOGIN_SUCCESS) {
-        handleCancel();
+      if (resultAction.type === "LOGIN_SUCCESS") {
+        if (!resultAction.payload.showQrCode) {
+          handleCancel();
+        }
       }
     } catch (error) {
       const message =
@@ -85,6 +94,29 @@ const LoginForm = ({
     } catch (error) {
       const message = error.response?.data?.message || "Xác thực OTP thất bại!";
       notification.error({ message });
+    }
+  };
+
+  const handleVerify2FA = async () => {
+    try {
+      setLoadingVerify2FA(true);
+      const values = await otpForm.validateFields();
+      await dispatch(
+        verify2FA({
+          userId,
+          otp: values.otp,
+          navigate,
+        })
+      );
+      setIs2FAVisible(false);
+      setQrCodeUrl(null);
+      otpForm.resetFields();
+      handleCancel();
+    } catch (error) {
+      const message = error.response?.data?.message || "Xác thực 2FA thất bại!";
+      notification.error({ message });
+    } finally {
+      setLoadingVerify2FA(false);
     }
   };
 
@@ -296,6 +328,70 @@ const LoginForm = ({
             </AntButton>
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title={<div className={styles["modal-title"]}>Xác thực hai yếu tố</div>}
+        visible={is2FAVisible}
+        width={550}
+        onCancel={() => {
+          setIs2FAVisible(false);
+          setQrCodeUrl(null);
+          otpForm.resetFields();
+          handleCancel();
+        }}
+        footer={null}
+      >
+        <div style={{ width: "max-content", minWidth: 500 }}>
+          <h2>XÁC THỰC</h2>
+          {qrCodeUrl && (
+            <Flex align="center" vertical gap={24} style={{ marginBottom: 24 }}>
+              <div>
+                <h4 style={{ margin: "0 0 8px 0" }}>Quét Mã vạch QR</h4>
+                <span style={{ opacity: "0.6", fontSize: 14 }}>
+                  Thiết lập tài khoản mới trong ứng dụng xác thực của bạn và quét mã vạch QR sau
+                </span>
+              </div>
+              <img src={qrCodeUrl} style={{ width: 240, height: 240 }} />
+            </Flex>
+          )}
+          <Form form={otpForm} name="otp-form" layout="vertical">
+            <Form.Item
+              name="otp"
+              rules={[{ required: true, message: "Vui lòng nhập mã OTP!" }]}
+            >
+              <Input
+                prefix={<LockOutlined />}
+                placeholder="Nhập mã OTP"
+                size="large"
+                type="number"
+              />
+            </Form.Item>
+            <Flex justify="end" gap={8}>
+              <AntButton
+                type="primary"
+                size="large"
+                loading={loadingVerify2FA}
+                style={{ width: "max-content" }}
+                onClick={handleVerify2FA}
+              >
+                Xác nhận
+              </AntButton>
+              <AntButton
+                size="large"
+                onClick={() => {
+                  setIs2FAVisible(false);
+                  setQrCodeUrl(null);
+                  otpForm.resetFields();
+                  handleCancel();
+                }}
+                style={{ width: "max-content" }}
+              >
+                Hủy
+              </AntButton>
+            </Flex>
+          </Form>
+        </div>
       </Modal>
     </>
   );
