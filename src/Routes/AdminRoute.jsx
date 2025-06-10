@@ -12,7 +12,7 @@ import {
 const AdminRoute = () => {
   const dispatch = useDispatch();
   const jwt = localStorage.getItem("jwt");
-  const storedRole = localStorage.getItem("role") || "3";
+  const storedRole = localStorage.getItem("role") || "";
 
   const { role, isLoading } = useSelector((state) => ({
     role: state.auth.role,
