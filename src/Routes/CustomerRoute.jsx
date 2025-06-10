@@ -23,7 +23,7 @@ import PageNotFound from './PageNotFound';
 const CustomerRoute = () => {
   const dispatch = useDispatch();
   const jwt = localStorage.getItem("jwt");
-  const storedRole = localStorage.getItem("role") || "2";
+  const storedRole = localStorage.getItem("role") || "";
   const location = useLocation();
 
   const { role } = useSelector((state) => ({
