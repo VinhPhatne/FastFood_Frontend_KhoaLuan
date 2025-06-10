@@ -35,6 +35,16 @@ const AdminRoute = () => {
 
   if (!role) {
     dispatch(getUserProfile());
+        if (storedRole != "2") {
+          notification.error({
+            message: "Truy cập bị từ chối",
+            description: "Bạn không có quyền truy cập trang này.",
+          });
+          if (storedRole == "1") {
+            return <Navigate to="/admin" replace />;
+          }
+          return <Navigate to="/" replace />;
+        }
   } else {
     if (role != "1") {
       notification.error({
