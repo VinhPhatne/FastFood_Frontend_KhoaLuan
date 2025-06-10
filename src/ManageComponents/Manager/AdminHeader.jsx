@@ -25,6 +25,7 @@ import { useCartContext } from "../../components/cart/CartContext";
 import socket from "../../components/config/socket";
 import styles from "./Header.module.scss";
 import sound from "../../assets/sounds/sound.mp3";
+import { API_URL } from "../../components/config/api";
 
 const AdminHeader = () => {
   const navigate = useNavigate();
@@ -36,12 +37,45 @@ const AdminHeader = () => {
   const [notificationCount, setNotificationCount] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
   const jwt = localStorage.getItem("jwt");
-
+  const userId = localStorage.getItem("userId");
   const cartContext = useCartContext();
   if (!cartContext) {
     console.error("CartContext is not available.");
   }
   const { clearCart } = cartContext || {};
+
+    const handleReset2FA = async () => {
+      if (!userId) {
+        notification.error({
+          message: "Lỗi",
+          description: "Không tìm thấy thông tin người dùng",
+        });
+        return;
+      }
+  
+      try {
+        await axios.get(
+          `${API_URL}/v1/account/${userId}/reset_2fa`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          }
+        );
+        notification.success({
+          message: "Thành công",
+          description: "Mã 2FA đã được đặt lại",
+        });
+      } catch (error) {
+        console.error("Error resetting 2FA:", error);
+        notification.error({
+          message: "Lỗi",
+          description: error.response?.data?.message || "Không thể đặt lại mã 2FA",
+        });
+      }
+      handleClose();
+    };
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -603,6 +637,7 @@ const AdminHeader = () => {
           open={Boolean(anchorEl)}
           onClose={handleClose}
         >
+          <MenuItem onClick={handleReset2FA}>Đặt lại Mã</MenuItem>
           <MenuItem onClick={handleLogout}>Log Out</MenuItem>
         </Menu>
       </Toolbar>
