@@ -343,7 +343,7 @@ const LoginForm = ({
         footer={null}
       >
         <div style={{ width: "max-content", minWidth: 500 }}>
-          <h2>XÁC THỰC</h2>
+          <h2 style={{ marginBottom: '4px' }}>XÁC THỰC</h2>
           {qrCodeUrl && (
             <Flex align="center" vertical gap={24} style={{ marginBottom: 24 }}>
               <div>
@@ -365,6 +365,7 @@ const LoginForm = ({
                 placeholder="Nhập mã OTP"
                 size="large"
                 type="number"
+                style={{ height: "50px" }}
               />
             </Form.Item>
             <Flex justify="end" gap={8}>
