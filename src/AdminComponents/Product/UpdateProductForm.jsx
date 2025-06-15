@@ -48,6 +48,7 @@ const UpdateProductForm = () => {
   const { id } = useParams();
 
   const [selectedProduct, setSelectedProduct] = useState("");
+  const [priceError, setPriceError] = useState("");
   const jwt = localStorage.getItem("jwt");
 
   const { categories } = useSelector(
@@ -60,7 +61,6 @@ const UpdateProductForm = () => {
         const response = await dispatch(getProductById({ id, jwt }));
         if (response) {
           setSelectedProduct(response.data);
-          // Điền dữ liệu vào formik
           const category = categories.find(
             (cat) => cat._id === response.data.category
           );
@@ -95,6 +95,10 @@ const UpdateProductForm = () => {
     initialValues,
     validationSchema,
     onSubmit: (values) => {
+      if (priceError) {
+        notification.error({ message: "Vui lòng sửa lỗi giá sản phẩm trước khi cập nhật" });
+        return;
+      }
       const productData = {
         ...values,
         price: parseFloat(values.price),
@@ -130,6 +134,27 @@ const UpdateProductForm = () => {
 
   const handleRemoveImage = () => {
     formik.setFieldValue("picture", "");
+  };
+
+  const handlePriceChange = (e) => {
+    const { value } = e.target;
+    const numericValue = value.replace(/[^0-9]/g, "");
+    if (numericValue === "" || parseFloat(numericValue) <= 0) {
+      setPriceError("Giá phải là một số dương");
+    } else {
+      setPriceError("");
+    }
+    formik.setFieldValue("price", numericValue);
+  };
+
+  const handlePriceBlur = () => {
+    const value = formik.values.price;
+    if (!value || parseFloat(value) <= 0) {
+      setPriceError("Giá phải là một số dương");
+      formik.setFieldValue("price", "");
+    } else {
+      setPriceError("");
+    }
   };
 
   return (
@@ -188,7 +213,6 @@ const UpdateProductForm = () => {
               </div>
             </Grid>
 
-            {/* Row for name field */}
             <Grid item xs={12}>
               <div className="flex items-center">
                 <label htmlFor="name" className="block font-medium mb-1 w-1/4">
@@ -208,7 +232,6 @@ const UpdateProductForm = () => {
               </div>
             </Grid>
 
-            {/* Row for description field */}
             <Grid item xs={12}>
               <div className="flex items-center">
                 <label htmlFor="description" className="block font-medium mb-1 w-1/4">
@@ -228,7 +251,6 @@ const UpdateProductForm = () => {
               </div>
             </Grid>
 
-            {/* Row for price field */}
             <Grid item xs={12}>
               <div className="flex items-center">
                 <label htmlFor="price" className="block font-medium mb-1 w-1/4">
@@ -239,16 +261,17 @@ const UpdateProductForm = () => {
                   id="price"
                   name="price"
                   variant="outlined"
-                  onChange={formik.handleChange}
+                  onChange={handlePriceChange}
+                  onBlur={handlePriceBlur}
                   value={formik.values.price}
-                  error={formik.touched.price && Boolean(formik.errors.price)}
-                  helperText={formik.touched.price && formik.errors.price}
+                  error={formik.touched.price && (Boolean(formik.errors.price) || Boolean(priceError))}
+                  helperText={(formik.touched.price && formik.errors.price) || priceError}
                   sx={{ maxWidth: "100%" }}
+                  inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
                 />
               </div>
             </Grid>
 
-            {/* Row for category field */}
             <Grid item xs={12}>
               <div className="flex items-center">
                 <label htmlFor="category" className="block font-medium mb-1 w-1/4">

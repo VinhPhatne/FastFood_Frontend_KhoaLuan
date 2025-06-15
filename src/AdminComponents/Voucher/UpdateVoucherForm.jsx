@@ -12,6 +12,7 @@ const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
     discount: "",
     code: "",
   });
+  const [discountError, setDiscountError] = useState("");
 
   useEffect(() => {
     if (voucher) {
@@ -23,16 +24,50 @@ const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
     }
   }, [voucher]);
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "discount") {
+      const numericValue = value.replace(/[^0-9]/g, "");
+      if (numericValue === "" || parseFloat(numericValue) <= 0) {
+        setDiscountError("Giảm giá phải là một số dương");
+      } else {
+        setDiscountError("");
+      }
+      setFormData({
+        ...formData,
+        [name]: numericValue,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  const handleDiscountBlur = () => {
+    const value = formData.discount;
+    if (!value || parseFloat(value) <= 0) {
+      setDiscountError("Giảm giá phải là một số dương");
+      setFormData({ ...formData, discount: "" });
+    } else {
+      setDiscountError("");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (discountError) {
+      notification.error({ message: "Vui lòng sửa lỗi giảm giá trước khi cập nhật" });
+      return;
+    }
     try {
       await dispatch(
         updateVoucher({
           id: voucher.data._id,
           code: formData.code,
           name: formData.name,
-          discount: formData.discount,
-          //expDate: formData.expDate,
+          discount: parseFloat(formData.discount),
           jwt: localStorage.getItem("jwt"),
         })
       );
@@ -41,15 +76,8 @@ const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
       onClose();
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Cập nhật thất bại";
-      notification.error({ message: errorMessage });    }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+      notification.error({ message: errorMessage });
+    }
   };
 
   return (
@@ -58,7 +86,6 @@ const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
         Cập nhật Voucher
       </h1>
       <form className="space-y-5" onSubmit={handleSubmit}>
-        {/* Tên Voucher */}
         <TextField
           fullWidth
           required
@@ -69,8 +96,6 @@ const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
           onChange={handleInputChange}
           value={formData.name}
         />
-
-        {/* Giảm giá (Chỉ cho nhập số) */}
         <TextField
           fullWidth
           required
@@ -78,13 +103,13 @@ const UpdateVoucherForm = ({ voucher, onClose, onSuccess }) => {
           name="discount"
           label="Giảm giá"
           variant="outlined"
-          type="number"
           onChange={handleInputChange}
+          onBlur={handleDiscountBlur}
           value={formData.discount}
-          inputProps={{ min: 0, max: 1000000000 }}
+          error={!!discountError}
+          helperText={discountError}
+          inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
         />
-
-        {/* Mã Voucher */}
         <TextField
           fullWidth
           required

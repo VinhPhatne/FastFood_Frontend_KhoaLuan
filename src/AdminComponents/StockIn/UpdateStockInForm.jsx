@@ -1,6 +1,6 @@
 import { Button, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { updateIngredient } from "../../components/State/Import/Action";
 import { notification } from "antd";
 
@@ -13,6 +13,8 @@ const UpdateStockInForm = ({ event, onClose, onSuccess }) => {
     quantity: "",
     price: "",
   });
+  const [quantityError, setQuantityError] = useState("");
+  const [priceError, setPriceError] = useState("");
 
   useEffect(() => {
     if (event) {
@@ -25,16 +27,69 @@ const UpdateStockInForm = ({ event, onClose, onSuccess }) => {
     }
   }, [event]);
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "quantity" || name === "price") {
+      const numericValue = value.replace(/[^0-9]/g, "");
+      if (numericValue === "" || parseFloat(numericValue) <= 0) {
+        if (name === "quantity") {
+          setQuantityError("Số lượng phải là một số dương");
+        } else {
+          setPriceError("Giá phải là một số dương");
+        }
+      } else {
+        if (name === "quantity") {
+          setQuantityError("");
+        } else {
+          setPriceError("");
+        }
+      }
+      setFormData({
+        ...formData,
+        [name]: numericValue,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  const handleQuantityBlur = () => {
+    const value = formData.quantity;
+    if (!value || parseFloat(value) <= 0) {
+      setQuantityError("Số lượng phải là một số dương");
+      setFormData({ ...formData, quantity: "" });
+    } else {
+      setQuantityError("");
+    }
+  };
+
+  const handlePriceBlur = () => {
+    const value = formData.price;
+    if (!value || parseFloat(value) <= 0) {
+      setPriceError("Giá phải là một số dương");
+      setFormData({ ...formData, price: "" });
+    } else {
+      setPriceError("");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (quantityError || priceError) {
+      notification.error({ message: "Vui lòng sửa lỗi số lượng hoặc giá trước khi cập nhật" });
+      return;
+    }
     try {
       await dispatch(
         updateIngredient({
           id: event._id,
           name: formData.name,
           unit: formData.unit,
-          quantity: formData.quantity,
-          price: formData.price,
+          quantity: parseFloat(formData.quantity),
+          price: parseFloat(formData.price),
           jwt: localStorage.getItem("jwt"),
         })
       );
@@ -47,27 +102,11 @@ const UpdateStockInForm = ({ event, onClose, onSuccess }) => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleNumberChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: Number(value),
-    });
-  };
-
   return (
     <div className="">
       <div className="p-5">
         <h1 className="text-orange-600 font-semibold text-center text-2xl pb-10">
-          Cập nhật sự kiện
+          Cập nhật Nguyên liệu
         </h1>
         <form className="space-y-5" onSubmit={handleSubmit}>
           <TextField
@@ -93,20 +132,26 @@ const UpdateStockInForm = ({ event, onClose, onSuccess }) => {
             id="quantity"
             name="quantity"
             label="Số lượng"
-            type="number"
             variant="outlined"
-            onChange={handleNumberChange}
+            onChange={handleInputChange}
+            onBlur={handleQuantityBlur}
             value={formData.quantity}
+            error={!!quantityError}
+            helperText={quantityError}
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           />
           <TextField
             fullWidth
             id="price"
             name="price"
             label="Giá"
-            type="number"
             variant="outlined"
-            onChange={handleNumberChange}
+            onChange={handleInputChange}
+            onBlur={handlePriceBlur}
             value={formData.price}
+            error={!!priceError}
+            helperText={priceError}
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           />
           <Button
             fullWidth
