@@ -16,16 +16,6 @@ import { notification } from "antd";
 const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (account) {
-      setFormData({
-        fullname: account.data.fullname || "",
-        phonenumber: account.data.phonenumber || "",
-        password: account.data.password || "",
-      });
-    }
-  }, [account]);
-
   const [formData, setFormData] = useState({
     fullname: "",
     phonenumber: "",
@@ -34,16 +24,57 @@ const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
     email: "",
     role: "",
   });
+  const [phoneError, setPhoneError] = useState("");
+
+  useEffect(() => {
+    if (account) {
+      setFormData({
+        fullname: account.data.fullname || "",
+        phonenumber: account.data.phonenumber || "",
+        password: account.data.password || "",
+        address: "",
+        email: "",
+        role: "",
+      });
+    }
+  }, [account]);
+
+  const phoneRegex = /^0[0-9]{9}$/;
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "phonenumber") {
+      if (!phoneRegex.test(value) && value !== "") {
+        setPhoneError("Số điện thoại phải bắt đầu bằng 0 và gồm 10 chữ số");
+      } else {
+        setPhoneError("");
+      }
+    }
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handlePhoneBlur = () => {
+    if (!phoneRegex.test(formData.phonenumber) && formData.phonenumber !== "") {
+      setPhoneError("Số điện thoại phải bắt đầu bằng 0 và gồm 10 chữ số");
+    } else {
+      setPhoneError("");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (phoneError) {
+      notification.error({ message: "Vui lòng sửa lỗi số điện thoại trước khi cập nhật" });
+      return;
+    }
     const accountData = {
       fullname: formData.fullname,
       phonenumber: formData.phonenumber,
       password: formData.password,
-      // address: formData.address,
-      // email: formData.email,
-      // role: formData.role,
+      email: formData.email,
     };
     try {
       await dispatch(
@@ -61,14 +92,6 @@ const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
       const errorMessage = error.response?.data?.message || "Cập nhật thất bại";
       notification.error({ message: errorMessage });
     }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
   };
 
   return (
@@ -96,7 +119,11 @@ const UpdateAccountForm = ({ account, onClose, onSuccess }) => {
             label="Số điện thoại"
             variant="outlined"
             onChange={handleInputChange}
+            onBlur={handlePhoneBlur}
             value={formData.phonenumber}
+            error={!!phoneError}
+            helperText={phoneError}
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           />
           <TextField
             fullWidth

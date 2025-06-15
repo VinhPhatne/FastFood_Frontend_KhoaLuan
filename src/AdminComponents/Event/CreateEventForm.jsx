@@ -1,6 +1,6 @@
 import { Button, TextField } from "@mui/material";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import { createEvent } from "../../components/State/Event/Action";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -18,18 +18,55 @@ const CreateEventForm = ({ onClose, onSuccess }) => {
     discountPercent: "",
     expDate: null,
   });
+  const [discountError, setDiscountError] = useState("");
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "discountPercent") {
+      const numericValue = value.replace(/[^0-9]/g, "");
+      if (numericValue === "" || parseFloat(numericValue) <= 0) {
+        setDiscountError("Giảm giá phải là một số dương");
+      } else {
+        setDiscountError("");
+      }
+      setFormData({
+        ...formData,
+        [name]: numericValue,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  const handleDiscountBlur = () => {
+    const value = formData.discountPercent;
+    if (!value || parseFloat(value) <= 0) {
+      setDiscountError("Giảm giá phải là một số dương");
+      setFormData({ ...formData, discountPercent: "" });
+    } else {
+      setDiscountError("");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (discountError) {
+      notification.error({ message: "Vui lòng sửa lỗi giảm giá trước khi thêm mới" });
+      return;
+    }
     const data = {
       name: formData.eventName,
-      discountPercent: formData.discountPercent,
+      discountPercent: parseFloat(formData.discountPercent),
       expDate: formData.expDate ? format(formData.expDate, "yyyy/MM/dd") : "",
     };
     try {
       const result = await dispatch(
         createEvent({
           name: formData.eventName,
-          discountPercent: formData.discountPercent,
+          discountPercent: parseFloat(formData.discountPercent),
           expDate: data.expDate,
           jwt: localStorage.getItem("jwt"),
         })
@@ -43,14 +80,6 @@ const CreateEventForm = ({ onClose, onSuccess }) => {
       const errorMessage = error.response?.data?.message || "Thêm mới thất bại";
       notification.error({ message: errorMessage });
     }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
   };
 
   return (
@@ -69,7 +98,7 @@ const CreateEventForm = ({ onClose, onSuccess }) => {
             variant="outlined"
             onChange={handleInputChange}
             value={formData.eventName}
-          ></TextField>
+          />
           <TextField
             fullWidth
             required
@@ -78,8 +107,12 @@ const CreateEventForm = ({ onClose, onSuccess }) => {
             label="Giảm giá"
             variant="outlined"
             onChange={handleInputChange}
+            onBlur={handleDiscountBlur}
             value={formData.discountPercent}
-          ></TextField>
+            error={!!discountError}
+            helperText={discountError}
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+          />
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DatePicker
               className="w-full"

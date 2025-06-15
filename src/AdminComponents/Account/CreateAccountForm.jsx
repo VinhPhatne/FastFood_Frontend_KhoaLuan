@@ -20,11 +20,41 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
     password: "",
     address: "",
     email: "",
-    role: "", // 1 = admin, 2 = manager, 3 = customer
+    role: "",
   });
+  const [phoneError, setPhoneError] = useState("");
+
+  const phoneRegex = /^0[0-9]{9}$/;
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "phonenumber") {
+      if (!phoneRegex.test(value) && value !== "") {
+        setPhoneError("Số điện thoại phải bắt đầu bằng 0 và gồm 10 chữ số");
+      } else {
+        setPhoneError("");
+      }
+    }
+    setFormData({
+      ...formData,
+      [name]: name === "role" ? parseInt(value, 10) : value,
+    });
+  };
+
+  const handlePhoneBlur = () => {
+    if (!phoneRegex.test(formData.phonenumber) && formData.phonenumber !== "") {
+      setPhoneError("Số điện thoại phải bắt đầu bằng 0 và gồm 10 chữ số");
+    } else {
+      setPhoneError("");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (phoneError) {
+      notification.error({ message: "Vui lòng sửa lỗi số điện thoại trước khi tạo tài khoản" });
+      return;
+    }
     const accountData = {
       fullname: formData.fullname,
       phonenumber: formData.phonenumber,
@@ -45,14 +75,6 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
       const errorMessage = error.response?.data?.message || "Thêm mới thất bại";
       notification.error({ message: errorMessage });
     }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: name === "role" ? parseInt(value, 10) : value,
-    });
   };
 
   return (
@@ -80,7 +102,11 @@ const CreateAccountForm = ({ onClose, onSuccess }) => {
             label="Số điện thoại"
             variant="outlined"
             onChange={handleInputChange}
+            onBlur={handlePhoneBlur}
             value={formData.phonenumber}
+            error={!!phoneError}
+            helperText={phoneError}
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           />
           <TextField
             fullWidth

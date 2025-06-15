@@ -106,6 +106,17 @@ const ProductDetail = () => {
     setVisibleReviews((prev) => prev + 5);
   };
 
+  const handleQuantityChange = (value) => {
+    if (value < 1) {
+      setQuantity(1);
+      notification.warning({
+        message: "Vui lòng nhập số lượng lớn hơn 0!",
+      });
+    } else {
+      setQuantity(value);
+    }
+  };
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -178,9 +189,9 @@ const ProductDetail = () => {
           <div className="quantity-section">
             <span>Số lượng:</span>
             <InputNumber
-              min={1}
+              //min={1}
               value={quantity}
-              onChange={(value) => setQuantity(value)}
+              onChange={handleQuantityChange}
             />
           </div>
 

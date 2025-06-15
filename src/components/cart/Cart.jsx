@@ -103,12 +103,22 @@ const Cart = () => {
 
   const handlePointsChange = (e) => {
     const value = parseInt(e.target.value) || 0;
-    if (value > userPoints) {
+    if (value < 0) {
+      setPointsUsed(0);
+      setPointsError("Số điểm không thể nhỏ hơn 0!");
+    } else if (value > userPoints) {
       setPointsError("Số điểm nhập vượt quá số điểm bạn đang có");
       setPointsUsed(userPoints);
     } else {
       setPointsError("");
       setPointsUsed(value);
+    }
+  };
+
+  const handlePointsBlur = () => {
+    if (pointsUsed < 0) {
+      setPointsUsed(0);
+      setPointsError("Số điểm không thể nhỏ hơn 0. Đã đặt lại về 0.");
     }
   };
 
@@ -297,6 +307,7 @@ const Cart = () => {
                     type="number"
                     value={pointsUsed}
                     onChange={handlePointsChange}
+                    onBlur={handlePointsBlur}
                     placeholder={`Bạn có ${userPoints} điểm`}
                     className="w-full border rounded px-4 py-2 mt-2"
                   />

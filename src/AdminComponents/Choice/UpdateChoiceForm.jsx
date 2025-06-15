@@ -6,19 +6,17 @@ import { notification } from "antd";
 import { updateChoice } from "../../components/State/Choice/Action";
 
 const UpdateChoiceForm = ({ event, onClose, onSuccess }) => {
-
   const dispatch = useDispatch();
-  const { optionalId } = useParams(); 
-
+  const { optionalId } = useParams();
 
   const [formData, setFormData] = useState({
     name: "",
     additionalPrice: "",
   });
-  
+  const [priceError, setPriceError] = useState("");
+
   useEffect(() => {
     if (event) {
-      const parsedDate = new Date(event.data.expDate);
       setFormData({
         name: event.data.name || "",
         additionalPrice: event.data.additionalPrice || "",
@@ -26,14 +24,49 @@ const UpdateChoiceForm = ({ event, onClose, onSuccess }) => {
     }
   }, [event]);
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "additionalPrice") {
+      const numericValue = value.replace(/[^0-9]/g, "");
+      if (numericValue !== "" && parseFloat(numericValue) < 0) {
+        setPriceError("Giá bổ sung không được là số âm");
+      } else {
+        setPriceError("");
+      }
+      setFormData({
+        ...formData,
+        [name]: numericValue,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+  };
+
+  const handlePriceBlur = () => {
+    const value = formData.additionalPrice;
+    if (value !== "" && parseFloat(value) < 0) {
+      setPriceError("Giá bổ sung không được là số âm");
+      setFormData({ ...formData, additionalPrice: "" });
+    } else {
+      setPriceError("");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (priceError) {
+      notification.error({ message: "Vui lòng sửa lỗi giá bổ sung trước khi cập nhật" });
+      return;
+    }
     try {
       await dispatch(
         updateChoice({
           id: event.data._id,
           name: formData.name,
-          additionalPrice: parseFloat(formData.additionalPrice),
+          additionalPrice: formData.additionalPrice === "" ? 0 : parseFloat(formData.additionalPrice),
           optional: optionalId,
         })
       );
@@ -46,14 +79,6 @@ const UpdateChoiceForm = ({ event, onClose, onSuccess }) => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
   return (
     <div className="">
       <div className="p-5">
@@ -61,7 +86,7 @@ const UpdateChoiceForm = ({ event, onClose, onSuccess }) => {
           Cập nhật Lựa chọn
         </h1>
         <form className="space-y-5" onSubmit={handleSubmit}>
-        <TextField
+          <TextField
             fullWidth
             required
             id="name"
@@ -78,9 +103,12 @@ const UpdateChoiceForm = ({ event, onClose, onSuccess }) => {
             name="additionalPrice"
             label="Giá bổ sung"
             variant="outlined"
-            type="number"
             onChange={handleInputChange}
+            onBlur={handlePriceBlur}
             value={formData.additionalPrice}
+            error={!!priceError}
+            helperText={priceError}
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           />
           <Button
             fullWidth

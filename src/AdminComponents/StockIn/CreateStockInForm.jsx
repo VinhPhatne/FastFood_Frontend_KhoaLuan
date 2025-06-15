@@ -15,42 +15,81 @@ const CreateStockInForm = ({ onClose, onSuccess }) => {
     quantity: "",
     price: "",
   });
-
-  const handleSubmit =async (e) => {
-    e.preventDefault();
-    try {
-      await dispatch(
-      createIngredient({
-        name: formData.name,
-        unit: formData.unit,
-        quantity: formData.quantity,
-        price: formData.price,
-        jwt: localStorage.getItem("jwt"),
-      })
-    );
-    onSuccess();
-    notification.success({ message: "Thêm mới thành công!" });
-    onClose();
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || "Thêm mới thất bại";
-    notification.error({ message: errorMessage });
-  }
-};
+  const [quantityError, setQuantityError] = useState("");
+  const [priceError, setPriceError] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    if (name === "quantity" || name === "price") {
+      const numericValue = value.replace(/[^0-9]/g, "");
+      if (numericValue === "" || parseFloat(numericValue) <= 0) {
+        if (name === "quantity") {
+          setQuantityError("Số lượng phải là một số dương");
+        } else {
+          setPriceError("Giá phải là một số dương");
+        }
+      } else {
+        if (name === "quantity") {
+          setQuantityError("");
+        } else {
+          setPriceError("");
+        }
+      }
+      setFormData({
+        ...formData,
+        [name]: numericValue,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
-  const handleNumberChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: Number(value),
-    });
+  const handleQuantityBlur = () => {
+    const value = formData.quantity;
+    if (!value || parseFloat(value) <= 0) {
+      setQuantityError("Số lượng phải là một số dương");
+      setFormData({ ...formData, quantity: "" });
+    } else {
+      setQuantityError("");
+    }
+  };
+
+  const handlePriceBlur = () => {
+    const value = formData.price;
+    if (!value || parseFloat(value) <= 0) {
+      setPriceError("Giá phải là một số dương");
+      setFormData({ ...formData, price: "" });
+    } else {
+      setPriceError("");
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (quantityError || priceError) {
+      notification.error({ message: "Vui lòng sửa lỗi số lượng hoặc giá trước khi thêm mới" });
+      return;
+    }
+    try {
+      await dispatch(
+        createIngredient({
+          name: formData.name,
+          unit: formData.unit,
+          quantity: parseFloat(formData.quantity),
+          price: parseFloat(formData.price),
+          jwt: localStorage.getItem("jwt"),
+        })
+      );
+      onSuccess();
+      notification.success({ message: "Thêm mới thành công!" });
+      onClose();
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Thêm mới thất bại";
+      notification.error({ message: errorMessage });
+    }
   };
 
   return (
@@ -83,20 +122,26 @@ const CreateStockInForm = ({ onClose, onSuccess }) => {
             id="quantity"
             name="quantity"
             label="Số lượng"
-            type="number"
             variant="outlined"
-            onChange={handleNumberChange}
+            onChange={handleInputChange}
+            onBlur={handleQuantityBlur}
             value={formData.quantity}
+            error={!!quantityError}
+            helperText={quantityError}
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           />
           <TextField
             fullWidth
             id="price"
             name="price"
             label="Giá"
-            type="number"
             variant="outlined"
-            onChange={handleNumberChange}
+            onChange={handleInputChange}
+            onBlur={handlePriceBlur}
             value={formData.price}
+            error={!!priceError}
+            helperText={priceError}
+            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           />
           <Button
             fullWidth
