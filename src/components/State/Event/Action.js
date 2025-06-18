@@ -55,13 +55,13 @@ export const createEvent =
 
 // Cập nhật sự kiện theo id
 export const updateEvent =
-  ({ id, name, discountPercent, expDate, jwt }) =>
+  ({ id, name, discountPercent, expDate, jwt, products }) =>
   async (dispatch) => {
     dispatch({ type: UPDATE_EVENT_REQUEST });
     try {
       const { data } = await api.put(
         `${API_URL}/v1/event/${id}`,
-        { name, discountPercent, expDate },
+        { name, discountPercent, expDate, products },
         { headers: { Authorization: `Bearer ${jwt}` } }
       );
       dispatch({ type: UPDATE_EVENT_SUCCESS, payload: data });

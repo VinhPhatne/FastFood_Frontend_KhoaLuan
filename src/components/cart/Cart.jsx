@@ -106,8 +106,11 @@ const Cart = () => {
     if (value < 0) {
       setPointsUsed(0);
       setPointsError("Số điểm không thể nhỏ hơn 0!");
+    } else if (value > totalPrice) {
+      setPointsError("Số điểm nhập vượt quá giá trị đơn hàng!");
+      setPointsUsed(totalPrice);
     } else if (value > userPoints) {
-      setPointsError("Số điểm nhập vượt quá số điểm bạn đang có");
+      setPointsError("Số điểm nhập vượt quá số điểm bạn đang có!");
       setPointsUsed(userPoints);
     } else {
       setPointsError("");
@@ -119,6 +122,9 @@ const Cart = () => {
     if (pointsUsed < 0) {
       setPointsUsed(0);
       setPointsError("Số điểm không thể nhỏ hơn 0. Đã đặt lại về 0.");
+    } else if (pointsUsed > totalPrice) {
+      setPointsUsed(totalPrice);
+      setPointsError("Số điểm vượt quá giá trị đơn hàng. Đã đặt lại bằng giá trị đơn hàng.");
     }
   };
 

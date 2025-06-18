@@ -253,13 +253,6 @@ const FoodCategoryTable = () => {
                         {item.isActive ? "Hoạt động" : "Khóa"}
                       </TableCell>
                       <TableCell align="right">
-                        <IconButton onClick={() => handleBlockUnblock(item)}>
-                          {item.isActive ? (
-                            <LockIcon style={{ color: "#D32F2F" }} />
-                          ) : (
-                            <LockOpenIcon style={{ color: "#43A047" }} />
-                          )}
-                        </IconButton>
                         <IconButton
                           color="error"
                           onClick={() => {
@@ -268,14 +261,21 @@ const FoodCategoryTable = () => {
                         >
                           <CreateIcon />
                         </IconButton>
-                        <IconButton
+                         <IconButton onClick={() => handleBlockUnblock(item)}>
+                          {item.isActive ? (
+                            <Delete style={{ color: "#D32F2F" }} />
+                          ) : (
+                            <LockOpenIcon style={{ color: "#43A047" }} />
+                          )}
+                        </IconButton>
+                        {/* <IconButton
                           color="error"
                           onClick={() => {
                             handleOpenDeleteModal(item._id);
                           }}
                         >
                           <Delete />
-                        </IconButton>
+                        </IconButton> */}
                       </TableCell>
                     </TableRow>
                   ))

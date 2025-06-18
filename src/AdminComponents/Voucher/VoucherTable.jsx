@@ -133,7 +133,7 @@ const VoucherTable = () => {
         <Box
           sx={{
             display: "flex",
-            justifyContent: "end",
+            justifyContent: "space-between",
             alignItems: "center",
             marginBottom: "20px",
           }}
