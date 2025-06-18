@@ -452,28 +452,28 @@ const ProductTable = () => {
                       </TableCell>
                       <TableCell align="center">
                         <IconButton
-                          onClick={() => handleBlockUnblockProduct(item)}
-                        >
-                          {item.isSelling ? (
-                            <LockIcon style={{ color: "#D32F2F" }} />
-                          ) : (
-                            <LockOpenIcon style={{ color: "#43A047" }} />
-                          )}
-                        </IconButton>
-                        <IconButton
                           color="error"
                           onClick={() => navigate(`${item._id}`)}
                         >
                           <CreateIcon />
                         </IconButton>
                         <IconButton
+                          onClick={() => handleBlockUnblockProduct(item)}
+                        >
+                          {item.isSelling ? (
+                            <Delete style={{ color: "#D32F2F" }} />
+                          ) : (
+                            <LockOpenIcon style={{ color: "#43A047" }} />
+                          )}
+                        </IconButton>
+                        {/* <IconButton
                           color="error"
                           onClick={() => {
                             handleOpenDeleteModal(item._id);
                           }}
                         >
                           <Delete />
-                        </IconButton>
+                        </IconButton> */}
                         <IconButton
                           onClick={() => handleOpenOptionalModal(item._id)}
                         >

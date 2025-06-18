@@ -86,6 +86,15 @@ const Card = () => {
     });
   };
 
+  const shouldShowDiscount = (item) => {
+    if (!item.event || !item.event.isActive || item.price === item.currentPrice) {
+      return false;
+    }
+    const currentDate = new Date();
+    const expDate = new Date(item.event.expDate);
+    return expDate > currentDate;
+  };
+
   return (
     <div>
       {loading ? (
@@ -107,7 +116,7 @@ const Card = () => {
             <ul className="flex justify-between items-center max-w-screen-lg mx-auto px-4 overflow-hidden">
               {Array.isArray(categories) &&
                 categories
-                  .filter((category) => category.isActive)
+                  .filter((category) => category.isActive && category?.products?.length > 0)
                   .slice(startIndex, startIndex + visibleCount)
                   .map((category) => (
                     <li
@@ -174,7 +183,7 @@ const Card = () => {
                             </div>
                             <div className={styles.footer}>
                               <div className={styles.cost}>
-                                {item.price !== item.currentPrice ? (
+                                {shouldShowDiscount(item) ? (
                                   <>
                                     <span>
                                       {item.currentPrice.toLocaleString()} đ
@@ -184,7 +193,7 @@ const Card = () => {
                                     </span>
                                   </>
                                 ) : (
-                                  <span>{item.currentPrice.toLocaleString()} đ</span>
+                                  <span>{item.price.toLocaleString()} đ</span>
                                 )}
                               </div>
                             </div>
@@ -220,7 +229,7 @@ const Card = () => {
                           item.isSelling
                       )
                     : [];
-                  return category.isActive && productsInCategory.length > 0;
+                  return category.isActive && productsInCategory?.length > 0;
                 })
                 .map((category) => (
                   <div key={category._id} className={styles.card}>
@@ -263,7 +272,7 @@ const Card = () => {
                                 </div>
                                 <div className={styles.footer}>
                                   <div className={styles.cost}>
-                                    {item.price !== item.currentPrice ? (
+                                    {shouldShowDiscount(item) ? (
                                       <>
                                         <span>
                                           {item.currentPrice.toLocaleString()} đ
@@ -273,9 +282,7 @@ const Card = () => {
                                         </span>
                                       </>
                                     ) : (
-                                      <span>
-                                        {item.currentPrice.toLocaleString()} đ
-                                      </span>
+                                      <span>{item.price.toLocaleString()} đ</span>
                                     )}
                                   </div>
                                 </div>

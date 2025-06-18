@@ -443,7 +443,7 @@ const AdminHeader = () => {
                     >
                       <IconDoubleCheck />
                     </div>
-                    <div
+                    {/* <div
                       onClick={handleDeleteAllNotifications}
                       className={styles.deleteAll}
                       style={{
@@ -452,7 +452,7 @@ const AdminHeader = () => {
                       }}
                     >
                       <DeleteOutlined />
-                    </div>
+                    </div> */}
                   </div>
                 </div>
                 <div className={styles.dataNotify}>
@@ -587,11 +587,11 @@ const AdminHeader = () => {
                             [styles.read]: isRead,
                           })}
                           key={item._id}
-                          onClick={() => {
-                            if (!isRead) {
-                              handleReadReview(item._id);
-                            }
-                          }}
+                          // onClick={() => {
+                          //   if (!isRead) {
+                          //     handleReadReview(item._id);
+                          //   }
+                          // }}
                         >
                           <div className={styles.iconProfile}>
                             <CommentOutlined

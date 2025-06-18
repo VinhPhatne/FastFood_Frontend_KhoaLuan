@@ -18,6 +18,8 @@ const UpdateEventForm = ({ event, onClose, onSuccess }) => {
   });
   const [discountError, setDiscountError] = useState("");
 
+  console.log('event', event)
+
   useEffect(() => {
     if (event) {
       const parsedDate = new Date(event.data.expDate);
@@ -79,6 +81,7 @@ const UpdateEventForm = ({ event, onClose, onSuccess }) => {
           discountPercent: parseFloat(formData.discountPercent),
           expDate: format(formData.expDate, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"),
           jwt: localStorage.getItem("jwt"),
+          products: event?.data?.products,
         })
       );
       onSuccess();
