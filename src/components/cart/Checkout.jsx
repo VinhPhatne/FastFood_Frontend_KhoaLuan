@@ -142,7 +142,16 @@ const RoutingMachine = ({ destination, setShippingFee, setDeliveryDistance }) =>
   return null
 }
 
-const MapFocusHandler = ({ wardCode, wards, districts, provinces, provinceId, districtId, mapRef }) => {
+const MapFocusHandler = ({
+  wardCode,
+  wards,
+  districts,
+  provinces,
+  provinceId,
+  districtId,
+  mapRef,
+  setWardLocation,
+}) => {
   const map = useMap()
 
   useEffect(() => {
@@ -162,6 +171,12 @@ const MapFocusHandler = ({ wardCode, wards, districts, provinces, provinceId, di
             if (response.data && response.data.length > 0) {
               const { lat, lon } = response.data[0]
               map.setView([Number.parseFloat(lat), Number.parseFloat(lon)], 16) // Zoom level 16 để tập trung vào khu vực phường/xã
+              notification.info({
+                message: "Đã định vị khu vực",
+                description: `Bản đồ đã được di chuyển đến khu vực ${wardName}, ${districtName}. Bạn có thể nhấp vào bản đồ để chọn vị trí giao hàng chính xác.`,
+                duration: 4,
+              })
+              setWardLocation({ lat: Number.parseFloat(lat), lng: Number.parseFloat(lon) })
             } else {
               notification.warning({
                 message: "Không tìm thấy tọa độ phường/xã",
@@ -181,7 +196,7 @@ const MapFocusHandler = ({ wardCode, wards, districts, provinces, provinceId, di
     }
 
     focusMapOnWard()
-  }, [wardCode, wards, districts, provinces, provinceId, districtId, map])
+  }, [wardCode, wards, districts, provinces, provinceId, districtId, map, setWardLocation])
 
   return null
 }
@@ -223,6 +238,7 @@ const Checkout = () => {
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
   const [addressInputValue, setAddressInputValue] = useState("")
   const mapRef = useRef(null)
+  const [wardLocation, setWardLocation] = useState(null)
 
   const GHN_API_TOKEN = "2d698e94-2c17-11f0-a0cd-12f647571c0a"
   const GHN_SHOP_ID = "5767786"
@@ -950,6 +966,56 @@ const Checkout = () => {
                 ))}
               </Select>
             </FormControl>
+            {formData.wardCode && (
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  // Trigger map focus manually
+                  const matchedWard = wards.find((ward) => ward.WardCode === formData.wardCode)
+                  if (matchedWard) {
+                    const wardName = matchedWard.WardName
+                    const districtName =
+                      districts.find((d) => d.DistrictID === Number.parseInt(formData.districtId))?.DistrictName || ""
+                    const provinceName =
+                      provinces.find((p) => p.ProvinceID === Number.parseInt(formData.provinceId))?.ProvinceName || ""
+
+                    const query = `${wardName}, ${districtName}, ${provinceName}, Vietnam`
+                    axios
+                      .get(
+                        `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(query)}&countrycodes=VN&addressdetails=1&bounded=1&viewbox=106.4,10.3,107.0,11.2`,
+                      )
+                      .then((response) => {
+                        if (response.data && response.data.length > 0) {
+                          const { lat, lon } = response.data[0]
+                          if (mapRef.current) {
+                            mapRef.current.setView([Number.parseFloat(lat), Number.parseFloat(lon)], 16)
+                          }
+                          notification.success({
+                            message: "Đã định vị thành công",
+                            description: `Bản đồ đã được di chuyển đến ${wardName}, ${districtName}. Nhấp vào bản đồ để chọn vị trí chính xác.`,
+                            duration: 4,
+                          })
+                        }
+                      })
+                      .catch((error) => {
+                        notification.error({
+                          message: "Lỗi định vị",
+                          description: "Không thể định vị khu vực này. Vui lòng thử lại.",
+                        })
+                      })
+                  }
+                }}
+                style={{
+                  marginBottom: "16px",
+                  width: "100%",
+                  borderColor: "#ff7d01",
+                  color: "#ff7d01",
+                }}
+                startIcon={<span>📍</span>}
+              >
+                Định vị khu vực trên bản đồ
+              </Button>
+            )}
 
             {/* Sử dụng Autocomplete cho địa chỉ chi tiết */}
             <Autocomplete
@@ -976,7 +1042,7 @@ const Checkout = () => {
                   helperText={
                     !formData.wardCode
                       ? "Vui lòng chọn phường/xã trước khi nhập địa chỉ"
-                      : "Nhập ít nhất 3 ký tự để xem gợi ý hoặc nhấp vào bản đồ để chọn vị trí"
+                      : "Bản đồ đã tự động di chuyển đến khu vực bạn chọn. Nhập địa chỉ chi tiết hoặc nhấp vào bản đồ để chọn vị trí chính xác."
                   }
                   style={{ marginBottom: "16px" }}
                   InputProps={{
@@ -1041,26 +1107,26 @@ const Checkout = () => {
               style={{
                 color: "#fff",
                 backgroundColor:
-                  !formData.provinceId ||
-                  !formData.districtId ||
-                  !formData.wardCode ||
+                  // !formData.provinceId ||
+                  // !formData.districtId ||
+                  // !formData.wardCode ||
                   !formData.address ||
                   deliveryDistance > MAX_DELIVERY_DISTANCE
                     ? "#ccc" // màu xám khi disabled
                     : "#ff7d01", // màu cam khi enabled
                 cursor:
-                  !formData.provinceId ||
-                  !formData.districtId ||
-                  !formData.wardCode ||
+                  // !formData.provinceId ||
+                  // !formData.districtId ||
+                  // !formData.wardCode ||
                   !formData.address ||
                   deliveryDistance > MAX_DELIVERY_DISTANCE
                     ? "not-allowed"
                     : "pointer",
               }}
               disabled={
-                !formData.provinceId ||
-                !formData.districtId ||
-                !formData.wardCode ||
+                // !formData.provinceId ||
+                // !formData.districtId ||
+                // !formData.wardCode ||
                 !formData.address ||
                 deliveryDistance > MAX_DELIVERY_DISTANCE
               }
@@ -1122,7 +1188,21 @@ const Checkout = () => {
                   provinceId={formData.provinceId}
                   districtId={formData.districtId}
                   mapRef={mapRef}
+                  setWardLocation={setWardLocation}
                 />
+                {formData.wardCode && wardLocation && (
+                  <Marker
+                    position={[wardLocation.lat, wardLocation.lng]}
+                    icon={L.divIcon({
+                      className: "ward-marker",
+                      html: '<div style="background-color: #4CAF50; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
+                      iconSize: [16, 16],
+                      iconAnchor: [8, 8],
+                    })}
+                  >
+                    <Popup>Khu vực {wards.find((w) => w.WardCode === formData.wardCode)?.WardName}</Popup>
+                  </Marker>
+                )}
               </MapContainer>
             </div>
           </div>
