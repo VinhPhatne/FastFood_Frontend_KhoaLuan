@@ -75,22 +75,27 @@ export default function TransactionChart() {
         >
           {generateYearOptions()}
         </select>
-
-              <div className="flex justify-end">
-                <select
-                  value={selectedProduct}
-                  onChange={handleProductChange}
-                  className="border border-gray-300 rounded-md p-2 bg-white text-gray-700"
-                >
-                  <option value="">Chọn sản phẩm</option>
-                  {products?.map((product) => (
-                    <option key={product._id} value={product._id}>
-                      {product.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              </div>
+          <div className="flex justify-end">
+            <select
+              value={selectedProduct}
+              onChange={handleProductChange}
+              className="border border-gray-300 rounded-md p-2 bg-white text-gray-700"
+            >
+              <option value="">Chọn sản phẩm</option>
+              {Array.isArray(products?.products) && products.products.length > 0 ? (
+                products.products.map((product) => (
+                  <option key={product._id} value={product._id}>
+                    {product.name}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>
+                  Không có sản phẩm nào
+                </option>
+              )}
+            </select>
+          </div>
+        </div>
       </div>
       <div className="mt-3 w-full flex-1 text-xs">
         <ResponsiveContainer width="100%" height="100%">
