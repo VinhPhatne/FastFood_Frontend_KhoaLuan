@@ -100,6 +100,7 @@ const Card = () => {
       {loading ? (
         <div className="flex justify-center items-center h-screen">
           <Spin size="large" />
+          <h3 className="mt-3">Please wait a few minutes for loading database</h3>
         </div>
       ) : (
         <>
